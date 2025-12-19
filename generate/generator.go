@@ -110,7 +110,7 @@ func (g *Generator) generateProvider() error {
 		g.generateNestedTypes(f, block, "ProviderConfig")
 	}
 
-	return g.writeFile(f, "provider.go")
+	return g.writeFile(f, "provider_gen.go")
 }
 
 // generateResources generates resource files.
@@ -142,7 +142,7 @@ func (g *Generator) generateResources() error {
 		g.generateNestedTypes(f, res.Block(), structName)
 	}
 
-	return g.writeFile(f, "resources.go")
+	return g.writeFile(f, "resources_gen.go")
 }
 
 // generateDataSources generates data source files.
@@ -174,7 +174,7 @@ func (g *Generator) generateDataSources() error {
 		g.generateNestedTypes(f, ds.Block(), structName)
 	}
 
-	return g.writeFile(f, "data_sources.go")
+	return g.writeFile(f, "data_sources_gen.go")
 }
 
 // generateBlockFields generates struct fields for a block's attributes and nested blocks.

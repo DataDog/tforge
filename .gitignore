@@ -1,0 +1,20 @@
+# Generated files
+*_gen.go
+
+# Binaries
+/tforge
+
+# Test artifacts
+*.tf.json
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
