@@ -103,8 +103,11 @@ func (g *Generator) generateProvider() error {
 		}
 		f.Comment("ProviderConfig represents the provider configuration.")
 		f.Type().Id("ProviderConfig").StructFunc(func(s *jen.Group) {
-			g.generateBlockFields(s, block)
+			g.generateBlockFields(s, block, "ProviderConfig")
 		})
+
+		// Generate nested block types for provider config
+		g.generateNestedTypes(f, block, "ProviderConfig")
 	}
 
 	return g.writeFile(f, "provider.go")
@@ -130,7 +133,7 @@ func (g *Generator) generateResources() error {
 		f.Type().Id(structName).StructFunc(func(s *jen.Group) {
 			block := res.Block()
 			if block != nil {
-				g.generateBlockFields(s, block)
+				g.generateBlockFields(s, block, structName)
 			}
 		})
 		f.Line()
@@ -162,7 +165,7 @@ func (g *Generator) generateDataSources() error {
 		f.Type().Id(structName).StructFunc(func(s *jen.Group) {
 			block := ds.Block()
 			if block != nil {
-				g.generateBlockFields(s, block)
+				g.generateBlockFields(s, block, structName)
 			}
 		})
 		f.Line()
@@ -175,7 +178,7 @@ func (g *Generator) generateDataSources() error {
 }
 
 // generateBlockFields generates struct fields for a block's attributes and nested blocks.
-func (g *Generator) generateBlockFields(s *jen.Group, block *schema.Block) {
+func (g *Generator) generateBlockFields(s *jen.Group, block *schema.Block, parentTypeName string) {
 	// Generate attributes
 	for _, attr := range block.Attributes() {
 		g.generateAttributeField(s, attr)
@@ -183,7 +186,7 @@ func (g *Generator) generateBlockFields(s *jen.Group, block *schema.Block) {
 
 	// Generate nested blocks
 	for _, nb := range block.NestedBlocks() {
-		g.generateNestedBlockField(s, nb)
+		g.generateNestedBlockField(s, nb, parentTypeName)
 	}
 }
 
@@ -215,9 +218,11 @@ func (g *Generator) generateAttributeField(s *jen.Group, attr *schema.Attribute)
 }
 
 // generateNestedBlockField generates a struct field for a nested block.
-func (g *Generator) generateNestedBlockField(s *jen.Group, nb *schema.NestedBlock) {
+// The type name is prefixed with the parent type name to avoid collisions.
+func (g *Generator) generateNestedBlockField(s *jen.Group, nb *schema.NestedBlock, parentTypeName string) {
 	fieldName := toGoName(nb.Name())
-	typeName := fieldName + "Block"
+	// Prefix with parent type name to make unique
+	typeName := parentTypeName + toGoName(nb.Name())
 	jsonTag := g.jsonTag(nb.Name(), true)
 
 	field := s.Id(fieldName)
@@ -237,22 +242,24 @@ func (g *Generator) generateNestedBlockField(s *jen.Group, nb *schema.NestedBloc
 }
 
 // generateNestedTypes generates struct types for nested blocks.
-func (g *Generator) generateNestedTypes(f *jen.File, block *schema.Block, parentName string) {
+// Type names are prefixed with the parent type name to avoid collisions.
+func (g *Generator) generateNestedTypes(f *jen.File, block *schema.Block, parentTypeName string) {
 	if block == nil {
 		return
 	}
 
 	for _, nb := range block.NestedBlocks() {
-		typeName := toGoName(nb.Name()) + "Block"
+		// Prefix with parent type name to make unique
+		typeName := parentTypeName + toGoName(nb.Name())
 
 		if g.config.GenerateComments && nb.Description() != "" {
 			f.Comment(wrapComment(nb.Description(), 80))
 		}
-		f.Commentf("%s represents a %s block in %s.", typeName, nb.Name(), parentName)
+		f.Commentf("%s represents a %s block in %s.", typeName, nb.Name(), parentTypeName)
 		f.Type().Id(typeName).StructFunc(func(s *jen.Group) {
 			innerBlock := nb.Block()
 			if innerBlock != nil {
-				g.generateBlockFields(s, innerBlock)
+				g.generateBlockFields(s, innerBlock, typeName)
 			}
 		})
 		f.Line()
