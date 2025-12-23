@@ -113,71 +113,14 @@ func isCommonAbbreviation(s string) bool {
 	return abbreviations[s]
 }
 
-// wrapComment wraps a comment to the specified line width.
-func wrapComment(text string, width int) string {
-	if len(text) <= width {
-		return text
-	}
+// cleanDescription cleans a description string for use in Go comments.
+// It normalizes whitespace, removes markdown artifacts, and ensures clean formatting.
+func cleanDescription(text string) string {
+	// Normalize whitespace - collapse multiple spaces/newlines into single space
+	text = strings.Join(strings.Fields(text), " ")
 
-	var result strings.Builder
-	words := strings.Fields(text)
-	lineLen := 0
+	// Trim leading/trailing whitespace
+	text = strings.TrimSpace(text)
 
-	for i, word := range words {
-		if i == 0 {
-			result.WriteString(word)
-			lineLen = len(word)
-			continue
-		}
-
-		if lineLen+1+len(word) > width {
-			result.WriteString("\n// ")
-			result.WriteString(word)
-			lineLen = len(word)
-		} else {
-			result.WriteString(" ")
-			result.WriteString(word)
-			lineLen += 1 + len(word)
-		}
-	}
-
-	return result.String()
+	return text
 }
-
-// sanitizeFieldName ensures a field name is a valid Go identifier.
-func sanitizeFieldName(name string) string {
-	// Replace invalid characters
-	name = strings.Map(func(r rune) rune {
-		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' {
-			return r
-		}
-		return '_'
-	}, name)
-
-	// Ensure it doesn't start with a digit
-	if len(name) > 0 && unicode.IsDigit(rune(name[0])) {
-		name = "_" + name
-	}
-
-	// Handle Go keywords
-	if isGoKeyword(name) {
-		name = name + "_"
-	}
-
-	return name
-}
-
-// isGoKeyword returns true if the string is a Go keyword.
-func isGoKeyword(s string) bool {
-	keywords := map[string]bool{
-		"break": true, "case": true, "chan": true, "const": true,
-		"continue": true, "default": true, "defer": true, "else": true,
-		"fallthrough": true, "for": true, "func": true, "go": true,
-		"goto": true, "if": true, "import": true, "interface": true,
-		"map": true, "package": true, "range": true, "return": true,
-		"select": true, "struct": true, "switch": true, "type": true,
-		"var": true,
-	}
-	return keywords[s]
-}
-

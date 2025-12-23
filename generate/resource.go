@@ -49,7 +49,7 @@ func (rg *ResourceGenerator) generateResourceStruct(res *schema.Resource, struct
 	}
 
 	if rg.config.GenerateComments && res.Description() != "" {
-		rg.file.Comment(wrapComment(res.Description(), 80))
+		rg.file.Comment(cleanDescription(res.Description()))
 	}
 
 	rg.file.Type().Id(structName).StructFunc(func(s *jen.Group) {
@@ -205,4 +205,3 @@ func jenTypeFromString(goType string) *jen.Statement {
 func (rg *ResourceGenerator) File() *jen.File {
 	return rg.file
 }
-

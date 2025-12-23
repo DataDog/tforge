@@ -1,24 +1,37 @@
 # tforge
 
-A minimal, idiomatic Go reimplementation of CDKTF without JSII or Node.js dependencies.
+A Go-native replacement for [CDKTF](https://developer.hashicorp.com/terraform/cdktf) — define TF infrastructure in pure Go.
+
+## Why tforge?
+
+CDKTF was sunset by IBM and while it was powerful it came with significant complexity:
+- **JSII overhead**: Requires Node.js runtime and JavaScript interop layer
+- **Multi-language complexity**: Supports many languages, adding abstraction layers
+- **HashiCorp dependencies**: Tightly coupled to HashiCorp's SDK and tooling
+
+**tforge** takes a different approach:
+- **Go only**: First-class Go support, no other languages
+- **No JSII**: Pure Go implementation, no Node.js or JavaScript runtime
+- **No HashiCorp libraries**: Zero dependencies on `github.com/hashicorp/*`
+- **Minimal**: Small codebase, easy to understand and extend
 
 ## Overview
 
-tforge enables you to define Terraform infrastructure using pure Go code, generating `.tf.json` files that can be applied with Terraform or OpenTofu.
+tforge generates typed Go structs from Terraform provider schemas, letting you define infrastructure with full IDE support and compile-time type checking. It outputs `.tf.json` files that work with both Terraform and OpenTofu.
 
 ## Architecture
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌────────────┐
 │  provider   │────▶│   generate   │────▶│   config   │
-│  (schemas)  │     │  (Go SDK)    │     │  (stacks)  │
+│  (schemas)  │     │   (Go SDK)   │     │  (stacks)  │
 └─────────────┘     └──────────────┘     └─────┬──────┘
                                                │
                                                ▼
-                                         ┌──────────┐
-                                         │  render  │
-                                         │ (.tf.json)│
-                                         └──────────┘
+                                         ┌────────────┐
+                                         │  render    │
+                                         │ (.tf.json) │
+                                         └────────────┘
 ```
 
 ## Packages
@@ -33,82 +46,38 @@ tforge enables you to define Terraform infrastructure using pure Go code, genera
 
 ## Quick Start
 
-```go
-package main
+For a runnable demo, see [`example/main.go`](./example/main.go).
 
-import (
-	"tforge/config"
-	"tforge/render"
-)
+#### Steps
 
-func main() {
-	// Create a new stack
-	stack := config.NewStack("my-infrastructure")
+1. Generate SDK code for your provider(s):
+   ```
+   go generate ./...
+   ```
+2. Implement your stack as shown above, using the generated types for resources and providers.
+3. Render your stack to `.tf.json` for use with Terraform or OpenTofu:
+   ```
+   go run main.go > main.tf.json
+   ```
 
-	// Add a provider
-	stack.AddProvider(config.Provider{
-		Name:    "aws",
-		Version: "~> 5.0",
-		Config: map[string]any{
-			"region": "us-east-1",
-		},
-	})
 
-	// Add a resource
-	stack.AddResource(config.Resource{
-		Type: "aws_instance",
-		Name: "web",
-		Config: map[string]any{
-			"ami":           "ami-0c55b159cbfafe1f0",
-			"instance_type": "t2.micro",
-		},
-	})
 
-	// Render to .tf.json
-	if err := render.ToFile(stack, "main.tf.json"); err != nil {
-		panic(err)
-	}
-}
-```
+## Design Principles
 
-## Generating Provider SDKs
-
-```go
-package main
-
-import (
-	"tforge/generate"
-	"tforge/provider"
-)
-
-func main() {
-	// Fetch the AWS provider schema
-	schema, err := provider.FetchSchema("hashicorp/aws", "5.0.0")
-	if err != nil {
-		panic(err)
-	}
-
-	// Generate Go SDK
-	gen := generate.New(generate.Config{
-		OutputDir:   "./generated/aws",
-		PackageName: "aws",
-	})
-
-	if err := gen.Generate(schema); err != nil {
-		panic(err)
-	}
-}
-```
-
-## Design Philosophy
-
-- **No JSII**: Pure Go, no JavaScript/TypeScript runtime
-- **No HCL parsing**: Generates `.tf.json` directly
-- **Minimal dependencies**: Standard library where possible
-- **Idiomatic Go**: Small, cohesive packages with minimal public APIs
-- **Extensible**: Easy to add expressions, imports, diffing later
+| Principle | Description |
+|-----------|-------------|
+| **Go-native** | Built for Go developers, not a multi-language abstraction |
+| **No JSII** | Pure Go, no Node.js, no JavaScript runtime, no interop layers |
+| **No HashiCorp deps** | Zero `github.com/hashicorp/*` imports |
+| **Minimal** | Standard library where possible, small dependency footprint |
+| **OpenTofu-first** | Prefers OpenTofu, falls back to Terraform CLI |
+| **Idiomatic** | Small packages, clear APIs, `go generate` friendly |
 
 ## Requirements
 
 - Go 1.22+
-- Terraform or OpenTofu (for applying generated configurations)
+- Terraform or OpenTofu
+
+## License
+
+Apache License 2.0 - see [LICENSE.md](LICENSE.md) for details.

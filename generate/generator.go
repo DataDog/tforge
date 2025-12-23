@@ -126,10 +126,11 @@ func (g *Generator) generateResources() error {
 	for _, res := range resources {
 		structName := toGoName(res.Name())
 
-		if g.config.GenerateComments && res.Description() != "" {
-			f.Comment(wrapComment(res.Description(), 80))
-		}
+		// Type name comment first (Go convention), then description
 		f.Commentf("%s represents the %s resource.", structName, res.Name())
+		if g.config.GenerateComments && res.Description() != "" {
+			f.Comment(cleanDescription(res.Description()))
+		}
 		f.Type().Id(structName).StructFunc(func(s *jen.Group) {
 			block := res.Block()
 			if block != nil {
@@ -158,10 +159,11 @@ func (g *Generator) generateDataSources() error {
 	for _, ds := range dataSources {
 		structName := toGoName(ds.Name()) + "Data"
 
-		if g.config.GenerateComments && ds.Description() != "" {
-			f.Comment(wrapComment(ds.Description(), 80))
-		}
+		// Type name comment first (Go convention), then description
 		f.Commentf("%s represents the %s data source.", structName, ds.Name())
+		if g.config.GenerateComments && ds.Description() != "" {
+			f.Comment(cleanDescription(ds.Description()))
+		}
 		f.Type().Id(structName).StructFunc(func(s *jen.Group) {
 			block := ds.Block()
 			if block != nil {
@@ -252,10 +254,11 @@ func (g *Generator) generateNestedTypes(f *jen.File, block *schema.Block, parent
 		// Prefix with parent type name to make unique
 		typeName := parentTypeName + toGoName(nb.Name())
 
-		if g.config.GenerateComments && nb.Description() != "" {
-			f.Comment(wrapComment(nb.Description(), 80))
-		}
+		// Type name comment first (Go convention), then description
 		f.Commentf("%s represents a %s block in %s.", typeName, nb.Name(), parentTypeName)
+		if g.config.GenerateComments && nb.Description() != "" {
+			f.Comment(cleanDescription(nb.Description()))
+		}
 		f.Type().Id(typeName).StructFunc(func(s *jen.Group) {
 			innerBlock := nb.Block()
 			if innerBlock != nil {
