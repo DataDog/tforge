@@ -144,3 +144,11 @@ Options:
 
 - **Version pinning**: Always specify exact provider versions in `go:generate` directives to ensure reproducible builds.
 
+# Steps
+
+go install ./cmd/tforge
+tforge schema -provider datadog/datadog -version 3.39.0
+go generate ./example/datadog
+go run ./example/ > ./example/main.tf.json
+terraform init
+dd-auth --domain app.datadoghq.eu terraform plan
