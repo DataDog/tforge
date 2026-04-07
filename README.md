@@ -1,6 +1,6 @@
 # tforge
 
-**Define Terraform infrastructure in pure Go — no JSII, no Node.js, no HashiCorp libraries.**
+**Define Terraform infrastructure in pure Go: no JSII, no Node.js, no HashiCorp libraries.**
 
 [![CI](https://github.com/St0rmingBr4in/tforge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/St0rmingBr4in/tforge/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/go-1.22+-00ADD8?logo=go)](https://go.dev/)
@@ -14,10 +14,10 @@ tforge generates typed Go structs from Terraform provider schemas, giving you co
 
 tforge takes a different approach:
 
-- **Go-native** — first-class Go support, no other languages
-- **No JSII** — pure Go implementation, no Node.js or JavaScript runtime
-- **No HashiCorp libraries** — zero `github.com/hashicorp/*` dependencies
-- **Minimal** — small codebase with a single external dependency
+- **Go-native**: first-class Go support, no other languages
+- **No JSII**: pure Go implementation, no Node.js or JavaScript runtime
+- **No HashiCorp libraries**: zero `github.com/hashicorp/*` dependencies
+- **Minimal**: small codebase with a single external dependency
 
 ## Architecture
 
@@ -177,4 +177,4 @@ make build
 
 ## License
 
-Apache License 2.0 — see [LICENSE.md](LICENSE.md) for details.
+Apache License 2.0: see [LICENSE.md](LICENSE.md) for details.
