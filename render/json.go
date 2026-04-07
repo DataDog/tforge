@@ -79,7 +79,6 @@ type terraformJSON struct {
 	Variable  map[string]variableJSON   `json:"variable,omitempty"`
 	Output    map[string]outputJSON     `json:"output,omitempty"`
 	Locals    map[string]any            `json:"locals,omitempty"`
-	Module    map[string]any            `json:"module,omitempty"`
 }
 
 // terraformBlock represents the terraform {} block.
@@ -87,7 +86,6 @@ type terraformBlock struct {
 	RequiredVersion   string                          `json:"required_version,omitempty"`
 	RequiredProviders map[string]requiredProviderJSON `json:"required_providers,omitempty"`
 	Backend           map[string]map[string]any       `json:"backend,omitempty"`
-	Cloud             map[string]any                  `json:"cloud,omitempty"`
 }
 
 // requiredProviderJSON represents a required provider entry.
@@ -458,42 +456,62 @@ func buildProvisioners(provisioners []config.Provisioner) []map[string]any {
 	return result
 }
 
-// buildConnection builds a connection block.
-func buildConnection(c *config.Connection) map[string]any {
-	conn := make(map[string]any)
+// connectionJSON represents a provisioner connection block.
+// Extra fields are flattened into the JSON output alongside the known fields.
+type connectionJSON struct {
+	Type       string         `json:"type,omitempty"`
+	Host       string         `json:"host,omitempty"`
+	Port       int            `json:"port,omitempty"`
+	User       string         `json:"user,omitempty"`
+	Password   string         `json:"password,omitempty"`
+	PrivateKey string         `json:"private_key,omitempty"`
+	Timeout    string         `json:"timeout,omitempty"`
+	Extra      map[string]any `json:"-"` // flattened via MarshalJSON
+}
+
+// MarshalJSON flattens Extra fields alongside the known connection fields.
+func (c connectionJSON) MarshalJSON() ([]byte, error) {
+	m := make(map[string]any)
 
 	if c.Type != "" {
-		conn["type"] = c.Type
+		m["type"] = c.Type
 	}
-
 	if c.Host != "" {
-		conn["host"] = c.Host
+		m["host"] = c.Host
 	}
-
 	if c.Port != 0 {
-		conn["port"] = c.Port
+		m["port"] = c.Port
 	}
-
 	if c.User != "" {
-		conn["user"] = c.User
+		m["user"] = c.User
 	}
-
 	if c.Password != "" {
-		conn["password"] = c.Password
+		m["password"] = c.Password
 	}
-
 	if c.PrivateKey != "" {
-		conn["private_key"] = c.PrivateKey
+		m["private_key"] = c.PrivateKey
 	}
-
 	if c.Timeout != "" {
-		conn["timeout"] = c.Timeout
+		m["timeout"] = c.Timeout
 	}
 
-	// Copy extra attributes
 	for k, v := range c.Extra {
-		conn[k] = v
+		m[k] = v
 	}
 
-	return conn
+	return json.Marshal(m)
+}
+
+// buildConnection builds a connection block.
+func buildConnection(c *config.Connection) connectionJSON {
+	return connectionJSON{
+		Type:       c.Type,
+		Host:       c.Host,
+		Port:       c.Port,
+		User:       c.User,
+		Password:   c.Password,
+		PrivateKey: c.PrivateKey,
+		Timeout:    c.Timeout,
+		Extra:      c.Extra,
+	}
 }
