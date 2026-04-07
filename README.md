@@ -1,4 +1,4 @@
-# tforge
+# 🔨 Terraform, Forged in Go: Introducing tforge
 
 **Define Terraform infrastructure in pure Go: no JSII, no Node.js, no HashiCorp libraries.**
 
@@ -6,7 +6,7 @@
 [![Go](https://img.shields.io/badge/go-1.22+-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.md)
 
-tforge generates typed Go structs from Terraform provider schemas, giving you compile-time type checking. It outputs `.tf.json` files that work with both Terraform and OpenTofu.
+tforge generates typed Go structs from Terraform provider schemas, giving you full flexibility on how you define your infrastructure. It outputs `.tf.json` files that work with both Terraform and OpenTofu.
 
 ## Why tforge?
 
