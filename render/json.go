@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 
 	"tforge/config"
 )
@@ -245,19 +244,7 @@ func buildResources(resources []config.Resource) map[string]map[string]any {
 		result[r.Type][r.Name] = cfg
 	}
 
-	// Sort resource types for deterministic output
-	sortedResult := make(map[string]map[string]any)
-	types := make([]string, 0, len(result))
-	for t := range result {
-		types = append(types, t)
-	}
-	sort.Strings(types)
-
-	for _, t := range types {
-		sortedResult[t] = result[t]
-	}
-
-	return sortedResult
+	return result
 }
 
 // buildResourceConfig builds a single resource configuration.
