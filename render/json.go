@@ -85,10 +85,10 @@ type terraformJSON struct {
 
 // terraformBlock represents the terraform {} block.
 type terraformBlock struct {
-	RequiredVersion   string                         `json:"required_version,omitempty"`
+	RequiredVersion   string                          `json:"required_version,omitempty"`
 	RequiredProviders map[string]requiredProviderJSON `json:"required_providers,omitempty"`
-	Backend           map[string]map[string]any      `json:"backend,omitempty"`
-	Cloud             map[string]any                 `json:"cloud,omitempty"`
+	Backend           map[string]map[string]any       `json:"backend,omitempty"`
+	Cloud             map[string]any                  `json:"cloud,omitempty"`
 }
 
 // requiredProviderJSON represents a required provider entry.
