@@ -37,13 +37,14 @@ coverage-check: coverage
 build:
 	go build -o tforge ./cmd/tforge
 
-# Regenerate golden files for e2e snapshot tests
+# Regenerate all golden files (e2e + render unit tests)
 update-snapshots:
 	go install ./cmd/tforge
 	go generate ./testdata/golden/...
 	@for dir in testdata/golden/*/; do \
 		go run ./$$dir > $${dir}main.tf.golden.json; \
 	done
+	go test ./render/ -run TestSnapshot -update
 
 # Verify golden files match generated output
 snapshot-tests:

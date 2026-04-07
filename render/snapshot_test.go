@@ -20,7 +20,7 @@ func TestSnapshot_FullStack(t *testing.T) {
 		t.Fatalf("ToJSON: %v", err)
 	}
 
-	golden := filepath.Join("testdata", "full_stack.golden.json")
+	golden := filepath.Join("..", "testdata", "render", "full_stack.golden.json")
 
 	if *update {
 		if err := os.WriteFile(golden, data, 0644); err != nil {
@@ -74,7 +74,7 @@ func TestSnapshot_LifecycleProvisioners(t *testing.T) {
 		t.Fatalf("ToJSON: %v", err)
 	}
 
-	golden := filepath.Join("testdata", "lifecycle_provisioners.golden.json")
+	golden := filepath.Join("..", "testdata", "render", "lifecycle_provisioners.golden.json")
 
 	if *update {
 		if err := os.WriteFile(golden, data, 0644); err != nil {
@@ -102,7 +102,7 @@ func TestSnapshot_MultiProvider(t *testing.T) {
 		t.Fatalf("ToJSON: %v", err)
 	}
 
-	golden := filepath.Join("testdata", "multi_provider.golden.json")
+	golden := filepath.Join("..", "testdata", "render", "multi_provider.golden.json")
 
 	if *update {
 		if err := os.WriteFile(golden, data, 0644); err != nil {
@@ -130,7 +130,7 @@ func TestSnapshot_VariableValidation(t *testing.T) {
 		t.Fatalf("ToJSON: %v", err)
 	}
 
-	golden := filepath.Join("testdata", "variable_validation.golden.json")
+	golden := filepath.Join("..", "testdata", "render", "variable_validation.golden.json")
 
 	if *update {
 		if err := os.WriteFile(golden, data, 0644); err != nil {
