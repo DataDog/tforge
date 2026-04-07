@@ -26,21 +26,11 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: Check formatting
-        run: |
-          unformatted=$(gofmt -l .)
-          if [ -n "$unformatted" ]; then
-            echo "Files need formatting:"
-            echo "$unformatted"
-            exit 1
-          fi
+      - name: Install golangci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
 
-      - name: Run golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
-          MODULE=$(go list -m)
-          PKGS=$(go list ./... | grep -v '/example' | sed "s|^${MODULE}/|./|" | tr '\n' ' ')
-          golangci-lint run $PKGS
+      - name: Lint
+        run: make lint
 
   test:
     name: Test
@@ -55,23 +45,7 @@ jobs:
           go-version: "1.22"
 
       - name: Run tests with coverage
-        run: |
-          # Exclude cmd/ (CLI glue, no logic) and example/ (generated code) from coverage
-          PKGS=$(go list ./... | grep -v '/cmd/' | grep -v '/example')
-          go test -race -coverprofile=coverage.out -covermode=atomic $PKGS
-
-      - name: Coverage summary
-        run: go tool cover -func=coverage.out
-
-      - name: Check coverage threshold
-        run: |
-          coverage=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}' | sed 's/%//')
-          echo "Total coverage: ${coverage}%"
-          threshold=80
-          if [ "$(echo "$coverage < $threshold" | bc -l)" -eq 1 ]; then
-            echo "Coverage ${coverage}% is below threshold ${threshold}%"
-            exit 1
-          fi
+        run: make coverage-check
 
       - name: Upload coverage
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
@@ -91,14 +65,5 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: Build tforge CLI
-        run: go install ./cmd/tforge
-
-      - name: Generate example types
-        run: go generate ./example/...
-
-      - name: Validate example output
-        run: go test ./example/ -v
-
-      - name: Validate render snapshots
-        run: go test ./render/ -run TestSnapshot -v
+      - name: Validate examples and snapshots
+        run: make validate

@@ -1,4 +1,4 @@
-.PHONY: fmt lint test coverage build clean update-snapshots validate
+.PHONY: fmt lint test coverage coverage-check build clean update-snapshots validate
 
 # Format check (same as CI)
 fmt:
@@ -14,8 +14,19 @@ test:
 
 # Run tests with coverage report
 coverage:
-	go test -race -coverprofile=coverage.out -covermode=atomic ./...
+	@PKGS=$$(go list ./... | grep -v '/cmd/' | grep -v '/example'); \
+	go test -race -coverprofile=coverage.out -covermode=atomic $$PKGS
 	go tool cover -func=coverage.out
+
+# Run tests with coverage and check 80% threshold
+coverage-check: coverage
+	@coverage=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
+	echo "Total coverage: $${coverage}%"; \
+	threshold=80; \
+	if [ "$$(echo "$$coverage < $$threshold" | bc -l)" -eq 1 ]; then \
+		echo "Coverage $${coverage}% is below threshold $${threshold}%"; \
+		exit 1; \
+	fi
 
 # Build the CLI binary
 build:
@@ -25,8 +36,9 @@ build:
 update-snapshots:
 	go test ./render/ -run TestSnapshot -update
 
-# Run full CI validation locally
-validate: build fmt
+# Run full CI validation locally (lint skipped if golangci-lint not installed)
+validate: fmt
+	@command -v golangci-lint >/dev/null 2>&1 && $(MAKE) lint || echo "Skipping lint: golangci-lint not installed"
 	go install ./cmd/tforge
 	go generate ./example/...
 	go test -race ./...
