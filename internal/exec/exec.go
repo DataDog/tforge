@@ -6,6 +6,7 @@ package exec
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -78,7 +79,8 @@ func (r *Runner) Run(ctx context.Context, name string, args ...string) (*Result,
 	}
 
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
 			result.ExitCode = exitErr.ExitCode()
 		} else {
 			return result, fmt.Errorf("running command: %w", err)

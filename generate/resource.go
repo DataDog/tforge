@@ -100,7 +100,7 @@ func (rg *ResourceGenerator) generateAttributeField(s *jen.Group, attr *schema.A
 
 	// Add deprecation comment if applicable
 	if attr.Deprecated() != "" {
-		field = s.Comment("Deprecated: " + attr.Deprecated())
+		s.Comment("Deprecated: " + attr.Deprecated())
 		field = s.Id(fieldName)
 	} else {
 		field = s.Id(fieldName)

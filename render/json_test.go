@@ -236,7 +236,7 @@ func TestToJSON_ResourceForEach(t *testing.T) {
 
 func TestToJSON_ResourceLifecycle(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
 		Config: map[string]any{},
@@ -246,7 +246,9 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 			IgnoreChanges:       []string{"tags"},
 			ReplaceTriggeredBy:  []string{"null_resource.trigger"},
 		},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -254,7 +256,9 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
 	lc := res["lifecycle"].(map[string]any)
 	if lc["create_before_destroy"] != true {
@@ -271,7 +275,7 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 
 func TestToJSON_ResourceTimeouts(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
 		Config: map[string]any{},
@@ -279,7 +283,9 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 			Create: "30m",
 			Delete: "10m",
 		},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -287,7 +293,9 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
 	timeouts := res["timeouts"].(map[string]any)
 	if timeouts["create"] != "30m" {
@@ -303,7 +311,7 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 
 func TestToJSON_ResourceProvisioners(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
 		Config: map[string]any{},
@@ -315,7 +323,9 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 				OnFailure: "continue",
 			},
 		},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -323,7 +333,9 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
 	provs := res["provisioner"].([]any)
 	if len(provs) != 1 {
