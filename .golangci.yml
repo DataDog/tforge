@@ -4,6 +4,7 @@ run:
 linters:
   enable:
     - bodyclose
+    - errcheck
     - errorlint
     - misspell
     - noctx
