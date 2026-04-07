@@ -68,7 +68,9 @@ func TestExtract_BasicFiles(t *testing.T) {
 func TestExtract_InvalidZip(t *testing.T) {
 	dir := t.TempDir()
 	badPath := filepath.Join(dir, "bad.zip")
-	os.WriteFile(badPath, []byte("not a zip"), 0644)
+	if err := os.WriteFile(badPath, []byte("not a zip"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	if err := Extract(badPath, dir); err == nil {
 		t.Fatal("expected error for invalid zip")
@@ -93,7 +95,9 @@ func TestExtract_ZipSlipPrevention(t *testing.T) {
 		f.Close()
 		t.Fatalf("creating header: %v", err)
 	}
-	fw.Write([]byte("evil"))
+	if _, err = fw.Write([]byte("evil")); err != nil {
+		t.Fatal(err)
+	}
 	w.Close()
 	f.Close()
 
@@ -132,7 +136,9 @@ func TestList(t *testing.T) {
 func TestList_InvalidZip(t *testing.T) {
 	dir := t.TempDir()
 	badPath := filepath.Join(dir, "bad.zip")
-	os.WriteFile(badPath, []byte("not a zip"), 0644)
+	if err := os.WriteFile(badPath, []byte("not a zip"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	_, err := List(badPath)
 	if err == nil {
@@ -174,7 +180,9 @@ func TestContains_Missing(t *testing.T) {
 func TestContains_InvalidZip(t *testing.T) {
 	dir := t.TempDir()
 	badPath := filepath.Join(dir, "bad.zip")
-	os.WriteFile(badPath, []byte("not a zip"), 0644)
+	if err := os.WriteFile(badPath, []byte("not a zip"), 0644); err != nil {
+		t.Fatal(err)
+	}
 
 	_, err := Contains(badPath, "anything")
 	if err == nil {

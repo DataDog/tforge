@@ -129,11 +129,13 @@ func TestToJSON_ProviderWithConfig(t *testing.T) {
 
 func TestToJSON_ResourceBasic(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
 		Config: map[string]any{"ami": "ami-123", "instance_type": "t3.micro"},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -153,12 +155,14 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 
 func TestToJSON_ResourceDependsOn(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type:      "aws_instance",
 		Name:      "web",
 		Config:    map[string]any{},
 		DependsOn: []string{"aws_vpc.main"},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -166,7 +170,9 @@ func TestToJSON_ResourceDependsOn(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
 	deps := res["depends_on"].([]any)
 	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
@@ -176,12 +182,14 @@ func TestToJSON_ResourceDependsOn(t *testing.T) {
 
 func TestToJSON_ResourceCount(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
 		Config: map[string]any{},
 		Count:  3,
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -189,7 +197,9 @@ func TestToJSON_ResourceCount(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
 	// JSON numbers unmarshal as float64
 	if res["count"] != float64(3) {
@@ -199,12 +209,14 @@ func TestToJSON_ResourceCount(t *testing.T) {
 
 func TestToJSON_ResourceForEach(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type:    "aws_instance",
 		Name:    "web",
 		Config:  map[string]any{},
 		ForEach: map[string]any{"a": "1", "b": "2"},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -212,7 +224,9 @@ func TestToJSON_ResourceForEach(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
 	forEach := res["for_each"].(map[string]any)
 	if forEach["a"] != "1" {
@@ -329,11 +343,13 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 
 func TestToJSON_DataSource(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "latest",
 		Config: map[string]any{"most_recent": true},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -341,7 +357,9 @@ func TestToJSON_DataSource(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
 	if ds["most_recent"] != true {
 		t.Errorf("expected most_recent true, got %v", ds["most_recent"])
@@ -517,17 +535,21 @@ func TestToJSON_FullStack(t *testing.T) {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
 		Config: map[string]any{"ami": "ami-123"},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
-	stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "latest",
 		Config: map[string]any{"most_recent": true},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	stack.AddVariable(config.Variable{
 		Name:    "env",
