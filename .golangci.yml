@@ -23,11 +23,16 @@ linters:
   exclusions:
     paths:
       - example
+      - third_party
     rules:
       - path: "_gen\\.go$"
         linters:
           - all
+    generated: lax
 
 formatters:
   enable:
     - gofmt
+  exclusions:
+    paths:
+      - example
