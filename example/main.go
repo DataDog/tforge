@@ -71,8 +71,13 @@ func main() {
 }
 
 func structToMap(v any) map[string]any {
-	data, _ := json.Marshal(v)
+	data, err := json.Marshal(v)
+	if err != nil {
+		panic(fmt.Sprintf("structToMap: marshal failed: %v", err))
+	}
 	var result map[string]any
-	json.Unmarshal(data, &result)
+	if err := json.Unmarshal(data, &result); err != nil {
+		panic(fmt.Sprintf("structToMap: unmarshal failed: %v", err))
+	}
 	return result
 }
