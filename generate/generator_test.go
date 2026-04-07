@@ -1,13 +1,35 @@
 package generate
 
 import (
+	"context"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
 	"tforge/provider"
 )
+
+// compileGeneratedCode creates a temporary Go module in the given directory
+// and runs "go build ./..." to verify the generated code compiles.
+func compileGeneratedCode(t *testing.T, dir, pkgName string) {
+	t.Helper()
+
+	// Write a go.mod so the directory is a valid Go module
+	goMod := "module testcompile\n\ngo 1.22\n"
+	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
+		t.Fatalf("writing go.mod: %v", err)
+	}
+
+	ctx := context.Background()
+	cmd := exec.CommandContext(ctx, "go", "build", "./...")
+	cmd.Dir = dir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("generated code does not compile:\n%s\n%v", out, err)
+	}
+}
 
 func TestNewDefaults(t *testing.T) {
 	g := New(Config{})
@@ -76,6 +98,9 @@ func TestGenerateEmptySchema(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(tmpDir, "provider_gen.go")); err != nil {
 		t.Errorf("provider_gen.go not found: %v", err)
 	}
+
+	// Verify generated code compiles
+	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
 func TestGenerateWithResources(t *testing.T) {
@@ -128,6 +153,9 @@ func TestGenerateWithResources(t *testing.T) {
 			t.Errorf("%s is empty", name)
 		}
 	}
+
+	// Verify generated code compiles
+	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
 func TestJsonTagBehavior(t *testing.T) {
@@ -353,6 +381,9 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 			t.Errorf("data_sources_gen.go does not contain %q", want)
 		}
 	}
+
+	// Verify generated code compiles
+	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
 func TestGenerateWithSetAndMapNesting(t *testing.T) {
@@ -418,6 +449,9 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 			t.Errorf("resources_gen.go does not contain %q", want)
 		}
 	}
+
+	// Verify generated code compiles
+	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
 func TestGenerateWithComments(t *testing.T) {
@@ -473,6 +507,167 @@ func TestGenerateWithComments(t *testing.T) {
 			t.Errorf("%s not found: %v", name, err)
 		}
 	}
+
+	// Verify generated code compiles
+	compileGeneratedCode(t, tmpDir, "testpkg")
+}
+
+// TestGenerateCompilationComplex verifies that generated code with complex type
+// combinations (nested lists, maps of objects, deeply nested blocks) compiles
+// successfully. This is the primary guard against generating syntactically valid
+// but type-incorrect Go code.
+func TestGenerateCompilationComplex(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-compile-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{
+		PackageName:      "testpkg",
+		OutputDir:        tmpDir,
+		OmitEmpty:        true,
+		GenerateComments: true,
+	})
+
+	ps := &provider.Schema{
+		Provider: &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"api_key":  {Type: json.RawMessage(`"string"`), Required: true},
+						"base_url": {Type: json.RawMessage(`"string"`), Optional: true},
+						"timeout":  {Type: json.RawMessage(`"number"`), Optional: true},
+						"debug":    {Type: json.RawMessage(`"bool"`), Optional: true},
+					},
+					BlockTypes: map[string]*provider.NestedBlock{
+						"auth": {
+							NestingMode: "single",
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"token": {Type: json.RawMessage(`"string"`), Required: true},
+								},
+							},
+						},
+					},
+				},
+			},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"test_server": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"name":    {Type: json.RawMessage(`"string"`), Required: true},
+							"id":      {Type: json.RawMessage(`"string"`), Computed: true},
+							"tags":    {Type: json.RawMessage(`["list","string"]`), Optional: true},
+							"labels":  {Type: json.RawMessage(`["map","string"]`), Optional: true},
+							"ports":   {Type: json.RawMessage(`["set","number"]`), Optional: true},
+							"dynamic": {Type: json.RawMessage(`"dynamic"`), Optional: true},
+						},
+						BlockTypes: map[string]*provider.NestedBlock{
+							"disk": {
+								NestingMode: "list",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"size": {Type: json.RawMessage(`"number"`), Required: true},
+										"type": {Type: json.RawMessage(`"string"`), Optional: true},
+									},
+								},
+							},
+							"network": {
+								NestingMode: "set",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"cidr": {Type: json.RawMessage(`"string"`), Required: true},
+									},
+								},
+							},
+							"metadata": {
+								NestingMode: "map",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"value": {Type: json.RawMessage(`"string"`), Optional: true},
+									},
+								},
+							},
+							"primary_nic": {
+								NestingMode: "single",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"mac": {Type: json.RawMessage(`"string"`), Computed: true},
+									},
+								},
+							},
+						},
+					},
+				},
+				"test_database": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"engine":  {Type: json.RawMessage(`"string"`), Required: true},
+							"version": {Type: json.RawMessage(`"string"`), Optional: true},
+						},
+						BlockTypes: map[string]*provider.NestedBlock{
+							"replica": {
+								NestingMode: "list",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"region": {Type: json.RawMessage(`"string"`), Required: true},
+									},
+									BlockTypes: map[string]*provider.NestedBlock{
+										"endpoint": {
+											NestingMode: "single",
+											Block: &provider.BlockType{
+												Attributes: map[string]*provider.Attribute{
+													"host": {Type: json.RawMessage(`"string"`), Computed: true},
+													"port": {Type: json.RawMessage(`"number"`), Computed: true},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			DataSourceSchemas: map[string]*provider.SchemaBlock{
+				"test_image": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"name":   {Type: json.RawMessage(`"string"`), Optional: true},
+							"id":     {Type: json.RawMessage(`"string"`), Computed: true},
+							"owners": {Type: json.RawMessage(`["list","string"]`), Optional: true},
+						},
+						BlockTypes: map[string]*provider.NestedBlock{
+							"filter": {
+								NestingMode: "set",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"name":   {Type: json.RawMessage(`"string"`), Required: true},
+										"values": {Type: json.RawMessage(`["list","string"]`), Required: true},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// Verify all expected files exist
+	for _, name := range []string{"provider_gen.go", "resources_gen.go", "data_sources_gen.go"} {
+		if _, err := os.Stat(filepath.Join(tmpDir, name)); err != nil {
+			t.Errorf("%s not found: %v", name, err)
+		}
+	}
+
+	// The critical check: verify the generated code actually compiles
+	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
 func contains(s, substr string) bool {
