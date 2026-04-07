@@ -13,6 +13,11 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GO_VERSION: "1.22"
+  GOLANGCI_LINT_VERSION: "v2.11.4"
+  GOTOOLCHAIN: local
+
 jobs:
   lint:
     name: Lint
@@ -24,10 +29,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version: "1.22"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Install golangci-lint
-        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.11.4
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANGCI_LINT_VERSION }}
 
       - name: Lint
         run: make lint
@@ -42,7 +47,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version: "1.22"
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Run tests with coverage
         run: make coverage-check
@@ -63,10 +68,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
-          go-version: "1.22"
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install OpenTofu
+        uses: opentofu/setup-opentofu@592200f5ffe7e66fb1fb692f3a0f80183104ae54 # v1.0.5
+        with:
+          tofu_wrapper: false
 
       - name: Install golangci-lint
-        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.11.4
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANGCI_LINT_VERSION }}
 
       - name: Validate examples and snapshots
         run: make validate
