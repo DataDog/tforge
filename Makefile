@@ -54,7 +54,8 @@ snapshot-tests:
 		go run ./$$dir | diff - $${dir}main.tf.golden.json || exit 1; \
 	done
 
-# Run full CI validation locally (pre-commit)
+# Run full CI validation locally (pre-commit).
+# Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.
 validate: lint coverage-check snapshot-tests
 
 # Clean build artifacts
