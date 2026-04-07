@@ -1,12 +1,18 @@
 .PHONY: fmt lint test coverage coverage-check build clean update-snapshots validate snapshot-tests
 
+# Packages excluded from lint and coverage (generated code, CLI glue)
+EXCLUDED = /cmd/ /example /testdata
+PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)'))
+# Lint needs relative paths, not module-prefixed
+LINT_PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)') | sed "s|^$$(go list -m)/|./|")
+
 # Format check (same as CI)
 fmt:
 	@test -z "$$(gofmt -l .)" || (echo "Files need formatting:" && gofmt -l . && exit 1)
 
 # Lint (requires golangci-lint installed locally)
 lint: fmt
-	golangci-lint run $$(go list ./... | grep -v '/example' | grep -v '/testdata' | sed "s|^$$(go list -m)/|./|")
+	golangci-lint run $(LINT_PKGS)
 
 # Run tests with race detector
 test:
@@ -14,8 +20,7 @@ test:
 
 # Run tests with coverage report
 coverage:
-	@PKGS=$$(go list ./... | grep -v '/cmd/' | grep -v '/example' | grep -v '/testdata'); \
-	go test -race -coverprofile=coverage.out -covermode=atomic $$PKGS
+	go test -race -coverprofile=coverage.out -covermode=atomic $(PKGS)
 	go tool cover -func=coverage.out
 
 # Run tests with coverage and check 80% threshold
