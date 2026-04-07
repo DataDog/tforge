@@ -241,6 +241,122 @@ func TestParseSchemaOutput_SuffixMatch(t *testing.T) {
 	}
 }
 
+func TestParseSchemaOutput_ExactMatchPreferredOverSuffix(t *testing.T) {
+	// When both custom/aws and hashicorp/aws exist, requesting custom/aws
+	// must return the custom/aws schema, not hashicorp/aws.
+	src := Source{Namespace: "custom", Name: "aws"}
+	data := []byte(`{
+		"format_version": "1.0",
+		"provider_schemas": {
+			"registry.terraform.io/hashicorp/aws": {
+				"provider": {"block": {}},
+				"resource_schemas": {"aws_wrong": {"block": {}}},
+				"data_source_schemas": {}
+			},
+			"registry.terraform.io/custom/aws": {
+				"provider": {"block": {}},
+				"resource_schemas": {"aws_correct": {"block": {}}},
+				"data_source_schemas": {}
+			}
+		}
+	}`)
+
+	ps, err := parseSchemaOutput(data, src)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, ok := ps.ResourceSchemas["aws_correct"]; !ok {
+		t.Error("expected aws_correct in ResourceSchemas (exact match)")
+	}
+	if _, ok := ps.ResourceSchemas["aws_wrong"]; ok {
+		t.Error("should not have returned hashicorp/aws schema")
+	}
+}
+
+func TestParseSchemaOutput_SuffixMatchRejectsWrongNamespace(t *testing.T) {
+	// When requesting custom/aws but only hashicorp/aws exists, the suffix
+	// match should still work (single candidate) but not silently if there
+	// are multiple candidates with different namespaces.
+	src := Source{Namespace: "custom", Name: "aws"}
+	data := []byte(`{
+		"format_version": "1.0",
+		"provider_schemas": {
+			"registry.terraform.io/hashicorp/aws": {
+				"provider": {"block": {}},
+				"resource_schemas": {"aws_instance": {"block": {}}},
+				"data_source_schemas": {}
+			}
+		}
+	}`)
+
+	// Single suffix candidate: falls back gracefully.
+	ps, err := parseSchemaOutput(data, src)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, ok := ps.ResourceSchemas["aws_instance"]; !ok {
+		t.Error("expected aws_instance via suffix fallback")
+	}
+}
+
+func TestParseSchemaOutput_AmbiguousSuffixReturnsError(t *testing.T) {
+	// When two providers share the same name but different namespaces and
+	// the exact match doesn't hit, the function should return an error
+	// instead of non-deterministically picking one.
+	src := Source{Namespace: "unrelated", Name: "aws"}
+	data := []byte(`{
+		"format_version": "1.0",
+		"provider_schemas": {
+			"registry.terraform.io/hashicorp/aws": {
+				"provider": {"block": {}},
+				"resource_schemas": {"aws_a": {"block": {}}},
+				"data_source_schemas": {}
+			},
+			"registry.terraform.io/custom/aws": {
+				"provider": {"block": {}},
+				"resource_schemas": {"aws_b": {"block": {}}},
+				"data_source_schemas": {}
+			}
+		}
+	}`)
+
+	_, err := parseSchemaOutput(data, src)
+	if err == nil {
+		t.Fatal("expected error for ambiguous suffix match, got nil")
+	}
+	if !strings.Contains(err.Error(), "multiple") {
+		t.Errorf("error = %q, want it to mention 'multiple'", err.Error())
+	}
+}
+
+func TestParseSchemaOutput_CrossRegistryExactMatch(t *testing.T) {
+	// Exact match across different registries.
+	src := Source{Namespace: "datadog", Name: "datadog"}
+	data := []byte(`{
+		"format_version": "1.0",
+		"provider_schemas": {
+			"registry.opentofu.org/datadog/datadog": {
+				"provider": {"block": {}},
+				"resource_schemas": {"datadog_monitor": {"block": {}}},
+				"data_source_schemas": {}
+			},
+			"registry.terraform.io/other/datadog": {
+				"provider": {"block": {}},
+				"resource_schemas": {"other_datadog_thing": {"block": {}}},
+				"data_source_schemas": {}
+			}
+		}
+	}`)
+
+	ps, err := parseSchemaOutput(data, src)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, ok := ps.ResourceSchemas["datadog_monitor"]; !ok {
+		t.Error("expected datadog_monitor from exact match")
+	}
+}
+
 func TestParseSchemaOutput_ProviderNotFound(t *testing.T) {
 	src := Source{Namespace: "datadog", Name: "datadog"}
 	data := []byte(`{

@@ -206,15 +206,19 @@ type schemaOutput struct {
 }
 
 // parseSchemaOutput extracts the provider schema from tofu output.
+// It prefers an exact namespace/name match and only falls back to a suffix
+// match on the provider name when no exact match exists. An ambiguous suffix
+// match (more than one candidate) returns an error instead of silently
+// picking a random provider.
 func parseSchemaOutput(data []byte, src Source) (*ProviderSchema, error) {
 	var output schemaOutput
 	if err := json.Unmarshal(data, &output); err != nil {
 		return nil, fmt.Errorf("unmarshaling schema: %w", err)
 	}
 
-	// Find the provider schema (key format: "registry.opentofu.org/namespace/name")
+	// First pass: look for an exact namespace/name match.
 	for key, ps := range output.ProviderSchemas {
-		if strings.Contains(key, src.String()) || strings.HasSuffix(key, "/"+src.Name) {
+		if strings.Contains(key, src.String()) {
 			return &ProviderSchema{
 				ConfigSchema:      ps.Provider,
 				ResourceSchemas:   ps.ResourceSchemas,
@@ -223,7 +227,38 @@ func parseSchemaOutput(data []byte, src Source) (*ProviderSchema, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("provider %s not found in schema output", src)
+	// Second pass: fall back to suffix match on "/name" only.
+	// Collect all candidates to detect ambiguity.
+	type candidate struct {
+		key string
+		ps  *ProviderSchema
+	}
+	var candidates []candidate
+	for key, ps := range output.ProviderSchemas {
+		if strings.HasSuffix(key, "/"+src.Name) {
+			candidates = append(candidates, candidate{
+				key: key,
+				ps: &ProviderSchema{
+					ConfigSchema:      ps.Provider,
+					ResourceSchemas:   ps.ResourceSchemas,
+					DataSourceSchemas: ps.DataSourceSchemas,
+				},
+			})
+		}
+	}
+
+	switch len(candidates) {
+	case 1:
+		return candidates[0].ps, nil
+	case 0:
+		return nil, fmt.Errorf("provider %s not found in schema output", src)
+	default:
+		keys := make([]string, len(candidates))
+		for i, c := range candidates {
+			keys[i] = c.key
+		}
+		return nil, fmt.Errorf("provider %s matched multiple schemas: %s", src, strings.Join(keys, ", "))
+	}
 }
 
 // LoadSchemaFromFile loads a provider schema from a JSON file.
