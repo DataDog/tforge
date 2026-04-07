@@ -1,0 +1,75 @@
+{
+  "terraform": {
+    "required_providers": {
+      "aws": {
+        "source": "hashicorp/aws",
+        "version": "~> 5.0"
+      },
+      "random": {
+        "source": "hashicorp/random",
+        "version": "~> 3.5"
+      }
+    }
+  },
+  "provider": {
+    "aws": [
+      {
+        "region": "us-east-1"
+      },
+      {
+        "alias": "west",
+        "region": "us-west-2"
+      }
+    ],
+    "random": [
+      {}
+    ]
+  },
+  "resource": {
+    "aws_instance": {
+      "east": {
+        "ami": "ami-east-123",
+        "depends_on": [
+          "random_pet.name"
+        ],
+        "instance_type": "t3.micro",
+        "provider": "aws",
+        "tags": {
+          "Name": "${random_pet.name.id}-east"
+        }
+      },
+      "west": {
+        "ami": "ami-west-456",
+        "count": 3,
+        "instance_type": "t3.micro",
+        "provider": "aws.west",
+        "tags": {
+          "Name": "${random_pet.name.id}-west-${count.index}"
+        }
+      }
+    },
+    "aws_s3_bucket": {
+      "logs": {
+        "bucket": "${each.key}-${random_pet.name.id}",
+        "for_each": "toset([\"access-logs\", \"app-logs\", \"audit-logs\"])",
+        "tags": {
+          "Purpose": "${each.key}"
+        }
+      }
+    },
+    "random_pet": {
+      "name": {
+        "length": 2
+      }
+    }
+  },
+  "data": {
+    "aws_availability_zones": {
+      "available": {
+        "provider": "aws.west",
+        "state": "available"
+      }
+    }
+  }
+}
+
