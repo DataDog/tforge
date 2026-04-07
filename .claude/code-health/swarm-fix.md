@@ -7,24 +7,28 @@ gh issue list --label "code-health" --state open --sort created --limit 20
 
 Rules:
 
-- Keep PRs small and reviewable
+- One commit per issue, directly on main
+- Commit message must include "Closes #XX" to auto-close the issue
 - Add or update tests first if risk warrants it
 - Do not refactor adjacent code "because it's there"
 - Maintain backward compatibility unless explicitly allowed
 - Update docs/comments where behavior or expectations change
 - Run `make lint` and `make test` before committing
+- Push after each commit
+
+Commit format:
+```bash
+git commit -m "$(cat <<'EOF'
+<description of what was done>
+
+Closes #XX
+EOF
+)"
+git push
+```
 
 Output:
 
-- List of commits with intent
-- What you changed and why
+- What you changed and why, per issue
 - Tests added/updated and what they cover
-- Update the GitHub issue with progress comments
-- Close the issue when complete
 - Create new GitHub issues for any follow-up tasks discovered during implementation
-
-**Using gh CLI to update issues:**
-```bash
-gh issue comment <issue-number> --body "..."
-gh issue close <issue-number> --comment "Completed: ..."
-```
