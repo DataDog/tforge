@@ -28,7 +28,7 @@ Generated files (`*_gen.go`) are gitignored. The example uses `go:generate` to c
 go generate ./example/...   # generates example/datadog/resources_gen.go
 ```
 
-CI runs `go generate` before testing examples.
+Run `go generate` before testing examples locally.
 
 ## Development
 
@@ -62,8 +62,7 @@ make fmt                # check formatting
 GitHub Actions (`.github/workflows/ci.yml`):
 - **Lint**: gofmt check + golangci-lint
 - **Test**: race detector + coverage with 80% threshold
-- **Validate Examples**: `go generate` + example tests
-- **Validate Snapshots**: golden file comparison
+- **Snapshot Tests**: golden file comparison
 
 ## Review Guidelines
 
