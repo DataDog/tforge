@@ -6,6 +6,7 @@
 /tforge
 
 # Test artifacts
+coverage.out
 *.tf.json
 .terraform/
 .terraform.lock.hcl
