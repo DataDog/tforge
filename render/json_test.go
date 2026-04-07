@@ -399,7 +399,9 @@ func TestToJSON_Variables(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	v := obj["variable"].(map[string]any)["instance_type"].(map[string]any)
 	if v["type"] != "string" {
 		t.Errorf("expected type string, got %v", v["type"])
@@ -441,7 +443,9 @@ func TestToJSON_Outputs(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	o := obj["output"].(map[string]any)["instance_ip"].(map[string]any)
 	if o["value"] != "${aws_instance.web.public_ip}" {
 		t.Errorf("unexpected value: %v", o["value"])
@@ -469,7 +473,9 @@ func TestToJSON_Locals(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	locals := obj["locals"].(map[string]any)
 	if locals["env"] != "production" {
 		t.Errorf("unexpected env: %v", locals["env"])
