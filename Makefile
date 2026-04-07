@@ -1,4 +1,4 @@
-.PHONY: fmt lint test coverage build clean update-snapshots
+.PHONY: fmt lint test coverage build clean update-snapshots validate
 
 # Format check (same as CI)
 fmt:
@@ -24,6 +24,13 @@ build:
 # Update golden files for snapshot tests
 update-snapshots:
 	go test ./render/ -run TestSnapshot -update
+
+# Run full CI validation locally
+validate: build fmt
+	go install ./cmd/tforge
+	go generate ./example/...
+	go test -race ./...
+	go test ./render/ -run TestSnapshot -v
 
 # Clean build artifacts
 clean:

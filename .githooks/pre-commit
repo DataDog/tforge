@@ -1,0 +1,8 @@
+#!/bin/sh
+# Pre-commit hook: run validate to catch CI failures locally
+# Install: git config core.hooksPath .githooks
+
+set -e
+
+echo "Running pre-commit validation..."
+make validate

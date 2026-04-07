@@ -91,6 +91,9 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Build tforge CLI
+        run: go install ./cmd/tforge
+
       - name: Generate example types
         run: go generate ./example/...
 
