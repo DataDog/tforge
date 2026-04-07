@@ -1,5 +1,3 @@
-version: "2"
-
 run:
   timeout: 5m
   go: "1.22"
@@ -11,28 +9,23 @@ linters:
     - staticcheck
     - unused
     - ineffassign
+    - gosimple
+    - gofmt
     - misspell
     - errorlint
     - bodyclose
     - noctx
-  settings:
-    errorlint:
-      errorf: true
-      asserts: true
-      comparison: true
-  exclusions:
-    paths:
-      - example
-      - third_party
-    rules:
-      - path: "_gen\\.go$"
-        linters:
-          - all
-    generated: lax
 
-formatters:
-  enable:
-    - gofmt
-  exclusions:
-    paths:
-      - example
+linters-settings:
+  errorlint:
+    errorf: true
+    asserts: true
+    comparison: true
+
+issues:
+  exclude-dirs:
+    - example
+  exclude-rules:
+    - path: "_gen\\.go$"
+      linters:
+        - all

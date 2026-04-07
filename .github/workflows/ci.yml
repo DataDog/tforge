@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -17,10 +18,14 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.22"
+
       - name: Check formatting
         run: |
           unformatted=$(gofmt -l .)
@@ -29,27 +34,34 @@ jobs:
             echo "$unformatted"
             exit 1
           fi
+
       - name: Run golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.1.6
-          PKGS=$(go list ./... | grep -v '/example')
-          golangci-lint run $PKGS
+        uses: golangci/golangci-lint-action@55c2c1448f86e01eaae002a5a3a9624417608d84 # v6
+        with:
+          version: latest
+          args: --exclude-dirs=example
 
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
           go-version: "1.22"
+
       - name: Run tests with coverage
         run: |
           # Exclude cmd/ (CLI glue, no logic) and example/ (generated code) from coverage
           PKGS=$(go list ./... | grep -v '/cmd/' | grep -v '/example')
           go test -race -coverprofile=coverage.out -covermode=atomic $PKGS
+
       - name: Coverage summary
         run: go tool cover -func=coverage.out
+
       - name: Check coverage threshold
         run: |
           coverage=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}' | sed 's/%//')
@@ -59,7 +71,9 @@ jobs:
             echo "Coverage ${coverage}% is below threshold ${threshold}%"
             exit 1
           fi
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage-report
           path: coverage.out
