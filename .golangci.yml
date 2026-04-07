@@ -12,26 +12,23 @@ linters:
     - unused
     - ineffassign
     - gosimple
-    - gofmt
     - misspell
     - errorlint
     - bodyclose
     - noctx
+  settings:
+    errorlint:
+      errorf: true
+      asserts: true
+      comparison: true
+  exclusions:
+    paths:
+      - example
+    rules:
+      - path: "_gen\\.go$"
+        linters:
+          - all
 
 formatters:
   enable:
     - gofmt
-
-linters-settings:
-  errorlint:
-    errorf: true
-    asserts: true
-    comparison: true
-
-issues:
-  exclude-dirs:
-    - example
-  exclude-rules:
-    - path: "_gen\\.go$"
-      linters:
-        - all
