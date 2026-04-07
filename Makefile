@@ -40,6 +40,7 @@ update-snapshots:
 validate: lint
 	go install ./cmd/tforge
 	go generate ./example/...
+	go run ./example/ > ./example/main.tf.json
 	go test -race ./...
 	go test ./render/ -run TestSnapshot -v
 
