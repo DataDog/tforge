@@ -1,4 +1,4 @@
-.PHONY: fmt lint test coverage build clean
+.PHONY: fmt lint test coverage build clean update-snapshots
 
 # Format check (same as CI)
 fmt:
@@ -20,6 +20,10 @@ coverage:
 # Build the CLI binary
 build:
 	go build -o tforge ./cmd/tforge
+
+# Update golden files for snapshot tests
+update-snapshots:
+	go test ./render/ -run TestSnapshot -update
 
 # Clean build artifacts
 clean:
