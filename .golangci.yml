@@ -1,3 +1,5 @@
+version: "2"
+
 run:
   timeout: 5m
   go: "1.22"
@@ -15,6 +17,10 @@ linters:
     - errorlint
     - bodyclose
     - noctx
+
+formatters:
+  enable:
+    - gofmt
 
 linters-settings:
   errorlint:
