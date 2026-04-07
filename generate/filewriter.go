@@ -42,6 +42,8 @@ func WriteFile(f *jen.File, path string) error {
 }
 
 // toGoName converts a snake_case Terraform name to PascalCase Go name.
+// If the result would start with a digit (invalid Go identifier), it is
+// prefixed with "X". An empty input returns an empty string.
 func toGoName(tfName string) string {
 	parts := strings.Split(tfName, "_")
 	var result strings.Builder
@@ -59,7 +61,12 @@ func toGoName(tfName string) string {
 		}
 	}
 
-	return result.String()
+	s := result.String()
+	// Prefix with "X" if the result starts with a digit (invalid Go identifier).
+	if len(s) > 0 && s[0] >= '0' && s[0] <= '9' {
+		return "X" + s
+	}
+	return s
 }
 
 // capitalizeFirst capitalizes the first letter of a string.

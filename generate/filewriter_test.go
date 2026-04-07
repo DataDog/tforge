@@ -17,6 +17,15 @@ func TestToGoName(t *testing.T) {
 		{"a", "A"},
 		{"http_url", "HTTPURL"},
 		{"vpc_id", "VPCID"},
+		// Edge cases from issue #27
+		{"_internal", "Internal"},
+		{"__", ""},
+		{"3d_model", "X3dModel"},
+		{"http_api_url_id", "HTTPAPIURLID"},
+		{"a_b_c_d_e", "ABCDE"},
+		{"__leading__underscores__", "LeadingUnderscores"},
+		{"123", "X123"},
+		{"0_count", "X0Count"},
 	}
 
 	for _, tt := range tests {
