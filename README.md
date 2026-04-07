@@ -2,7 +2,7 @@
 
 **Define Terraform infrastructure in pure Go — no JSII, no Node.js, no HashiCorp libraries.**
 
-[![CI](https://github.com/datadog-labs/tforge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/datadog-labs/tforge/actions/workflows/ci.yml)
+[![CI](https://github.com/St0rmingBr4in/tforge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/St0rmingBr4in/tforge/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/go-1.22+-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.md)
 
