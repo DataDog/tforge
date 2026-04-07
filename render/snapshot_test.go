@@ -66,6 +66,256 @@ func TestSnapshot_FullStack_ValidJSON(t *testing.T) {
 	}
 }
 
+func TestSnapshot_LifecycleProvisioners(t *testing.T) {
+	stack := buildLifecycleProvisionersStack()
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("ToJSON: %v", err)
+	}
+
+	golden := filepath.Join("testdata", "lifecycle_provisioners.golden.json")
+
+	if *update {
+		if err := os.WriteFile(golden, data, 0644); err != nil {
+			t.Fatalf("updating golden file: %v", err)
+		}
+		t.Log("updated golden file")
+		return
+	}
+
+	expected, err := os.ReadFile(golden)
+	if err != nil {
+		t.Fatalf("reading golden file (run with -update to create): %v", err)
+	}
+
+	if string(data) != string(expected) {
+		t.Errorf("output does not match golden file %s\n\nGot:\n%s\n\nWant:\n%s", golden, data, expected)
+	}
+}
+
+func TestSnapshot_MultiProvider(t *testing.T) {
+	stack := buildMultiProviderStack()
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("ToJSON: %v", err)
+	}
+
+	golden := filepath.Join("testdata", "multi_provider.golden.json")
+
+	if *update {
+		if err := os.WriteFile(golden, data, 0644); err != nil {
+			t.Fatalf("updating golden file: %v", err)
+		}
+		t.Log("updated golden file")
+		return
+	}
+
+	expected, err := os.ReadFile(golden)
+	if err != nil {
+		t.Fatalf("reading golden file (run with -update to create): %v", err)
+	}
+
+	if string(data) != string(expected) {
+		t.Errorf("output does not match golden file %s\n\nGot:\n%s\n\nWant:\n%s", golden, data, expected)
+	}
+}
+
+func TestSnapshot_VariableValidation(t *testing.T) {
+	stack := buildVariableValidationStack()
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("ToJSON: %v", err)
+	}
+
+	golden := filepath.Join("testdata", "variable_validation.golden.json")
+
+	if *update {
+		if err := os.WriteFile(golden, data, 0644); err != nil {
+			t.Fatalf("updating golden file: %v", err)
+		}
+		t.Log("updated golden file")
+		return
+	}
+
+	expected, err := os.ReadFile(golden)
+	if err != nil {
+		t.Fatalf("reading golden file (run with -update to create): %v", err)
+	}
+
+	if string(data) != string(expected) {
+		t.Errorf("output does not match golden file %s\n\nGot:\n%s\n\nWant:\n%s", golden, data, expected)
+	}
+}
+
+func buildLifecycleProvisionersStack() *config.Stack {
+	stack := config.NewStack("lifecycle-provisioners")
+
+	stack.AddProvider(config.Provider{
+		Name:    "aws",
+		Source:  "hashicorp/aws",
+		Version: "~> 5.0",
+		Config:  map[string]any{"region": "us-east-1"},
+	})
+
+	if err := stack.AddResource(config.Resource{
+		Type: "aws_instance",
+		Name: "app",
+		Config: map[string]any{
+			"ami":           "ami-abcdef",
+			"instance_type": "t3.small",
+		},
+		Lifecycle: &config.Lifecycle{
+			CreateBeforeDestroy: true,
+			PreventDestroy:      true,
+			IgnoreChanges:       []string{"tags", "ami"},
+			ReplaceTriggeredBy:  []string{"aws_security_group.main.id"},
+			Precondition: &config.Condition{
+				Condition:    "var.env != \"\"",
+				ErrorMessage: "env must not be empty",
+			},
+			Postcondition: &config.Condition{
+				Condition:    "self.public_ip != \"\"",
+				ErrorMessage: "instance must have a public IP",
+			},
+		},
+		Connection: &config.Connection{
+			Type:       "ssh",
+			Host:       "${self.public_ip}",
+			User:       "ubuntu",
+			PrivateKey: "${file(\"~/.ssh/id_rsa\")}",
+			Timeout:    "5m",
+		},
+		Provisioners: []config.Provisioner{
+			{
+				Type:   "local-exec",
+				Config: map[string]any{"command": "echo ${self.public_ip} >> hosts.txt"},
+			},
+			{
+				Type:      "remote-exec",
+				Config:    map[string]any{"inline": []string{"sudo apt-get update", "sudo apt-get install -y nginx"}},
+				When:      "create",
+				OnFailure: "continue",
+				Connection: &config.Connection{
+					Type: "ssh",
+					Host: "${self.private_ip}",
+					User: "admin",
+					Port: 2222,
+				},
+			},
+		},
+		Timeouts: &config.Timeouts{
+			Create: "30m",
+			Update: "20m",
+			Delete: "15m",
+		},
+	}); err != nil {
+		panic(err)
+	}
+
+	return stack
+}
+
+func buildMultiProviderStack() *config.Stack {
+	stack := config.NewStack("multi-provider")
+
+	// Default AWS provider
+	stack.AddProvider(config.Provider{
+		Name:    "aws",
+		Source:  "hashicorp/aws",
+		Version: "~> 5.0",
+		Config:  map[string]any{"region": "us-east-1"},
+	})
+
+	// Aliased AWS provider for us-west-2
+	stack.AddProvider(config.Provider{
+		Name:   "aws",
+		Alias:  "west",
+		Config: map[string]any{"region": "us-west-2"},
+	})
+
+	// Google provider
+	stack.AddProvider(config.Provider{
+		Name:    "google",
+		Source:  "hashicorp/google",
+		Version: "~> 5.0",
+		Config:  map[string]any{"project": "my-project", "region": "us-central1"},
+	})
+
+	// Resource using default AWS provider
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "east",
+		Config: map[string]any{"ami": "ami-east", "instance_type": "t3.micro"},
+	}); err != nil {
+		panic(err)
+	}
+
+	// Resource using aliased AWS provider
+	if err := stack.AddResource(config.Resource{
+		Type:     "aws_instance",
+		Name:     "west",
+		Provider: "aws.west",
+		Config:   map[string]any{"ami": "ami-west", "instance_type": "t3.micro"},
+	}); err != nil {
+		panic(err)
+	}
+
+	// Resource using Google provider
+	if err := stack.AddResource(config.Resource{
+		Type:   "google_compute_instance",
+		Name:   "central",
+		Config: map[string]any{"machine_type": "e2-medium", "zone": "us-central1-a"},
+	}); err != nil {
+		panic(err)
+	}
+
+	return stack
+}
+
+func buildVariableValidationStack() *config.Stack {
+	stack := config.NewStack("variable-validation")
+
+	stack.AddVariable(config.Variable{
+		Name:        "environment",
+		Type:        "string",
+		Description: "Deployment environment",
+		Default:     "dev",
+		Validation: &config.VariableValidation{
+			Condition:    "contains([\"dev\", \"staging\", \"prod\"], var.environment)",
+			ErrorMessage: "Environment must be dev, staging, or prod.",
+		},
+	})
+
+	stack.AddVariable(config.Variable{
+		Name:        "db_password",
+		Type:        "string",
+		Description: "Database password",
+		Sensitive:   true,
+	})
+
+	stack.AddOutput(config.Output{
+		Name:        "app_url",
+		Value:       "https://${aws_lb.main.dns_name}",
+		Description: "Application URL",
+		DependsOn:   []string{"aws_lb.main", "aws_lb_listener.https"},
+		Precondition: &config.Condition{
+			Condition:    "aws_lb.main.dns_name != \"\"",
+			ErrorMessage: "Load balancer must have a DNS name",
+		},
+	})
+
+	stack.AddOutput(config.Output{
+		Name:      "db_connection_string",
+		Value:     "postgres://user:${var.db_password}@${aws_db_instance.main.endpoint}/mydb",
+		Sensitive: true,
+	})
+
+	return stack
+}
+
 func buildFullStack() *config.Stack {
 	stack := config.NewStack("snapshot-test")
 

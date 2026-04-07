@@ -1,0 +1,36 @@
+{
+  "variable": {
+    "db_password": {
+      "type": "string",
+      "description": "Database password",
+      "sensitive": true
+    },
+    "environment": {
+      "type": "string",
+      "description": "Deployment environment",
+      "default": "dev",
+      "validation": {
+        "condition": "contains([\"dev\", \"staging\", \"prod\"], var.environment)",
+        "error_message": "Environment must be dev, staging, or prod."
+      }
+    }
+  },
+  "output": {
+    "app_url": {
+      "value": "https://${aws_lb.main.dns_name}",
+      "description": "Application URL",
+      "depends_on": [
+        "aws_lb.main",
+        "aws_lb_listener.https"
+      ],
+      "precondition": {
+        "condition": "aws_lb.main.dns_name != \"\"",
+        "error_message": "Load balancer must have a DNS name"
+      }
+    },
+    "db_connection_string": {
+      "value": "postgres://user:${var.db_password}@${aws_db_instance.main.endpoint}/mydb",
+      "sensitive": true
+    }
+  }
+}
