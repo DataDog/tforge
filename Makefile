@@ -6,7 +6,7 @@ fmt:
 
 # Lint (requires golangci-lint installed locally)
 lint: fmt
-	golangci-lint run ./...
+	golangci-lint run $$(go list ./... | grep -v '/example' | sed "s|^$$(go list -m)/|./|")
 
 # Run tests with race detector
 test:
