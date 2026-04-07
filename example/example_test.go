@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"os"
 	"testing"
 
 	"tforge/config"
@@ -36,24 +34,6 @@ func TestExample_GeneratesValidJSON(t *testing.T) {
 	}
 	if _, ok := parsed["resource"]; !ok {
 		t.Error("missing resource block")
-	}
-}
-
-func TestExample_MatchesSnapshot(t *testing.T) {
-	stack := buildExampleStack()
-
-	data, err := render.ToJSON(stack)
-	if err != nil {
-		t.Fatalf("ToJSON: %v", err)
-	}
-
-	golden, err := os.ReadFile("main.tf.json")
-	if err != nil {
-		t.Fatalf("reading main.tf.json: %v", err)
-	}
-
-	if !bytes.Equal(bytes.TrimSpace(data), bytes.TrimSpace(golden)) {
-		t.Errorf("output does not match main.tf.json\n\nGot:\n%s\n\nWant:\n%s\n\nRun 'go run main.go > main.tf.json' to update", data, golden)
 	}
 }
 

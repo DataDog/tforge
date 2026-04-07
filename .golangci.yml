@@ -25,6 +25,7 @@ linters:
         path: _gen\.go$
     paths:
       - example
+      - testdata
       - third_party$
       - builtin$
       - examples$
@@ -35,6 +36,7 @@ formatters:
     generated: lax
     paths:
       - example
+      - testdata
       - third_party$
       - builtin$
       - examples$

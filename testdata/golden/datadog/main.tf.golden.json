@@ -1,0 +1,42 @@
+{
+  "terraform": {
+    "required_providers": {
+      "datadog": {
+        "source": "datadog/datadog",
+        "version": "~> 3.39"
+      }
+    }
+  },
+  "provider": {
+    "datadog": [
+      {
+        "api_url": "https://api.datadoghq.eu/"
+      }
+    ]
+  },
+  "resource": {
+    "datadog_monitor": {
+      "cpu_alert": {
+        "message": "CPU usage is above threshold. @slack-alerts",
+        "monitor_thresholds": [
+          {
+            "critical": "80",
+            "warning": "60"
+          }
+        ],
+        "name": "High CPU Usage Alert",
+        "no_data_timeframe": 10,
+        "notify_no_data": true,
+        "query": "avg(last_5m):avg:system.cpu.user{*} by {host} > 80",
+        "renotify_interval": 60,
+        "require_full_window": true,
+        "tags": [
+          "env:production",
+          "managed-by:tforge"
+        ],
+        "type": "metric alert"
+      }
+    }
+  }
+}
+

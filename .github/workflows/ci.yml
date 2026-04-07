@@ -58,8 +58,8 @@ jobs:
           name: coverage-report
           path: coverage.out
 
-  examples:
-    name: Validate Examples
+  snapshots:
+    name: Snapshot Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -75,5 +75,5 @@ jobs:
         with:
           tofu_wrapper: false
 
-      - name: Validate examples and snapshots
+      - name: Run snapshot tests
         run: make snapshot-tests

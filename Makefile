@@ -6,7 +6,7 @@ fmt:
 
 # Lint (requires golangci-lint installed locally)
 lint: fmt
-	golangci-lint run $$(go list ./... | grep -v '/example' | sed "s|^$$(go list -m)/|./|")
+	golangci-lint run $$(go list ./... | grep -v '/example' | grep -v '/testdata' | sed "s|^$$(go list -m)/|./|")
 
 # Run tests with race detector
 test:
@@ -14,7 +14,7 @@ test:
 
 # Run tests with coverage report
 coverage:
-	@PKGS=$$(go list ./... | grep -v '/cmd/' | grep -v '/example'); \
+	@PKGS=$$(go list ./... | grep -v '/cmd/' | grep -v '/example' | grep -v '/testdata'); \
 	go test -race -coverprofile=coverage.out -covermode=atomic $$PKGS
 	go tool cover -func=coverage.out
 
@@ -32,17 +32,22 @@ coverage-check: coverage
 build:
 	go build -o tforge ./cmd/tforge
 
-# Update golden files for snapshot tests
+# Regenerate golden files for e2e snapshot tests
 update-snapshots:
-	go test ./render/ -run TestSnapshot -update
+	go install ./cmd/tforge
+	go generate ./testdata/golden/...
+	@for dir in testdata/golden/*/; do \
+		go run ./$$dir > $${dir}main.tf.golden.json; \
+	done
 
-# Validate examples and snapshots (generate, run example, test)
+# Verify golden files match generated output
 snapshot-tests:
 	go install ./cmd/tforge
-	go generate ./example/...
-	go run ./example/ > ./example/main.tf.json
-	go test ./example/ -v
-	go test ./render/ -run TestSnapshot -v
+	go generate ./testdata/golden/...
+	@for dir in testdata/golden/*/; do \
+		echo "Testing $$dir..."; \
+		go run ./$$dir | diff - $${dir}main.tf.golden.json || exit 1; \
+	done
 
 # Run full CI validation locally (pre-commit)
 validate: lint coverage-check snapshot-tests
