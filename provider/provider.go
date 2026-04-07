@@ -293,15 +293,21 @@ func CacheDir() string {
 
 // ListVersions returns available versions for a provider from the registry.
 func ListVersions(ctx context.Context, source string) ([]string, error) {
+	return listVersionsWithFallback(ctx, source, RegistryURL, FallbackRegistryURL)
+}
+
+// listVersionsWithFallback tries the primary registry first, then falls back
+// to the secondary registry. Extracted for testability.
+func listVersionsWithFallback(ctx context.Context, source, primaryURL, fallbackURL string) ([]string, error) {
 	src, err := ParseSource(source)
 	if err != nil {
 		return nil, err
 	}
 
-	// Try OpenTofu registry first, then fallback to Terraform registry
-	versions, err := listVersionsFromRegistry(ctx, RegistryURL, src)
+	// Try primary registry first, then fallback
+	versions, err := listVersionsFromRegistry(ctx, primaryURL, src)
 	if err != nil {
-		versions, err = listVersionsFromRegistry(ctx, FallbackRegistryURL, src)
+		versions, err = listVersionsFromRegistry(ctx, fallbackURL, src)
 		if err != nil {
 			return nil, err
 		}

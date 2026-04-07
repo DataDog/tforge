@@ -293,7 +293,7 @@ func TestParseSchemaOutput_ProviderNotFound(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for provider not found, got nil")
 	}
-	if got := err.Error(); !contains(got, "not found") {
+	if got := err.Error(); !strings.Contains(got, "not found") {
 		t.Errorf("error = %q, want it to contain 'not found'", got)
 	}
 }
@@ -314,20 +314,6 @@ func TestParseSchemaOutput_InvalidJSON(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for invalid JSON, got nil")
 	}
-}
-
-// helper for substring check
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && searchString(s, substr)
-}
-
-func searchString(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
 
 // ---------------------------------------------------------------------------
@@ -646,6 +632,79 @@ func TestListVersions_InvalidSource(t *testing.T) {
 
 func TestDownloadProvider_InvalidSource(t *testing.T) {
 	_, err := DownloadProvider(context.Background(), "badsource", "1.0.0")
+	if err == nil {
+		t.Error("expected error for invalid source, got nil")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// listVersionsWithFallback tests
+// ---------------------------------------------------------------------------
+
+func TestListVersionsWithFallback_PrimarySucceeds(t *testing.T) {
+	primary := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"versions": [{"version": "1.0.0"}]}`)
+	}))
+	defer primary.Close()
+
+	fallback := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Error("fallback should not be called when primary succeeds")
+	}))
+	defer fallback.Close()
+
+	versions, err := listVersionsWithFallback(context.Background(), "datadog/datadog", primary.URL, fallback.URL)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(versions) != 1 || versions[0] != "1.0.0" {
+		t.Errorf("versions = %v, want [1.0.0]", versions)
+	}
+}
+
+func TestListVersionsWithFallback_PrimaryFails_FallbackSucceeds(t *testing.T) {
+	primary := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer primary.Close()
+
+	fallback := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, `{"versions": [{"version": "2.0.0"}, {"version": "1.0.0"}]}`)
+	}))
+	defer fallback.Close()
+
+	versions, err := listVersionsWithFallback(context.Background(), "datadog/datadog", primary.URL, fallback.URL)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(versions) != 2 {
+		t.Fatalf("expected 2 versions, got %d", len(versions))
+	}
+	if versions[0] != "2.0.0" {
+		t.Errorf("versions[0] = %q, want %q", versions[0], "2.0.0")
+	}
+}
+
+func TestListVersionsWithFallback_BothFail(t *testing.T) {
+	primary := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	defer primary.Close()
+
+	fallback := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer fallback.Close()
+
+	_, err := listVersionsWithFallback(context.Background(), "datadog/datadog", primary.URL, fallback.URL)
+	if err == nil {
+		t.Fatal("expected error when both registries fail, got nil")
+	}
+}
+
+func TestListVersionsWithFallback_InvalidSource(t *testing.T) {
+	_, err := listVersionsWithFallback(context.Background(), "invalid", "http://unused", "http://unused")
 	if err == nil {
 		t.Error("expected error for invalid source, got nil")
 	}

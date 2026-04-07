@@ -72,45 +72,48 @@ func capitalizeFirst(s string) string {
 	return string(runes)
 }
 
+// commonAbbreviations is the set of abbreviations that should remain
+// fully uppercased in Go identifiers (e.g. "ID", "API", "URL").
+var commonAbbreviations = map[string]bool{
+	"ID":    true,
+	"IDS":   true,
+	"API":   true,
+	"URL":   true,
+	"URI":   true,
+	"HTTP":  true,
+	"HTTPS": true,
+	"JSON":  true,
+	"XML":   true,
+	"HTML":  true,
+	"CSS":   true,
+	"SQL":   true,
+	"SSH":   true,
+	"TCP":   true,
+	"UDP":   true,
+	"IP":    true,
+	"DNS":   true,
+	"VPC":   true,
+	"ARN":   true,
+	"IAM":   true,
+	"EC2":   true,
+	"ECS":   true,
+	"EKS":   true,
+	"RDS":   true,
+	"S3":    true,
+	"SQS":   true,
+	"SNS":   true,
+	"KMS":   true,
+	"ACL":   true,
+	"TTL":   true,
+	"CPU":   true,
+	"RAM":   true,
+	"OS":    true,
+	"VM":    true,
+}
+
 // isCommonAbbreviation returns true if the string is a common abbreviation.
 func isCommonAbbreviation(s string) bool {
-	abbreviations := map[string]bool{
-		"ID":    true,
-		"IDS":   true,
-		"API":   true,
-		"URL":   true,
-		"URI":   true,
-		"HTTP":  true,
-		"HTTPS": true,
-		"JSON":  true,
-		"XML":   true,
-		"HTML":  true,
-		"CSS":   true,
-		"SQL":   true,
-		"SSH":   true,
-		"TCP":   true,
-		"UDP":   true,
-		"IP":    true,
-		"DNS":   true,
-		"VPC":   true,
-		"ARN":   true,
-		"IAM":   true,
-		"EC2":   true,
-		"ECS":   true,
-		"EKS":   true,
-		"RDS":   true,
-		"S3":    true,
-		"SQS":   true,
-		"SNS":   true,
-		"KMS":   true,
-		"ACL":   true,
-		"TTL":   true,
-		"CPU":   true,
-		"RAM":   true,
-		"OS":    true,
-		"VM":    true,
-	}
-	return abbreviations[s]
+	return commonAbbreviations[s]
 }
 
 // cleanDescription cleans a description string for use in Go comments.
