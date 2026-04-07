@@ -503,7 +503,9 @@ func TestToJSON_Backend(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	tf := obj["terraform"].(map[string]any)
 	backend := tf["backend"].(map[string]any)
 	s3 := backend["s3"].(map[string]any)
@@ -526,7 +528,9 @@ func TestToJSON_RequiredProviders(t *testing.T) {
 	}
 
 	var obj map[string]any
-	json.Unmarshal(data, &obj)
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
 	tf := obj["terraform"].(map[string]any)
 	rp := tf["required_providers"].(map[string]any)
 	aws := rp["aws"].(map[string]any)
