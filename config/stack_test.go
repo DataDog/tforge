@@ -188,6 +188,64 @@ func TestAddDataSource(t *testing.T) {
 	}
 }
 
+func TestAddResourceDuplicate(t *testing.T) {
+	s := NewStack("test")
+	err := s.AddResource(Resource{Type: "aws_instance", Name: "web", Config: map[string]any{"ami": "first"}})
+	if err != nil {
+		t.Fatalf("first AddResource() error = %v", err)
+	}
+
+	err = s.AddResource(Resource{Type: "aws_instance", Name: "web", Config: map[string]any{"ami": "second"}})
+	if err == nil {
+		t.Fatal("second AddResource() with same type and name should return error")
+	}
+	if len(s.Resources) != 1 {
+		t.Fatalf("len(Resources) = %d, want 1 after duplicate rejected", len(s.Resources))
+	}
+
+	// Different name should succeed
+	err = s.AddResource(Resource{Type: "aws_instance", Name: "api"})
+	if err != nil {
+		t.Fatalf("AddResource() with different name error = %v", err)
+	}
+
+	// Different type should succeed
+	err = s.AddResource(Resource{Type: "aws_s3_bucket", Name: "web"})
+	if err != nil {
+		t.Fatalf("AddResource() with different type error = %v", err)
+	}
+
+	if len(s.Resources) != 3 {
+		t.Fatalf("len(Resources) = %d, want 3", len(s.Resources))
+	}
+}
+
+func TestAddDataSourceDuplicate(t *testing.T) {
+	s := NewStack("test")
+	err := s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", Config: map[string]any{"filter": "first"}})
+	if err != nil {
+		t.Fatalf("first AddDataSource() error = %v", err)
+	}
+
+	err = s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", Config: map[string]any{"filter": "second"}})
+	if err == nil {
+		t.Fatal("second AddDataSource() with same type and name should return error")
+	}
+	if len(s.DataSources) != 1 {
+		t.Fatalf("len(DataSources) = %d, want 1 after duplicate rejected", len(s.DataSources))
+	}
+
+	// Different name should succeed
+	err = s.AddDataSource(DataSource{Type: "aws_ami", Name: "base"})
+	if err != nil {
+		t.Fatalf("AddDataSource() with different name error = %v", err)
+	}
+
+	if len(s.DataSources) != 2 {
+		t.Fatalf("len(DataSources) = %d, want 2", len(s.DataSources))
+	}
+}
+
 func TestAddVariable(t *testing.T) {
 	s := NewStack("test")
 	s.AddVariable(Variable{Name: "region", Type: "string"})

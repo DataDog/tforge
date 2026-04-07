@@ -79,6 +79,8 @@ func (s *Stack) AddProvider(p Provider) {
 }
 
 // AddResource adds a managed resource to the stack.
+// It returns an error if the resource type or name is empty,
+// or if a resource with the same type and name already exists.
 func (s *Stack) AddResource(r Resource) error {
 	// Validate resource has required fields
 	if r.Type == "" {
@@ -88,17 +90,35 @@ func (s *Stack) AddResource(r Resource) error {
 		return fmt.Errorf("resource name is required")
 	}
 
+	// Check for duplicates
+	addr := r.Address()
+	for _, existing := range s.Resources {
+		if existing.Address() == addr {
+			return fmt.Errorf("duplicate resource: %s", addr)
+		}
+	}
+
 	s.Resources = append(s.Resources, r)
 	return nil
 }
 
 // AddDataSource adds a data source to the stack.
+// It returns an error if the data source type or name is empty,
+// or if a data source with the same type and name already exists.
 func (s *Stack) AddDataSource(d DataSource) error {
 	if d.Type == "" {
 		return fmt.Errorf("data source type is required")
 	}
 	if d.Name == "" {
 		return fmt.Errorf("data source name is required")
+	}
+
+	// Check for duplicates
+	addr := d.Address()
+	for _, existing := range s.DataSources {
+		if existing.Address() == addr {
+			return fmt.Errorf("duplicate data source: %s", addr)
+		}
 	}
 
 	s.DataSources = append(s.DataSources, d)
