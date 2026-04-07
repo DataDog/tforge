@@ -114,18 +114,27 @@ type validationJSON struct {
 
 // outputJSON represents a Terraform output definition.
 type outputJSON struct {
-	Value       any      `json:"value"`
-	Description string   `json:"description,omitempty"`
-	Sensitive   bool     `json:"sensitive,omitempty"`
-	DependsOn   []string `json:"depends_on,omitempty"`
+	Value        any            `json:"value"`
+	Description  string         `json:"description,omitempty"`
+	Sensitive    bool           `json:"sensitive,omitempty"`
+	DependsOn    []string       `json:"depends_on,omitempty"`
+	Precondition *conditionJSON `json:"precondition,omitempty"`
+}
+
+// conditionJSON represents a precondition or postcondition block.
+type conditionJSON struct {
+	Condition    string `json:"condition"`
+	ErrorMessage string `json:"error_message"`
 }
 
 // lifecycleJSON represents a resource lifecycle block.
 type lifecycleJSON struct {
-	CreateBeforeDestroy bool     `json:"create_before_destroy,omitempty"`
-	PreventDestroy      bool     `json:"prevent_destroy,omitempty"`
-	IgnoreChanges       []string `json:"ignore_changes,omitempty"`
-	ReplaceTriggeredBy  []string `json:"replace_triggered_by,omitempty"`
+	CreateBeforeDestroy bool           `json:"create_before_destroy,omitempty"`
+	PreventDestroy      bool           `json:"prevent_destroy,omitempty"`
+	IgnoreChanges       []string       `json:"ignore_changes,omitempty"`
+	ReplaceTriggeredBy  []string       `json:"replace_triggered_by,omitempty"`
+	Precondition        *conditionJSON `json:"precondition,omitempty"`
+	Postcondition       *conditionJSON `json:"postcondition,omitempty"`
 }
 
 // timeoutsJSON represents a resource timeouts block.
@@ -281,6 +290,10 @@ func buildResourceConfig(r config.Resource) map[string]any {
 		cfg["timeouts"] = buildTimeouts(r.Timeouts)
 	}
 
+	if r.Connection != nil {
+		cfg["connection"] = buildConnection(r.Connection)
+	}
+
 	if len(r.Provisioners) > 0 {
 		cfg["provisioner"] = buildProvisioners(r.Provisioners)
 	}
@@ -358,12 +371,21 @@ func buildOutputs(outputs []config.Output) map[string]outputJSON {
 	result := make(map[string]outputJSON)
 
 	for _, o := range outputs {
-		result[o.Name] = outputJSON{
+		oj := outputJSON{
 			Value:       o.Value,
 			Description: o.Description,
 			Sensitive:   o.Sensitive,
 			DependsOn:   o.DependsOn,
 		}
+
+		if o.Precondition != nil {
+			oj.Precondition = &conditionJSON{
+				Condition:    o.Precondition.Condition,
+				ErrorMessage: o.Precondition.ErrorMessage,
+			}
+		}
+
+		result[o.Name] = oj
 	}
 
 	return result
@@ -371,12 +393,28 @@ func buildOutputs(outputs []config.Output) map[string]outputJSON {
 
 // buildLifecycle builds the lifecycle block.
 func buildLifecycle(lc *config.Lifecycle) lifecycleJSON {
-	return lifecycleJSON{
+	lcj := lifecycleJSON{
 		CreateBeforeDestroy: lc.CreateBeforeDestroy,
 		PreventDestroy:      lc.PreventDestroy,
 		IgnoreChanges:       lc.IgnoreChanges,
 		ReplaceTriggeredBy:  lc.ReplaceTriggeredBy,
 	}
+
+	if lc.Precondition != nil {
+		lcj.Precondition = &conditionJSON{
+			Condition:    lc.Precondition.Condition,
+			ErrorMessage: lc.Precondition.ErrorMessage,
+		}
+	}
+
+	if lc.Postcondition != nil {
+		lcj.Postcondition = &conditionJSON{
+			Condition:    lc.Postcondition.Condition,
+			ErrorMessage: lc.Postcondition.ErrorMessage,
+		}
+	}
+
+	return lcj
 }
 
 // buildTimeouts builds the timeouts block.
@@ -409,9 +447,53 @@ func buildProvisioners(provisioners []config.Provisioner) []map[string]any {
 			cfg["on_failure"] = p.OnFailure
 		}
 
+		if p.Connection != nil {
+			cfg["connection"] = buildConnection(p.Connection)
+		}
+
 		prov[p.Type] = cfg
 		result[i] = prov
 	}
 
 	return result
+}
+
+// buildConnection builds a connection block.
+func buildConnection(c *config.Connection) map[string]any {
+	conn := make(map[string]any)
+
+	if c.Type != "" {
+		conn["type"] = c.Type
+	}
+
+	if c.Host != "" {
+		conn["host"] = c.Host
+	}
+
+	if c.Port != 0 {
+		conn["port"] = c.Port
+	}
+
+	if c.User != "" {
+		conn["user"] = c.User
+	}
+
+	if c.Password != "" {
+		conn["password"] = c.Password
+	}
+
+	if c.PrivateKey != "" {
+		conn["private_key"] = c.PrivateKey
+	}
+
+	if c.Timeout != "" {
+		conn["timeout"] = c.Timeout
+	}
+
+	// Copy extra attributes
+	for k, v := range c.Extra {
+		conn[k] = v
+	}
+
+	return conn
 }

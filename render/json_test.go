@@ -650,3 +650,240 @@ func TestToFile_CreatesDirectory(t *testing.T) {
 		t.Fatal("file was not created")
 	}
 }
+
+func TestToJSON_ResourceConnection(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{"ami": "ami-123"},
+		Connection: &config.Connection{
+			Type:    "ssh",
+			Host:    "1.2.3.4",
+			User:    "admin",
+			Port:    22,
+			Timeout: "5m",
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	conn := res["connection"].(map[string]any)
+	if conn["type"] != "ssh" {
+		t.Errorf("expected type ssh, got %v", conn["type"])
+	}
+	if conn["host"] != "1.2.3.4" {
+		t.Errorf("expected host 1.2.3.4, got %v", conn["host"])
+	}
+	if conn["user"] != "admin" {
+		t.Errorf("expected user admin, got %v", conn["user"])
+	}
+	if conn["port"] != float64(22) {
+		t.Errorf("expected port 22, got %v", conn["port"])
+	}
+	if conn["timeout"] != "5m" {
+		t.Errorf("expected timeout 5m, got %v", conn["timeout"])
+	}
+}
+
+func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{},
+		Connection: &config.Connection{
+			Type: "winrm",
+			Host: "10.0.0.1",
+			Extra: map[string]any{
+				"https":    true,
+				"cacert":   "/path/to/ca.pem",
+				"insecure": true,
+			},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	conn := res["connection"].(map[string]any)
+	if conn["type"] != "winrm" {
+		t.Errorf("expected type winrm, got %v", conn["type"])
+	}
+	if conn["https"] != true {
+		t.Errorf("expected https true, got %v", conn["https"])
+	}
+	if conn["cacert"] != "/path/to/ca.pem" {
+		t.Errorf("expected cacert, got %v", conn["cacert"])
+	}
+}
+
+func TestToJSON_LifecyclePrecondition(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{},
+		Lifecycle: &config.Lifecycle{
+			Precondition: &config.Condition{
+				Condition:    "var.x > 0",
+				ErrorMessage: "x must be positive",
+			},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	lc := res["lifecycle"].(map[string]any)
+	pre := lc["precondition"].(map[string]any)
+	if pre["condition"] != "var.x > 0" {
+		t.Errorf("expected condition 'var.x > 0', got %v", pre["condition"])
+	}
+	if pre["error_message"] != "x must be positive" {
+		t.Errorf("expected error_message 'x must be positive', got %v", pre["error_message"])
+	}
+}
+
+func TestToJSON_LifecyclePostcondition(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{},
+		Lifecycle: &config.Lifecycle{
+			Postcondition: &config.Condition{
+				Condition:    "self.public_ip != \"\"",
+				ErrorMessage: "instance must have a public IP",
+			},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	lc := res["lifecycle"].(map[string]any)
+	post := lc["postcondition"].(map[string]any)
+	if post["condition"] != "self.public_ip != \"\"" {
+		t.Errorf("expected condition, got %v", post["condition"])
+	}
+	if post["error_message"] != "instance must have a public IP" {
+		t.Errorf("expected error_message, got %v", post["error_message"])
+	}
+}
+
+func TestToJSON_OutputPrecondition(t *testing.T) {
+	stack := config.NewStack("test")
+	stack.AddOutput(config.Output{
+		Name:  "ip",
+		Value: "${aws_instance.web.public_ip}",
+		Precondition: &config.Condition{
+			Condition:    "aws_instance.web.public_ip != \"\"",
+			ErrorMessage: "instance must have a public IP",
+		},
+	})
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	o := obj["output"].(map[string]any)["ip"].(map[string]any)
+	pre := o["precondition"].(map[string]any)
+	if pre["condition"] != "aws_instance.web.public_ip != \"\"" {
+		t.Errorf("expected condition, got %v", pre["condition"])
+	}
+	if pre["error_message"] != "instance must have a public IP" {
+		t.Errorf("expected error_message, got %v", pre["error_message"])
+	}
+}
+
+func TestToJSON_ProvisionerConnection(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{},
+		Provisioners: []config.Provisioner{
+			{
+				Type:   "remote-exec",
+				Config: map[string]any{"inline": []string{"echo hello"}},
+				Connection: &config.Connection{
+					Type:       "ssh",
+					Host:       "10.0.0.1",
+					User:       "deploy",
+					PrivateKey: "file(\"/path/to/key\")",
+				},
+			},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	provs := res["provisioner"].([]any)
+	remoteExec := provs[0].(map[string]any)["remote-exec"].(map[string]any)
+	conn := remoteExec["connection"].(map[string]any)
+	if conn["type"] != "ssh" {
+		t.Errorf("expected type ssh, got %v", conn["type"])
+	}
+	if conn["host"] != "10.0.0.1" {
+		t.Errorf("expected host 10.0.0.1, got %v", conn["host"])
+	}
+	if conn["user"] != "deploy" {
+		t.Errorf("expected user deploy, got %v", conn["user"])
+	}
+	if conn["private_key"] != "file(\"/path/to/key\")" {
+		t.Errorf("expected private_key, got %v", conn["private_key"])
+	}
+}
