@@ -85,7 +85,7 @@ func buildFullStack() *config.Stack {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
-	stack.AddResource(config.Resource{
+	if err := stack.AddResource(config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Config: map[string]any{
@@ -93,16 +93,20 @@ func buildFullStack() *config.Stack {
 			"instance_type": "t3.micro",
 			"tags":          map[string]string{"Name": "web-server"},
 		},
-	})
+	}); err != nil {
+		panic(err)
+	}
 
-	stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(config.DataSource{
 		Type: "aws_ami",
 		Name: "ubuntu",
 		Config: map[string]any{
 			"most_recent": true,
 			"owners":      []string{"099720109477"},
 		},
-	})
+	}); err != nil {
+		panic(err)
+	}
 
 	stack.AddVariable(config.Variable{
 		Name:        "environment",

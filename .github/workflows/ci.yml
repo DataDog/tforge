@@ -91,6 +91,9 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Generate example types
+        run: go generate ./example/...
+
       - name: Validate example output
         run: go test ./example/ -v
 
