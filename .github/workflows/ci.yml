@@ -76,4 +76,4 @@ jobs:
           tofu_wrapper: false
 
       - name: Validate examples and snapshots
-        run: make validate-examples
+        run: make snapshot-tests

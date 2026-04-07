@@ -1,4 +1,4 @@
-.PHONY: fmt lint test coverage coverage-check build clean update-snapshots validate validate-examples
+.PHONY: fmt lint test coverage coverage-check build clean update-snapshots validate snapshot-tests
 
 # Format check (same as CI)
 fmt:
@@ -37,7 +37,7 @@ update-snapshots:
 	go test ./render/ -run TestSnapshot -update
 
 # Validate examples and snapshots (generate, run example, test)
-validate-examples:
+snapshot-tests:
 	go install ./cmd/tforge
 	go generate ./example/...
 	go run ./example/ > ./example/main.tf.json
@@ -45,7 +45,7 @@ validate-examples:
 	go test ./render/ -run TestSnapshot -v
 
 # Run full CI validation locally (pre-commit)
-validate: lint coverage-check validate-examples
+validate: lint coverage-check snapshot-tests
 
 # Clean build artifacts
 clean:
