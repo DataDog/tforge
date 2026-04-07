@@ -77,18 +77,64 @@ type terraformJSON struct {
 	Provider  map[string][]any          `json:"provider,omitempty"`
 	Resource  map[string]map[string]any `json:"resource,omitempty"`
 	Data      map[string]map[string]any `json:"data,omitempty"`
-	Variable  map[string]any            `json:"variable,omitempty"`
-	Output    map[string]any            `json:"output,omitempty"`
+	Variable  map[string]variableJSON   `json:"variable,omitempty"`
+	Output    map[string]outputJSON     `json:"output,omitempty"`
 	Locals    map[string]any            `json:"locals,omitempty"`
 	Module    map[string]any            `json:"module,omitempty"`
 }
 
 // terraformBlock represents the terraform {} block.
 type terraformBlock struct {
-	RequiredVersion   string         `json:"required_version,omitempty"`
-	RequiredProviders map[string]any `json:"required_providers,omitempty"`
-	Backend           map[string]any `json:"backend,omitempty"`
-	Cloud             map[string]any `json:"cloud,omitempty"`
+	RequiredVersion   string                         `json:"required_version,omitempty"`
+	RequiredProviders map[string]requiredProviderJSON `json:"required_providers,omitempty"`
+	Backend           map[string]map[string]any      `json:"backend,omitempty"`
+	Cloud             map[string]any                 `json:"cloud,omitempty"`
+}
+
+// requiredProviderJSON represents a required provider entry.
+type requiredProviderJSON struct {
+	Source  string `json:"source"`
+	Version string `json:"version"`
+}
+
+// variableJSON represents a Terraform variable definition.
+type variableJSON struct {
+	Type        string          `json:"type,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Default     any             `json:"default,omitempty"`
+	Sensitive   bool            `json:"sensitive,omitempty"`
+	Nullable    bool            `json:"nullable,omitempty"`
+	Validation  *validationJSON `json:"validation,omitempty"`
+}
+
+// validationJSON represents a variable validation block.
+type validationJSON struct {
+	Condition    string `json:"condition"`
+	ErrorMessage string `json:"error_message"`
+}
+
+// outputJSON represents a Terraform output definition.
+type outputJSON struct {
+	Value       any      `json:"value"`
+	Description string   `json:"description,omitempty"`
+	Sensitive   bool     `json:"sensitive,omitempty"`
+	DependsOn   []string `json:"depends_on,omitempty"`
+}
+
+// lifecycleJSON represents a resource lifecycle block.
+type lifecycleJSON struct {
+	CreateBeforeDestroy bool     `json:"create_before_destroy,omitempty"`
+	PreventDestroy      bool     `json:"prevent_destroy,omitempty"`
+	IgnoreChanges       []string `json:"ignore_changes,omitempty"`
+	ReplaceTriggeredBy  []string `json:"replace_triggered_by,omitempty"`
+}
+
+// timeoutsJSON represents a resource timeouts block.
+type timeoutsJSON struct {
+	Create string `json:"create,omitempty"`
+	Read   string `json:"read,omitempty"`
+	Update string `json:"update,omitempty"`
+	Delete string `json:"delete,omitempty"`
 }
 
 // buildTerraformJSON converts a Stack to the terraform JSON structure.
@@ -144,18 +190,18 @@ func buildTerraformBlock(stack *config.Stack) *terraformBlock {
 
 	// Required providers
 	if len(stack.RequiredProviders) > 0 {
-		tb.RequiredProviders = make(map[string]any)
+		tb.RequiredProviders = make(map[string]requiredProviderJSON)
 		for name, req := range stack.RequiredProviders {
-			tb.RequiredProviders[name] = map[string]string{
-				"source":  req.Source,
-				"version": req.Version,
+			tb.RequiredProviders[name] = requiredProviderJSON{
+				Source:  req.Source,
+				Version: req.Version,
 			}
 		}
 	}
 
 	// Backend
 	if stack.Backend != nil {
-		tb.Backend = map[string]any{
+		tb.Backend = map[string]map[string]any{
 			stack.Backend.Type: stack.Backend.Config,
 		}
 	}
@@ -295,116 +341,65 @@ func buildDataSources(dataSources []config.DataSource) map[string]map[string]any
 }
 
 // buildVariables builds the variable configurations.
-func buildVariables(variables []config.Variable) map[string]any {
-	result := make(map[string]any)
+func buildVariables(variables []config.Variable) map[string]variableJSON {
+	result := make(map[string]variableJSON)
 
 	for _, v := range variables {
-		cfg := make(map[string]any)
-
-		if v.Type != "" {
-			cfg["type"] = v.Type
-		}
-
-		if v.Description != "" {
-			cfg["description"] = v.Description
-		}
-
-		if v.Default != nil {
-			cfg["default"] = v.Default
-		}
-
-		if v.Sensitive {
-			cfg["sensitive"] = true
-		}
-
-		if v.Nullable {
-			cfg["nullable"] = true
+		vj := variableJSON{
+			Type:        v.Type,
+			Description: v.Description,
+			Default:     v.Default,
+			Sensitive:   v.Sensitive,
+			Nullable:    v.Nullable,
 		}
 
 		if v.Validation != nil {
-			cfg["validation"] = map[string]string{
-				"condition":     v.Validation.Condition,
-				"error_message": v.Validation.ErrorMessage,
+			vj.Validation = &validationJSON{
+				Condition:    v.Validation.Condition,
+				ErrorMessage: v.Validation.ErrorMessage,
 			}
 		}
 
-		result[v.Name] = cfg
+		result[v.Name] = vj
 	}
 
 	return result
 }
 
 // buildOutputs builds the output configurations.
-func buildOutputs(outputs []config.Output) map[string]any {
-	result := make(map[string]any)
+func buildOutputs(outputs []config.Output) map[string]outputJSON {
+	result := make(map[string]outputJSON)
 
 	for _, o := range outputs {
-		cfg := make(map[string]any)
-
-		cfg["value"] = o.Value
-
-		if o.Description != "" {
-			cfg["description"] = o.Description
+		result[o.Name] = outputJSON{
+			Value:       o.Value,
+			Description: o.Description,
+			Sensitive:   o.Sensitive,
+			DependsOn:   o.DependsOn,
 		}
-
-		if o.Sensitive {
-			cfg["sensitive"] = true
-		}
-
-		if len(o.DependsOn) > 0 {
-			cfg["depends_on"] = o.DependsOn
-		}
-
-		result[o.Name] = cfg
 	}
 
 	return result
 }
 
 // buildLifecycle builds the lifecycle block.
-func buildLifecycle(lc *config.Lifecycle) map[string]any {
-	cfg := make(map[string]any)
-
-	if lc.CreateBeforeDestroy {
-		cfg["create_before_destroy"] = true
+func buildLifecycle(lc *config.Lifecycle) lifecycleJSON {
+	return lifecycleJSON{
+		CreateBeforeDestroy: lc.CreateBeforeDestroy,
+		PreventDestroy:      lc.PreventDestroy,
+		IgnoreChanges:       lc.IgnoreChanges,
+		ReplaceTriggeredBy:  lc.ReplaceTriggeredBy,
 	}
-
-	if lc.PreventDestroy {
-		cfg["prevent_destroy"] = true
-	}
-
-	if len(lc.IgnoreChanges) > 0 {
-		cfg["ignore_changes"] = lc.IgnoreChanges
-	}
-
-	if len(lc.ReplaceTriggeredBy) > 0 {
-		cfg["replace_triggered_by"] = lc.ReplaceTriggeredBy
-	}
-
-	return cfg
 }
 
 // buildTimeouts builds the timeouts block.
-func buildTimeouts(t *config.Timeouts) map[string]any {
-	cfg := make(map[string]any)
-
-	if t.Create != "" {
-		cfg["create"] = t.Create
+func buildTimeouts(t *config.Timeouts) timeoutsJSON {
+	return timeoutsJSON{
+		Create: t.Create,
+		Read:   t.Read,
+		Update: t.Update,
+		Delete: t.Delete,
 	}
-
-	if t.Read != "" {
-		cfg["read"] = t.Read
-	}
-
-	if t.Update != "" {
-		cfg["update"] = t.Update
-	}
-
-	if t.Delete != "" {
-		cfg["delete"] = t.Delete
-	}
-
-	return cfg
 }
 
 // buildProvisioners builds the provisioner blocks.
