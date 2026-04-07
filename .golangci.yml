@@ -1,31 +1,40 @@
+version: "2"
 run:
-  timeout: 5m
   go: "1.22"
-
 linters:
   enable:
-    - errcheck
-    - govet
-    - staticcheck
-    - unused
-    - ineffassign
-    - gosimple
-    - gofmt
-    - misspell
-    - errorlint
     - bodyclose
+    - errorlint
+    - misspell
     - noctx
-
-linters-settings:
-  errorlint:
-    errorf: true
-    asserts: true
-    comparison: true
-
-issues:
-  exclude-dirs:
-    - example
-  exclude-rules:
-    - path: "_gen\\.go$"
-      linters:
-        - all
+  settings:
+    errorlint:
+      errorf: true
+      asserts: true
+      comparison: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - all
+        path: _gen\.go$
+    paths:
+      - example
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - example
+      - third_party$
+      - builtin$
+      - examples$

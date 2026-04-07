@@ -36,9 +36,8 @@ build:
 update-snapshots:
 	go test ./render/ -run TestSnapshot -update
 
-# Run full CI validation locally (lint skipped if golangci-lint not installed)
-validate: fmt
-	@command -v golangci-lint >/dev/null 2>&1 && $(MAKE) lint || echo "Skipping lint: golangci-lint not installed"
+# Run full CI validation locally
+validate: lint
 	go install ./cmd/tforge
 	go generate ./example/...
 	go test -race ./...

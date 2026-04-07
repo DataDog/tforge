@@ -174,6 +174,10 @@ make build
 
 - Go 1.22+
 - [OpenTofu](https://opentofu.org/) or [Terraform](https://www.terraform.io/) CLI
+- [golangci-lint](https://golangci-lint.run/) for linting:
+  ```bash
+  brew install golangci-lint  # macOS
+  ```
 
 ## License
 
