@@ -73,22 +73,22 @@ func ToFile(stack *config.Stack, path string) error {
 
 // terraformJSON represents the root structure of a .tf.json file.
 type terraformJSON struct {
-	Terraform *terraformBlock          `json:"terraform,omitempty"`
-	Provider  map[string][]any         `json:"provider,omitempty"`
+	Terraform *terraformBlock           `json:"terraform,omitempty"`
+	Provider  map[string][]any          `json:"provider,omitempty"`
 	Resource  map[string]map[string]any `json:"resource,omitempty"`
 	Data      map[string]map[string]any `json:"data,omitempty"`
-	Variable  map[string]any           `json:"variable,omitempty"`
-	Output    map[string]any           `json:"output,omitempty"`
-	Locals    map[string]any           `json:"locals,omitempty"`
-	Module    map[string]any           `json:"module,omitempty"`
+	Variable  map[string]any            `json:"variable,omitempty"`
+	Output    map[string]any            `json:"output,omitempty"`
+	Locals    map[string]any            `json:"locals,omitempty"`
+	Module    map[string]any            `json:"module,omitempty"`
 }
 
 // terraformBlock represents the terraform {} block.
 type terraformBlock struct {
-	RequiredVersion   string                 `json:"required_version,omitempty"`
-	RequiredProviders map[string]any         `json:"required_providers,omitempty"`
-	Backend           map[string]any         `json:"backend,omitempty"`
-	Cloud             map[string]any         `json:"cloud,omitempty"`
+	RequiredVersion   string         `json:"required_version,omitempty"`
+	RequiredProviders map[string]any `json:"required_providers,omitempty"`
+	Backend           map[string]any `json:"backend,omitempty"`
+	Cloud             map[string]any `json:"cloud,omitempty"`
 }
 
 // buildTerraformJSON converts a Stack to the terraform JSON structure.
@@ -433,4 +433,3 @@ func buildProvisioners(provisioners []config.Provisioner) []map[string]any {
 
 	return result
 }
-

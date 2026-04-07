@@ -1,0 +1,489 @@
+package generate
+
+import (
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"tforge/provider"
+)
+
+func TestNewDefaults(t *testing.T) {
+	g := New(Config{})
+	if g.config.PackageName != "generated" {
+		t.Errorf("default PackageName = %q, want %q", g.config.PackageName, "generated")
+	}
+	if g.config.OutputDir != "./generated" {
+		t.Errorf("default OutputDir = %q, want %q", g.config.OutputDir, "./generated")
+	}
+}
+
+func TestNewCustomValues(t *testing.T) {
+	g := New(Config{PackageName: "foo", OutputDir: "/tmp"})
+	if g.config.PackageName != "foo" {
+		t.Errorf("PackageName = %q, want %q", g.config.PackageName, "foo")
+	}
+	if g.config.OutputDir != "/tmp" {
+		t.Errorf("OutputDir = %q, want %q", g.config.OutputDir, "/tmp")
+	}
+}
+
+func TestGenerateNilSchema(t *testing.T) {
+	g := New(Config{})
+	err := g.Generate(nil)
+	if err == nil {
+		t.Fatal("expected error for nil schema, got nil")
+	}
+	if err.Error() != "nil provider schema" {
+		t.Errorf("error = %q, want %q", err.Error(), "nil provider schema")
+	}
+}
+
+func TestGenerateNilProvider(t *testing.T) {
+	g := New(Config{})
+	err := g.Generate(&provider.Schema{})
+	if err == nil {
+		t.Fatal("expected error for nil provider, got nil")
+	}
+}
+
+func TestGenerateEmptySchema(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
+	})
+
+	ps := &provider.Schema{
+		Provider: &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{
+				Block: &provider.BlockType{},
+			},
+		},
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// provider_gen.go should exist
+	if _, err := os.Stat(filepath.Join(tmpDir, "provider_gen.go")); err != nil {
+		t.Errorf("provider_gen.go not found: %v", err)
+	}
+}
+
+func TestGenerateWithResources(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
+	})
+
+	ps := &provider.Schema{
+		Provider: &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"api_key": {Type: json.RawMessage(`"string"`), Required: true},
+					},
+				},
+			},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"test_thing": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"name": {Type: json.RawMessage(`"string"`), Required: true},
+							"id":   {Type: json.RawMessage(`"string"`), Computed: true},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// Verify generated files exist
+	for _, name := range []string{"provider_gen.go", "resources_gen.go"} {
+		path := filepath.Join(tmpDir, name)
+		info, err := os.Stat(path)
+		if err != nil {
+			t.Errorf("%s not found: %v", name, err)
+			continue
+		}
+		if info.Size() == 0 {
+			t.Errorf("%s is empty", name)
+		}
+	}
+}
+
+func TestJsonTagBehavior(t *testing.T) {
+	// Test jsonTag behavior through Generate output.
+	// jsonTag is a method on *Generator, so we test via generated code.
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-jsontag-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// With OmitEmpty = true
+	g := New(Config{
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
+		OmitEmpty:   true,
+	})
+
+	// jsonTag is unexported, but accessible within same package
+	got := g.jsonTag("name", false)
+	if got != "name" {
+		t.Errorf("jsonTag(name, false) = %q, want %q", got, "name")
+	}
+
+	got = g.jsonTag("name", true)
+	if got != "name,omitempty" {
+		t.Errorf("jsonTag(name, true) with OmitEmpty=true = %q, want %q", got, "name,omitempty")
+	}
+
+	// With OmitEmpty = false
+	g2 := New(Config{
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
+		OmitEmpty:   false,
+	})
+
+	got = g2.jsonTag("name", true)
+	if got != "name" {
+		t.Errorf("jsonTag(name, true) with OmitEmpty=false = %q, want %q", got, "name")
+	}
+}
+
+func TestGoTypeForAttribute(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-gotype-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	tests := []struct {
+		name     string
+		typeJSON string
+		want     string
+	}{
+		{"string", `"string"`, "string"},
+		{"number", `"number"`, "float64"},
+		{"bool", `"bool"`, "bool"},
+		{"dynamic", `"dynamic"`, "any"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Build a minimal provider.Attribute to wrap in schema.Attribute
+			// and pass through goTypeForAttribute
+			ps := &provider.Schema{
+				Provider: &provider.ProviderSchema{
+					ConfigSchema: &provider.SchemaBlock{
+						Block: &provider.BlockType{
+							Attributes: map[string]*provider.Attribute{
+								"test_attr": {Type: json.RawMessage(tt.typeJSON), Required: true},
+							},
+						},
+					},
+				},
+			}
+
+			// Generate and check the output contains the expected Go type
+			outDir := filepath.Join(tmpDir, tt.name)
+			g2 := New(Config{
+				PackageName: "testpkg",
+				OutputDir:   outDir,
+			})
+			if err := g2.Generate(ps); err != nil {
+				t.Fatalf("Generate failed: %v", err)
+			}
+
+			data, err := os.ReadFile(filepath.Join(outDir, "provider_gen.go"))
+			if err != nil {
+				t.Fatalf("reading generated file: %v", err)
+			}
+
+			content := string(data)
+			// The field should contain the Go type
+			if tt.want == "any" {
+				// jen renders "any" as "interface{}" in older Go or "any" in newer
+				if !contains(content, "interface{}") && !contains(content, " any ") {
+					t.Errorf("generated code does not contain type %q or interface{}", tt.want)
+				}
+			} else {
+				if !contains(content, tt.want) {
+					t.Errorf("generated code does not contain type %q", tt.want)
+				}
+			}
+		})
+	}
+}
+
+func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-nested-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
+		OmitEmpty:   true,
+	})
+
+	ps := &provider.Schema{
+		Provider: &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"api_key": {Type: json.RawMessage(`"string"`), Required: true},
+					},
+					BlockTypes: map[string]*provider.NestedBlock{
+						"settings": {
+							NestingMode: "single",
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"timeout": {Type: json.RawMessage(`"number"`), Optional: true},
+								},
+							},
+						},
+					},
+				},
+			},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"test_thing": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"name": {Type: json.RawMessage(`"string"`), Required: true},
+							"id":   {Type: json.RawMessage(`"string"`), Computed: true},
+						},
+						BlockTypes: map[string]*provider.NestedBlock{
+							"config": {
+								NestingMode: "list",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"key":   {Type: json.RawMessage(`"string"`), Required: true},
+										"value": {Type: json.RawMessage(`"string"`), Optional: true},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			DataSourceSchemas: map[string]*provider.SchemaBlock{
+				"test_data": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"filter": {Type: json.RawMessage(`"string"`), Optional: true},
+							"id":     {Type: json.RawMessage(`"string"`), Computed: true},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// Verify all generated files exist
+	for _, name := range []string{"provider_gen.go", "resources_gen.go", "data_sources_gen.go"} {
+		path := filepath.Join(tmpDir, name)
+		info, err := os.Stat(path)
+		if err != nil {
+			t.Errorf("%s not found: %v", name, err)
+			continue
+		}
+		if info.Size() == 0 {
+			t.Errorf("%s is empty", name)
+		}
+	}
+
+	// Verify provider_gen.go contains nested block type
+	providerData, err := os.ReadFile(filepath.Join(tmpDir, "provider_gen.go"))
+	if err != nil {
+		t.Fatalf("reading provider_gen.go: %v", err)
+	}
+	providerContent := string(providerData)
+	for _, want := range []string{"ProviderConfig", "Settings", "ProviderConfigSettings"} {
+		if !contains(providerContent, want) {
+			t.Errorf("provider_gen.go does not contain %q", want)
+		}
+	}
+
+	// Verify resources_gen.go contains nested block type
+	resourceData, err := os.ReadFile(filepath.Join(tmpDir, "resources_gen.go"))
+	if err != nil {
+		t.Fatalf("reading resources_gen.go: %v", err)
+	}
+	resourceContent := string(resourceData)
+	for _, want := range []string{"TestThing", "Config", "TestThingConfig"} {
+		if !contains(resourceContent, want) {
+			t.Errorf("resources_gen.go does not contain %q", want)
+		}
+	}
+
+	// Verify data_sources_gen.go content
+	dsData, err := os.ReadFile(filepath.Join(tmpDir, "data_sources_gen.go"))
+	if err != nil {
+		t.Fatalf("reading data_sources_gen.go: %v", err)
+	}
+	dsContent := string(dsData)
+	for _, want := range []string{"TestDataData", "Filter", "ID"} {
+		if !contains(dsContent, want) {
+			t.Errorf("data_sources_gen.go does not contain %q", want)
+		}
+	}
+}
+
+func TestGenerateWithSetAndMapNesting(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-nesting-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
+	})
+
+	ps := &provider.Schema{
+		Provider: &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{
+				Block: &provider.BlockType{},
+			},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"test_multi": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"name": {Type: json.RawMessage(`"string"`), Required: true},
+						},
+						BlockTypes: map[string]*provider.NestedBlock{
+							"tags": {
+								NestingMode: "set",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"key": {Type: json.RawMessage(`"string"`), Required: true},
+									},
+								},
+							},
+							"metadata": {
+								NestingMode: "map",
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"value": {Type: json.RawMessage(`"string"`), Optional: true},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	resourceData, err := os.ReadFile(filepath.Join(tmpDir, "resources_gen.go"))
+	if err != nil {
+		t.Fatalf("reading resources_gen.go: %v", err)
+	}
+	resourceContent := string(resourceData)
+
+	// Check that set and map nesting modes produce correct types
+	for _, want := range []string{"TestMulti", "TestMultiTags", "TestMultiMetadata"} {
+		if !contains(resourceContent, want) {
+			t.Errorf("resources_gen.go does not contain %q", want)
+		}
+	}
+}
+
+func TestGenerateWithComments(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-comments-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{
+		PackageName:      "testpkg",
+		OutputDir:        tmpDir,
+		GenerateComments: true,
+	})
+
+	ps := &provider.Schema{
+		Provider: &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"token": {Type: json.RawMessage(`"string"`), Required: true},
+					},
+				},
+			},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"test_item": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"name": {Type: json.RawMessage(`"string"`), Required: true},
+						},
+					},
+				},
+			},
+			DataSourceSchemas: map[string]*provider.SchemaBlock{
+				"test_lookup": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"query": {Type: json.RawMessage(`"string"`), Optional: true},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// Verify all three files exist
+	for _, name := range []string{"provider_gen.go", "resources_gen.go", "data_sources_gen.go"} {
+		if _, err := os.Stat(filepath.Join(tmpDir, name)); err != nil {
+			t.Errorf("%s not found: %v", name, err)
+		}
+	}
+}
+
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && searchString(s, substr)
+}
+
+func searchString(s, substr string) bool {
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
+}

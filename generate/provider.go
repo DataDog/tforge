@@ -143,4 +143,3 @@ func (pg *ProviderGenerator) generateProviderHelpers(providerName string) {
 func (pg *ProviderGenerator) File() *jen.File {
 	return pg.file
 }
-

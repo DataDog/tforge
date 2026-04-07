@@ -120,4 +120,3 @@ func Contains(src, name string) (bool, error) {
 
 	return false, nil
 }
-

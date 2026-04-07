@@ -110,4 +110,3 @@ func Exists(name string) bool {
 	_, err := exec.LookPath(name)
 	return err == nil
 }
-

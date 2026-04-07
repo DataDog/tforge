@@ -172,4 +172,3 @@ type CloudWorkspaces struct {
 	// Project selects workspaces by project.
 	Project string
 }
-

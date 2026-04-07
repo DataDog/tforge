@@ -167,4 +167,3 @@ type ProviderRequirement struct {
 	// Version is the version constraint (e.g., "~> 5.0").
 	Version string
 }
-
