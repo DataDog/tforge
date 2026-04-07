@@ -53,7 +53,7 @@ go install tforge/cmd/tforge@latest
 Or build from source:
 
 ```bash
-git clone https://github.com/datadog-labs/tforge.git && cd tforge
+git clone https://github.com/St0rmingBr4in/tforge.git && cd tforge
 make build
 ```
 
@@ -137,8 +137,8 @@ tforge -v
 | `-schema` | Load schema from file instead of fetching | - |
 | `-output` | Output directory for generated code | `./generated` |
 | `-package` | Go package name | `generated` |
-| `-comments` | Include doc comments in generated code | `false` |
-| `-omitempty` | Add `omitempty` to optional field JSON tags | `false` |
+| `-comments` | Include doc comments in generated code | `true` |
+| `-omitempty` | Add `omitempty` to optional field JSON tags | `true` |
 
 ## Development
 
