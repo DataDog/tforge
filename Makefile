@@ -1,5 +1,9 @@
 .PHONY: fmt lint test coverage coverage-check build clean update-snapshots validate snapshot-tests validate-golden
 
+# Terraform/OpenTofu versions to validate golden files against (requires Docker)
+TERRAFORM_VERSIONS = 1.5 1.9 latest
+TOFU_VERSIONS = 1.8 latest
+
 # Packages excluded from lint and coverage (generated code, CLI glue)
 EXCLUDED = /cmd/ /example /testdata
 PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)'))
@@ -56,7 +60,7 @@ snapshot-tests:
 
 # Validate golden files against multiple Terraform and OpenTofu versions (requires Docker)
 validate-golden:
-	./scripts/validate-golden.sh
+	TERRAFORM_VERSIONS="$(TERRAFORM_VERSIONS)" TOFU_VERSIONS="$(TOFU_VERSIONS)" ./scripts/validate-golden.sh
 
 # Run full CI validation locally (pre-commit).
 # Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.

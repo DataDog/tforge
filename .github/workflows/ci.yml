@@ -82,35 +82,9 @@ jobs:
     name: Validate Golden Files
     needs: snapshots
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - tool: terraform
-            image: hashicorp/terraform
-            version: "1.5"
-          - tool: terraform
-            image: hashicorp/terraform
-            version: "1.9"
-          - tool: terraform
-            image: hashicorp/terraform
-            version: latest
-          - tool: tofu
-            image: ghcr.io/opentofu/opentofu
-            version: "1.8"
-          - tool: tofu
-            image: ghcr.io/opentofu/opentofu
-            version: latest
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Validate golden files with ${{ matrix.tool }} ${{ matrix.version }}
-        run: |
-          for dir in testdata/golden/*/; do
-            echo "Validating ${dir} with ${{ matrix.tool }}:${{ matrix.version }}..."
-            tmpdir=$(mktemp -d)
-            cp "${dir}"main.tf.golden.json "${tmpdir}/main.tf.json"
-            docker run --rm -v "${tmpdir}:/work" -w /work "${{ matrix.image }}:${{ matrix.version }}" \
-              sh -c "${{ matrix.tool }} init -backend=false > /dev/null 2>&1 && ${{ matrix.tool }} validate"
-            rm -rf "${tmpdir}"
-          done
+      - name: Validate golden files against Terraform and OpenTofu
+        run: make validate-golden
