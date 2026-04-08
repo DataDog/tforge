@@ -1,4 +1,4 @@
-.PHONY: fmt lint test coverage coverage-check build clean update-snapshots validate snapshot-tests validate-golden
+.PHONY: fmt lint shellcheck test coverage coverage-check build clean update-snapshots validate snapshot-tests validate-golden
 
 # Terraform/OpenTofu versions to validate golden files against (requires Docker)
 TERRAFORM_VERSIONS = 1.5 1.9 latest
@@ -15,8 +15,12 @@ fmt:
 	@test -z "$$(gofmt -l .)" || (echo "Files need formatting:" && gofmt -l . && exit 1)
 
 # Lint (requires golangci-lint installed locally)
-lint: fmt
+lint: fmt shellcheck
 	golangci-lint run $(LINT_PKGS)
+
+# Lint shell scripts (requires shellcheck)
+shellcheck:
+	shellcheck scripts/*.sh
 
 # Run tests with race detector
 test:

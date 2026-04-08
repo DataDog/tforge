@@ -9,7 +9,7 @@
 #
 # Requires: docker
 
-set -euox pipefail
+set -euo pipefail
 
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
   echo "SKIP: Docker not available, skipping golden file validation"
@@ -27,14 +27,25 @@ validate() {
   local version="$2"
   local cmd="$3"
   local golden_dir="$4"
+  local label="${image}:${version}"
 
+  local tmpdir
   tmpdir=$(mktemp -d)
 
-  cp "${golden_dir}"main.tf.golden.json "${tmpdir}/main.tf.json"
+  cp "${golden_dir}main.tf.golden.json" "${tmpdir}/main.tf.json"
 
-  if ! docker run --rm --entrypoint sh -v "${tmpdir}:/work" -w /work "${image}:${version}" \
-    -c "${cmd} init -backend=false > /dev/null 2>&1 && ${cmd} validate" 2>&1; then
-    echo "FAIL: ${golden_dir} with ${image}:${version}"
+  echo "--- ${cmd} init (${label}) ---"
+  if ! docker run --rm --entrypoint sh -v "${tmpdir}:/work" -w /work "${label}" \
+    -c "${cmd} init -backend=false"; then
+    echo "FAIL: ${golden_dir} init failed with ${label}"
+    rm -rf "${tmpdir}"
+    return 1
+  fi
+
+  echo "--- ${cmd} validate (${label}) ---"
+  if ! docker run --rm --entrypoint sh -v "${tmpdir}:/work" -w /work "${label}" \
+    -c "${cmd} validate"; then
+    echo "FAIL: ${golden_dir} validate failed with ${label}"
     rm -rf "${tmpdir}"
     return 1
   fi
@@ -49,21 +60,21 @@ for dir in testdata/golden/*/; do
   fi
 
   for version in "${TF_VERSIONS[@]}"; do
-    echo "Validating ${dir} with terraform:${version}..."
-    if ! validate "hashicorp/terraform" "$version" "terraform" "$dir"; then
+    echo "=== Validating ${dir} with terraform:${version} ==="
+    if ! validate "hashicorp/terraform" "${version}" "terraform" "${dir}"; then
       failed=1
     fi
   done
 
   for version in "${OT_VERSIONS[@]}"; do
-    echo "Validating ${dir} with opentofu:${version}..."
-    if ! validate "ghcr.io/opentofu/opentofu" "$version" "tofu" "$dir"; then
+    echo "=== Validating ${dir} with opentofu:${version} ==="
+    if ! validate "ghcr.io/opentofu/opentofu" "${version}" "tofu" "${dir}"; then
       failed=1
     fi
   done
 done
 
-if [ $failed -ne 0 ]; then
+if [ "${failed}" -ne 0 ]; then
   echo ""
   echo "Some validations failed."
   exit 1
