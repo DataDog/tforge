@@ -112,17 +112,11 @@ func TestRunMigrate_StringProvider(t *testing.T) {
 		t.Errorf("wrong package name: %s", genContent)
 	}
 
-	// .gitignore updated
+	// .gitignore updated (only appends, does not remove existing entries)
 	gitignore, _ := os.ReadFile(filepath.Join(dir, ".gitignore"))
 	gi := string(gitignore)
-	for _, line := range strings.Split(gi, "\n") {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "cdktf.out" {
-			t.Error(".gitignore should not contain cdktf.out entry")
-		}
-		if trimmed == "generated" {
-			t.Error(".gitignore should not contain generated entry")
-		}
+	if !strings.Contains(gi, "cdktf.out") {
+		t.Error(".gitignore should still contain original cdktf.out entry")
 	}
 	if !strings.Contains(gi, "*_gen.go") {
 		t.Error(".gitignore should contain *_gen.go")

@@ -222,7 +222,7 @@ func stripConstraintPrefix(v string) string {
 	return strings.TrimSpace(v)
 }
 
-// updateGitignore adds tforge entries and removes cdktf-specific entries.
+// updateGitignore appends tforge entries to .gitignore if not already present.
 func updateGitignore(dir string, stderr io.Writer) error {
 	path := filepath.Join(dir, ".gitignore")
 
@@ -235,47 +235,23 @@ func updateGitignore(dir string, stderr io.Writer) error {
 		}
 	}
 
-	lines := strings.Split(string(content), "\n")
-
-	// Remove cdktf-specific entries
-	cdktfEntries := map[string]bool{
-		"cdktf.out":  true,
-		"generated":  true,
-		"cdktf.out/": true,
-		"generated/": true,
-	}
-	var filtered []string
-	for _, line := range lines {
-		if !cdktfEntries[strings.TrimSpace(line)] {
-			filtered = append(filtered, line)
-		}
-	}
-
-	// Add tforge entry if not present
+	// Check if tforge entry already present
 	tforgeEntry := "*_gen.go"
-	found := false
-	for _, line := range filtered {
+	for _, line := range strings.Split(string(content), "\n") {
 		if strings.TrimSpace(line) == tforgeEntry {
-			found = true
-			break
+			return nil // already present
 		}
-	}
-	if !found {
-		// Add with a section header
-		if len(filtered) > 0 && filtered[len(filtered)-1] != "" {
-			filtered = append(filtered, "")
-		}
-		filtered = append(filtered, "# tforge generated files")
-		filtered = append(filtered, tforgeEntry)
 	}
 
-	result := strings.Join(filtered, "\n")
-	if !strings.HasSuffix(result, "\n") {
-		result += "\n"
+	// Append tforge section
+	var addition string
+	if len(content) > 0 && !strings.HasSuffix(string(content), "\n") {
+		addition += "\n"
 	}
+	addition += "\n# tforge generated files\n" + tforgeEntry + "\n"
 
 	fmt.Fprintf(stderr, "Updating %s\n", path)
-	return os.WriteFile(path, []byte(result), 0644)
+	return os.WriteFile(path, append(content, []byte(addition)...), 0644)
 }
 
 func printManualSteps(w io.Writer, directives []string, modules []json.RawMessage) {
