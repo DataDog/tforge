@@ -70,8 +70,12 @@ func ToFile(stack *config.Stack, path string) error {
 	return nil
 }
 
+// Version is the tforge version, set at build time or defaulting to "dev".
+var Version = "dev"
+
 // terraformJSON represents the root structure of a .tf.json file.
 type terraformJSON struct {
+	Comment   map[string]any            `json:"//,omitempty"`
 	Terraform *terraformBlock           `json:"terraform,omitempty"`
 	Provider  map[string][]any          `json:"provider,omitempty"`
 	Resource  map[string]map[string]any `json:"resource,omitempty"`
@@ -145,7 +149,15 @@ type timeoutsJSON struct {
 
 // buildTerraformJSON converts a Stack to the terraform JSON structure.
 func buildTerraformJSON(stack *config.Stack) *terraformJSON {
-	tf := &terraformJSON{}
+	tf := &terraformJSON{
+		Comment: map[string]any{
+			"metadata": map[string]any{
+				"tool":      "tforge",
+				"version":   Version,
+				"stackName": stack.Name,
+			},
+		},
+	}
 
 	// Build terraform block
 	if needsTerraformBlock(stack) {

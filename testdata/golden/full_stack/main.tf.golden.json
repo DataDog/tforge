@@ -1,4 +1,11 @@
 {
+  "//": {
+    "metadata": {
+      "stackName": "full-stack-golden",
+      "tool": "tforge",
+      "version": "dev"
+    }
+  },
   "terraform": {
     "required_providers": {
       "aws": {

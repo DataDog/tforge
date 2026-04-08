@@ -19,11 +19,13 @@ import (
 
 	"tforge/generate"
 	"tforge/provider"
+	"tforge/render"
 )
 
 const version = "0.1.0"
 
 func main() {
+	render.Version = version
 	os.Exit(run(os.Args, os.Stdout, os.Stderr))
 }
 

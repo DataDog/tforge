@@ -1,4 +1,11 @@
 {
+  "//": {
+    "metadata": {
+      "stackName": "lifecycle-provisioners-golden",
+      "tool": "tforge",
+      "version": "dev"
+    }
+  },
   "terraform": {
     "required_providers": {
       "aws": {

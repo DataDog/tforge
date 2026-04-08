@@ -1,4 +1,11 @@
 {
+  "//": {
+    "metadata": {
+      "stackName": "data-source-meta-args-golden",
+      "tool": "tforge",
+      "version": "dev"
+    }
+  },
   "terraform": {
     "required_providers": {
       "aws": {

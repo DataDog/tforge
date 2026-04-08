@@ -1,4 +1,11 @@
 {
+  "//": {
+    "metadata": {
+      "stackName": "datadog-v4-golden",
+      "tool": "tforge",
+      "version": "dev"
+    }
+  },
   "terraform": {
     "required_providers": {
       "datadog": {
