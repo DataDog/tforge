@@ -75,9 +75,6 @@ func generateCmd(args []string) {
 	schemaFile := fs.String("schema", "", "Path to cached schema JSON file (alternative to -provider/-version)")
 	outputDir := fs.String("output", "./generated", "Output directory for generated code")
 	packageName := fs.String("package", "", "Go package name (defaults to provider name)")
-	comments := fs.Bool("comments", true, "Generate documentation comments")
-	omitEmpty := fs.Bool("omitempty", true, "Add omitempty to optional JSON tags")
-
 	fs.Usage = func() {
 		fmt.Println(`Usage: tforge generate [options]
 
@@ -145,10 +142,8 @@ Examples:
 
 	// Generate code
 	gen := generate.New(generate.Config{
-		OutputDir:        *outputDir,
-		PackageName:      pkg,
-		GenerateComments: *comments,
-		OmitEmpty:        *omitEmpty,
+		OutputDir:   *outputDir,
+		PackageName: pkg,
 	})
 
 	if err := gen.Generate(schema); err != nil {

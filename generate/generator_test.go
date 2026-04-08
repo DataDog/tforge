@@ -159,22 +159,12 @@ func TestGenerateWithResources(t *testing.T) {
 }
 
 func TestJsonTagBehavior(t *testing.T) {
-	// Test jsonTag behavior through Generate output.
-	// jsonTag is a method on *Generator, so we test via generated code.
-	tmpDir, err := os.MkdirTemp("", "tforge-gen-jsontag-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	// With OmitEmpty = true
+	// jsonTag always adds omitempty for optional fields.
 	g := New(Config{
 		PackageName: "testpkg",
-		OutputDir:   tmpDir,
-		OmitEmpty:   true,
+		OutputDir:   t.TempDir(),
 	})
 
-	// jsonTag is unexported, but accessible within same package
 	got := g.jsonTag("name", false)
 	if got != "name" {
 		t.Errorf("jsonTag(name, false) = %q, want %q", got, "name")
@@ -182,19 +172,7 @@ func TestJsonTagBehavior(t *testing.T) {
 
 	got = g.jsonTag("name", true)
 	if got != "name,omitempty" {
-		t.Errorf("jsonTag(name, true) with OmitEmpty=true = %q, want %q", got, "name,omitempty")
-	}
-
-	// With OmitEmpty = false
-	g2 := New(Config{
-		PackageName: "testpkg",
-		OutputDir:   tmpDir,
-		OmitEmpty:   false,
-	})
-
-	got = g2.jsonTag("name", true)
-	if got != "name" {
-		t.Errorf("jsonTag(name, true) with OmitEmpty=false = %q, want %q", got, "name")
+		t.Errorf("jsonTag(name, true) = %q, want %q", got, "name,omitempty")
 	}
 }
 
@@ -273,7 +251,6 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 	g := New(Config{
 		PackageName: "testpkg",
 		OutputDir:   tmpDir,
-		OmitEmpty:   true,
 	})
 
 	ps := &provider.Schema{
@@ -462,9 +439,8 @@ func TestGenerateWithComments(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
-		PackageName:      "testpkg",
-		OutputDir:        tmpDir,
-		GenerateComments: true,
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
 	})
 
 	ps := &provider.Schema{
@@ -524,10 +500,8 @@ func TestGenerateCompilationComplex(t *testing.T) {
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
-		PackageName:      "testpkg",
-		OutputDir:        tmpDir,
-		OmitEmpty:        true,
-		GenerateComments: true,
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
 	})
 
 	ps := &provider.Schema{

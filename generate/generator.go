@@ -17,6 +17,8 @@
 //	if err := gen.Generate(schema); err != nil {
 //	    log.Fatal(err)
 //	}
+//
+// Documentation comments and omitempty tags for optional fields are always generated.
 package generate
 
 import (
@@ -36,12 +38,6 @@ type Config struct {
 
 	// PackageName is the Go package name for generated code.
 	PackageName string
-
-	// GenerateComments enables generation of documentation comments.
-	GenerateComments bool
-
-	// OmitEmpty adds omitempty to JSON tags for optional fields.
-	OmitEmpty bool
 }
 
 // Generator generates Go code from provider schemas.
@@ -98,7 +94,7 @@ func (g *Generator) generateProvider() error {
 		f.Comment("ProviderConfig represents the provider configuration.")
 		f.Type().Id("ProviderConfig").Struct()
 	} else {
-		if g.config.GenerateComments && block.Description() != "" {
+		if block.Description() != "" {
 			f.Comment(block.Description())
 		}
 		f.Comment("ProviderConfig represents the provider configuration.")
@@ -128,7 +124,7 @@ func (g *Generator) generateResources() error {
 
 		// Type name comment first (Go convention), then description
 		f.Commentf("%s represents the %s resource.", structName, res.Name())
-		if g.config.GenerateComments && res.Description() != "" {
+		if res.Description() != "" {
 			f.Comment(cleanDescription(res.Description()))
 		}
 		f.Type().Id(structName).StructFunc(func(s *jen.Group) {
@@ -161,7 +157,7 @@ func (g *Generator) generateDataSources() error {
 
 		// Type name comment first (Go convention), then description
 		f.Commentf("%s represents the %s data source.", structName, ds.Name())
-		if g.config.GenerateComments && ds.Description() != "" {
+		if ds.Description() != "" {
 			f.Comment(cleanDescription(ds.Description()))
 		}
 		f.Type().Id(structName).StructFunc(func(s *jen.Group) {
@@ -256,7 +252,7 @@ func (g *Generator) generateNestedTypes(f *jen.File, block *schema.Block, parent
 
 		// Type name comment first (Go convention), then description
 		f.Commentf("%s represents a %s block in %s.", typeName, nb.Name(), parentTypeName)
-		if g.config.GenerateComments && nb.Description() != "" {
+		if nb.Description() != "" {
 			f.Comment(cleanDescription(nb.Description()))
 		}
 		f.Type().Id(typeName).StructFunc(func(s *jen.Group) {
@@ -277,9 +273,9 @@ func (g *Generator) goTypeForAttribute(attr *schema.Attribute) string {
 	return schema.GoTypeName(attr.Type())
 }
 
-// jsonTag generates a JSON struct tag.
+// jsonTag generates a JSON struct tag, adding omitempty for optional fields.
 func (g *Generator) jsonTag(name string, optional bool) string {
-	if optional && g.config.OmitEmpty {
+	if optional {
 		return name + ",omitempty"
 	}
 	return name
