@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # Test that tforge migration produces correct output for each CDKTF example.
 #
-# For each example in testdata/migration/:
-#   1. Copy CDKTF source files to a temp dir
-#   2. Run `tforge migrate` to process cdktf.json
-#   3. Replace main.go with the hand-written tforge version
-#   4. Set up go.mod with local tforge dependency
-#   5. Run `go generate` + `go run` to produce .tf.json
-#   6. Diff output against expected.tf.json
+# Each example lives in testdata/migration/<name>/ with two subdirs:
+#   cdktf/  — original CDKTF project (exact copy from terraform-cdk),
+#             including cdktf.out/ with the expected output from cdktf synth
+#   tforge/ — hand-written tforge conversion (main.go, go.mod)
 #
-# Requires: tforge binary (built via `go install ./cmd/tforge`)
+# The test:
+#   1. Copies cdktf/ to a temp dir
+#   2. Runs `tforge migrate` (verifies cdktf.json deleted, generate.go created)
+#   3. Swaps in main.go and go.mod from tforge/
+#   4. Runs `go generate` + `go run` to produce main.tf.json
+#   5. Diffs output against cdktf/cdktf.out/.../cdk.tf.json
 
 set -euo pipefail
 
@@ -26,36 +28,51 @@ total=0
 
 for example_dir in "${MIGRATION_DIR}"/*/; do
   name=$(basename "${example_dir}")
+  cdktf_dir="${example_dir}/cdktf"
+  tforge_dir="${example_dir}/tforge"
   total=$((total + 1))
 
   echo "=== Testing migration: ${name} ==="
 
-  # Check required files exist
-  for f in cdktf.json main.go.cdktf main.go.tforge go.mod.tforge expected.tf.json; do
-    if [ ! -f "${example_dir}/${f}" ]; then
-      echo "SKIP: ${name} (missing ${f})"
-      continue 2
-    fi
-  done
+  # Check required dirs and files
+  if [ ! -d "${cdktf_dir}" ] || [ ! -d "${tforge_dir}" ]; then
+    echo "SKIP: ${name} (missing cdktf/ or tforge/ subdir)"
+    continue
+  fi
+  if [ ! -f "${cdktf_dir}/cdktf.json" ]; then
+    echo "SKIP: ${name} (missing cdktf/cdktf.json)"
+    continue
+  fi
+  if [ ! -f "${tforge_dir}/main.go" ]; then
+    echo "SKIP: ${name} (missing tforge/main.go)"
+    continue
+  fi
 
-  # Set up temp dir with CDKTF source
+  # Find expected output (cdktf.out/stacks/*/cdk.tf.json)
+  expected_file=$(find "${cdktf_dir}/cdktf.out" -name "cdk.tf.json" 2>/dev/null | head -1)
+  if [ -z "${expected_file}" ]; then
+    echo "SKIP: ${name} (no cdktf.out/.../cdk.tf.json found)"
+    continue
+  fi
+
+  # Set up temp dir with CDKTF source (exact copy, excluding cdktf.out)
   tmpdir=$(mktemp -d)
-  trap_cleanup() { rm -rf "${tmpdir}"; }
-  trap trap_cleanup EXIT
-
-  # Copy CDKTF files (the starting state before migration)
-  cp "${example_dir}/cdktf.json" "${tmpdir}/"
-  cp "${example_dir}/main.go.cdktf" "${tmpdir}/main.go"
-  if [ -f "${example_dir}/package.json" ]; then
-    cp "${example_dir}/package.json" "${tmpdir}/"
-  fi
-  if [ -f "${example_dir}/.gitignore" ]; then
-    cp "${example_dir}/.gitignore" "${tmpdir}/"
-  fi
+  for f in "${cdktf_dir}"/*; do
+    fname=$(basename "$f")
+    [ "${fname}" = "cdktf.out" ] && continue
+    cp -a "$f" "${tmpdir}/"
+  done
+  # Copy hidden files
+  for f in "${cdktf_dir}"/.*; do
+    fname=$(basename "$f")
+    [ "${fname}" = "." ] || [ "${fname}" = ".." ] && continue
+    cp -a "$f" "${tmpdir}/"
+  done
 
   # Step 1: Run tforge migrate
   if ! "${TFORGE_BIN}" migrate -dir "${tmpdir}" > /dev/null 2>&1; then
     echo "FAIL: ${name} (tforge migrate failed)"
+    "${TFORGE_BIN}" migrate -dir "${tmpdir}" 2>&1 || true
     failed=$((failed + 1))
     rm -rf "${tmpdir}"
     continue
@@ -77,16 +94,15 @@ for example_dir in "${MIGRATION_DIR}"/*/; do
     continue
   fi
 
-  # Step 2: Replace main.go with tforge version
-  cp "${example_dir}/main.go.tforge" "${tmpdir}/main.go"
-
-  # Step 3: Set up go.mod with local replace
-  cp "${example_dir}/go.mod.tforge" "${tmpdir}/go.mod"
+  # Step 2: Swap in tforge main.go and go.mod (with local replace)
+  cp "${tforge_dir}/main.go" "${tmpdir}/main.go"
+  cp "${tforge_dir}/go.mod" "${tmpdir}/go.mod"
   echo "replace tforge => ${TFORGE_ROOT}" >> "${tmpdir}/go.mod"
 
-  # Step 4: Generate provider bindings and run
+  # Step 3: Generate provider bindings and run
   if ! (cd "${tmpdir}" && go generate ./... 2>/dev/null); then
     echo "FAIL: ${name} (go generate failed)"
+    (cd "${tmpdir}" && go generate ./... 2>&1) || true
     failed=$((failed + 1))
     rm -rf "${tmpdir}"
     continue
@@ -94,15 +110,16 @@ for example_dir in "${MIGRATION_DIR}"/*/; do
 
   if ! (cd "${tmpdir}" && go run . 2>/dev/null); then
     echo "FAIL: ${name} (go run failed)"
+    (cd "${tmpdir}" && go run . 2>&1) || true
     failed=$((failed + 1))
     rm -rf "${tmpdir}"
     continue
   fi
 
-  # Step 5: Diff output against expected
-  if ! diff -u "${example_dir}/expected.tf.json" "${tmpdir}/main.tf.json" > /dev/null 2>&1; then
+  # Step 4: Diff tforge output against CDKTF expected output
+  if ! diff -u "${expected_file}" "${tmpdir}/main.tf.json" > /dev/null 2>&1; then
     echo "FAIL: ${name} (output mismatch)"
-    diff -u "${example_dir}/expected.tf.json" "${tmpdir}/main.tf.json" || true
+    diff -u "${expected_file}" "${tmpdir}/main.tf.json" || true
     failed=$((failed + 1))
     rm -rf "${tmpdir}"
     continue

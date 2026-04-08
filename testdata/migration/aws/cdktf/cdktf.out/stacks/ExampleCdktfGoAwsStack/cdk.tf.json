@@ -1,0 +1,43 @@
+{
+  "terraform": {
+    "required_providers": {
+      "aws": {
+        "source": "hashicorp/aws",
+        "version": "~> 3.70"
+      }
+    }
+  },
+  "provider": {
+    "aws": [
+      {
+        "region": "us-east-1"
+      }
+    ]
+  },
+  "resource": {
+    "aws_eks_cluster": {
+      "EKS": {
+        "name": "my-eks",
+        "role_arn": "arn:aws:iam::012345678910:role/eks-role",
+        "version": "1.17",
+        "vpc_config": [
+          {
+            "subnet_ids": [
+              "subnet-a",
+              "subnet-b"
+            ]
+          }
+        ]
+      }
+    },
+    "aws_instance": {
+      "Hello": {
+        "ami": "ami-2757f631",
+        "instance_type": "t2.micro",
+        "tags": {
+          "environment": "development"
+        }
+      }
+    }
+  }
+}
