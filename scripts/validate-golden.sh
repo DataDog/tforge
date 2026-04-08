@@ -9,7 +9,7 @@
 #
 # Requires: docker
 
-set -euo pipefail
+set -euox pipefail
 
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
   echo "SKIP: Docker not available, skipping golden file validation"
@@ -32,8 +32,8 @@ validate() {
 
   cp "${golden_dir}"main.tf.golden.json "${tmpdir}/main.tf.json"
 
-  if ! docker run --rm -v "${tmpdir}:/work" -w /work "${image}:${version}" \
-    sh -c "${cmd} init -backend=false > /dev/null 2>&1 && ${cmd} validate" 2>&1; then
+  if ! docker run --rm --entrypoint sh -v "${tmpdir}:/work" -w /work "${image}:${version}" \
+    -c "${cmd} init -backend=false > /dev/null 2>&1 && ${cmd} validate" 2>&1; then
     echo "FAIL: ${golden_dir} with ${image}:${version}"
     rm -rf "${tmpdir}"
     return 1
