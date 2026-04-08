@@ -76,8 +76,8 @@ validate: lint coverage-check snapshot-tests validate-golden
 # Clean build artifacts
 # One-time setup after cloning (installs pre-commit hook)
 setup:
-	git config core.hooksPath .githooks
-	@echo "Pre-commit hook installed (.githooks/pre-commit)"
+	ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit
+	@echo "Pre-commit hook installed (.git/hooks/pre-commit -> .githooks/pre-commit)"
 
 # Clean build artifacts
 clean:
