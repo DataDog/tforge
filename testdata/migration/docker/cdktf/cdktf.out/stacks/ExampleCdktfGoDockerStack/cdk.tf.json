@@ -1,0 +1,34 @@
+{
+  "terraform": {
+    "required_providers": {
+      "docker": {
+        "source": "kreuzwerker/docker",
+        "version": "~> 3.0"
+      }
+    }
+  },
+  "provider": {
+    "docker": [
+      {}
+    ]
+  },
+  "resource": {
+    "docker_container": {
+      "nginxContainer": {
+        "image": "${docker_image.nginxImage.image_id}",
+        "name": "tutorial",
+        "ports": [
+          {
+            "external": 8000,
+            "internal": 80
+          }
+        ]
+      }
+    },
+    "docker_image": {
+      "nginxImage": {
+        "name": "nginx:latest"
+      }
+    }
+  }
+}
