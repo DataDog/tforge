@@ -74,7 +74,7 @@ migration-test:
 
 # Run full CI validation locally (pre-commit).
 # Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.
-validate: lint coverage-check snapshot-tests validate-golden
+validate: lint coverage-check snapshot-tests validate-golden migration-test
 
 # Clean build artifacts
 # One-time setup after cloning (installs pre-commit hook)
