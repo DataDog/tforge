@@ -26,6 +26,7 @@ type cdktfProvider struct {
 // parsedProvider is the normalized result of parsing a provider entry.
 type parsedProvider struct {
 	Source  string // e.g., "hashicorp/aws"
+	Name    string // e.g., "aws" (last part of source, used as package name)
 	Version string // e.g., "3.70.0" (without constraint prefix)
 }
 
@@ -34,8 +35,6 @@ func runMigrate(args []string, stdout, stderr io.Writer) error {
 	fs.SetOutput(stderr)
 
 	dir := fs.String("dir", ".", "Directory containing cdktf.json")
-	packageName := fs.String("package", "main", "Go package name for generated code")
-	outputDir := fs.String("output", ".", "Output directory for generated files")
 	dryRun := fs.Bool("dry-run", false, "Show what would be done without making changes")
 
 	fs.Usage = func() {
@@ -43,8 +42,12 @@ func runMigrate(args []string, stdout, stderr io.Writer) error {
 
 Migrate a CDKTF Go project to tforge.
 
-Reads cdktf.json, extracts provider requirements, and sets up
-go:generate directives for tforge. Removes CDKTF-specific files.
+Reads cdktf.json, extracts provider requirements, and creates a
+sub-package per provider with go:generate directives (matching the
+tforge convention: each provider gets its own package).
+
+For example, "hashicorp/aws@~> 3.70.0" creates:
+  aws/generate.go  with  //go:generate tforge generate -provider hashicorp/aws ...
 
 Options:`)
 		fs.PrintDefaults()
@@ -84,23 +87,11 @@ Examples:
 		return fmt.Errorf("no terraformProviders found in cdktf.json")
 	}
 
-	// Generate the go:generate directives
-	var directives []string
-	for _, p := range providers {
-		directive := fmt.Sprintf("//go:generate tforge generate -provider %s -version %s -package %s -output %s",
-			p.Source, p.Version, *packageName, *outputDir)
-		directives = append(directives, directive)
-	}
-
 	if *dryRun {
 		fmt.Fprintln(stdout, "Dry run — no changes will be made.")
-		fmt.Fprintln(stdout, "Providers found:")
+		fmt.Fprintln(stdout, "\nProvider packages to create:")
 		for _, p := range providers {
-			fmt.Fprintf(stdout, "  %s@%s\n", p.Source, p.Version)
-		}
-		fmt.Fprintln(stdout, "\ngo:generate directives to add:")
-		for _, d := range directives {
-			fmt.Fprintf(stdout, "  %s\n", d)
+			fmt.Fprintf(stdout, "  %s/generate.go  (provider %s@%s)\n", p.Name, p.Source, p.Version)
 		}
 		fmt.Fprintln(stdout, "\nFiles to delete:")
 		fmt.Fprintf(stdout, "  %s\n", cdktfPath)
@@ -108,7 +99,7 @@ Examples:
 		if _, err := os.Stat(pkgJSON); err == nil {
 			fmt.Fprintf(stdout, "  %s\n", pkgJSON)
 		}
-		printManualSteps(stdout, directives, cfg.TerraformModules)
+		printManualSteps(stdout, providers, cfg.TerraformModules)
 		return nil
 	}
 
@@ -131,20 +122,28 @@ Examples:
 		fmt.Fprintf(stderr, "Warning: could not update .gitignore: %v\n", err)
 	}
 
-	// Write generate.go with go:generate directives
-	generateFile := filepath.Join(*dir, "generate.go")
-	var buf strings.Builder
-	for _, d := range directives {
-		buf.WriteString(d + "\n")
-	}
-	buf.WriteString("package " + *packageName + "\n")
+	// Create a sub-package per provider with generate.go
+	for _, p := range providers {
+		pkgDir := filepath.Join(*dir, p.Name)
+		if err := os.MkdirAll(pkgDir, 0755); err != nil {
+			return fmt.Errorf("creating %s/: %w", p.Name, err)
+		}
 
-	fmt.Fprintf(stderr, "Writing %s\n", generateFile)
-	if err := os.WriteFile(generateFile, []byte(buf.String()), 0644); err != nil {
-		return fmt.Errorf("writing generate.go: %w", err)
+		generateFile := filepath.Join(pkgDir, "generate.go")
+		content := fmt.Sprintf(
+			"// Package %s provides generated types for the %s Terraform provider.\n"+
+				"//\n"+
+				"//go:generate tforge generate -provider %s -version %s -package %s -output .\n"+
+				"package %s\n",
+			p.Name, p.Source, p.Source, p.Version, p.Name, p.Name)
+
+		fmt.Fprintf(stderr, "Writing %s\n", generateFile)
+		if err := os.WriteFile(generateFile, []byte(content), 0644); err != nil {
+			return fmt.Errorf("writing %s: %w", generateFile, err)
+		}
 	}
 
-	printManualSteps(stdout, directives, cfg.TerraformModules)
+	printManualSteps(stdout, providers, cfg.TerraformModules)
 
 	return nil
 }
@@ -180,12 +179,17 @@ func parseProviders(raw []json.RawMessage) ([]parsedProvider, error) {
 			return nil, fmt.Errorf("provider entry missing source: %s", string(entry))
 		}
 
+		name := obj.Name
+		if name == "" {
+			name = providerName(source)
+		}
+
 		version := stripConstraintPrefix(obj.Version)
 		if version == "" {
 			version = "latest"
 		}
 
-		providers = append(providers, parsedProvider{Source: source, Version: version})
+		providers = append(providers, parsedProvider{Source: source, Name: name, Version: version})
 	}
 
 	return providers, nil
@@ -207,12 +211,20 @@ func parseProviderString(s string) (parsedProvider, error) {
 		source = "hashicorp/" + source
 	}
 
+	name := providerName(source)
+
 	version := "latest"
 	if len(parts) == 2 {
 		version = stripConstraintPrefix(strings.TrimSpace(parts[1]))
 	}
 
-	return parsedProvider{Source: source, Version: version}, nil
+	return parsedProvider{Source: source, Name: name, Version: version}, nil
+}
+
+// providerName extracts the short name from a provider source (e.g., "aws" from "hashicorp/aws").
+func providerName(source string) string {
+	parts := strings.Split(source, "/")
+	return parts[len(parts)-1]
 }
 
 // stripConstraintPrefix removes version constraint operators like "~> ", ">= ", "= ".
@@ -254,11 +266,11 @@ func updateGitignore(dir string, stderr io.Writer) error {
 	return os.WriteFile(path, append(content, []byte(addition)...), 0644)
 }
 
-func printManualSteps(w io.Writer, directives []string, modules []json.RawMessage) {
+func printManualSteps(w io.Writer, providers []parsedProvider, modules []json.RawMessage) {
 	fmt.Fprintln(w, "\n=== Migration Summary ===")
-	fmt.Fprintln(w, "\ngo:generate directives written to generate.go:")
-	for _, d := range directives {
-		fmt.Fprintf(w, "  %s\n", d)
+	fmt.Fprintln(w, "\nProvider packages created:")
+	for _, p := range providers {
+		fmt.Fprintf(w, "  %s/  (%s@%s)\n", p.Name, p.Source, p.Version)
 	}
 
 	fmt.Fprintln(w, "\nNext steps:")
@@ -269,18 +281,25 @@ func printManualSteps(w io.Writer, directives []string, modules []json.RawMessag
 	fmt.Fprintln(w, "  3. Update imports in your Go files:")
 	fmt.Fprintln(w, "     - Remove: constructs, jsii-runtime-go, terraform-cdk-go/cdktf")
 	fmt.Fprintln(w, "     - Remove: generated provider packages (e.g., generated/hashicorp/aws/*)")
-	fmt.Fprintln(w, "     - Add:    tforge/config, tforge/render")
+
+	if len(providers) > 0 {
+		fmt.Fprintln(w, "     - Add:    tforge/config, tforge/render")
+		for _, p := range providers {
+			fmt.Fprintf(w, "     - Add:    <your-module>/%s  (generated provider types)\n", p.Name)
+		}
+	}
+
 	fmt.Fprintln(w, "  4. Replace CDKTF patterns:")
 	fmt.Fprintln(w, "     - cdktf.NewApp / app.Synth()  →  render.ToFile(stack, \"main.tf.json\")")
 	fmt.Fprintln(w, "     - cdktf.NewTerraformStack()   →  config.NewStack(\"name\")")
 	fmt.Fprintln(w, "     - provider.NewXxx(stack, ...)  →  stack.AddProvider(config.Provider{...})")
-	fmt.Fprintln(w, "     - resource.NewXxx(stack, ...)  →  NewXxx(stack, \"name\", XxxConfig{...})")
+	fmt.Fprintln(w, "     - resource.NewXxx(stack, ...)  →  pkg.NewXxx(stack, \"name\", pkg.XxxConfig{...})")
 	fmt.Fprintln(w, "     - jsii.String(\"value\")         →  \"value\"")
 	fmt.Fprintln(w, "  5. Run and verify:")
 	fmt.Fprintln(w, "     go run . && terraform init && terraform validate")
 
 	if len(modules) > 0 {
-		fmt.Fprintln(w, "\n⚠ Warning: This project uses Terraform modules:")
+		fmt.Fprintln(w, "\nWarning: This project uses Terraform modules:")
 		for _, m := range modules {
 			fmt.Fprintf(w, "    %s\n", string(m))
 		}

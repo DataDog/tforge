@@ -86,9 +86,10 @@ for example_dir in "${MIGRATION_DIR}"/*/; do
     continue
   fi
 
-  # Verify generate.go was created
-  if [ ! -f "${tmpdir}/generate.go" ]; then
-    echo "FAIL: ${name} (generate.go not created)"
+  # Verify at least one provider generate.go was created
+  gen_count=$(find "${tmpdir}" -name "generate.go" -not -path "*/cdktf.out/*" | wc -l)
+  if [ "${gen_count}" -eq 0 ]; then
+    echo "FAIL: ${name} (no generate.go created)"
     failed=$((failed + 1))
     rm -rf "${tmpdir}"
     continue
