@@ -1,4 +1,4 @@
-.PHONY: fmt lint shellcheck test coverage coverage-check build clean update-snapshots validate snapshot-tests validate-golden
+.PHONY: fmt lint shellcheck test coverage coverage-check build clean update-snapshots validate snapshot-tests validate-golden clear-golden-cache
 
 # Terraform/OpenTofu versions to validate golden files against (requires Docker)
 TERRAFORM_VERSIONS = 1.5 1.9 latest
@@ -65,6 +65,9 @@ snapshot-tests:
 # Validate golden files against multiple Terraform and OpenTofu versions (requires Docker)
 validate-golden:
 	TERRAFORM_VERSIONS="$(TERRAFORM_VERSIONS)" TOFU_VERSIONS="$(TOFU_VERSIONS)" ./scripts/validate-golden.sh
+
+clear-golden-cache:
+	./scripts/validate-golden.sh --clear-cache
 
 # Run full CI validation locally (pre-commit).
 # Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.
