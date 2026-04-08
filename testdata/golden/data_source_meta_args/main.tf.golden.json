@@ -37,7 +37,7 @@
     "aws_caller_identity": {
       "current": {
         "depends_on": [
-          "aws_iam_role.admin"
+          "data.aws_availability_zones.counted"
         ]
       }
     },

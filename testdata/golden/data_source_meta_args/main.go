@@ -54,7 +54,7 @@ func main() {
 		Type:      "aws_caller_identity",
 		Name:      "current",
 		Config:    map[string]any{},
-		DependsOn: []string{"aws_iam_role.admin"},
+		DependsOn: []string{"data.aws_availability_zones.counted"},
 	}); err != nil {
 		log.Fatal(err)
 	}
