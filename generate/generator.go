@@ -41,8 +41,9 @@ type Config struct {
 
 // Generator generates Go code from provider schemas.
 type Generator struct {
-	config Config
-	schema *provider.ProviderSchema
+	config        Config
+	schema        *provider.ProviderSchema
+	reservedNames map[string]bool // top-level type names to avoid collisions
 }
 
 // New creates a new Generator with the given configuration.
@@ -63,6 +64,17 @@ func (g *Generator) Generate(ps *provider.Schema) error {
 	}
 
 	g.schema = ps.Provider
+
+	// Collect all top-level type names so nested block types can avoid collisions.
+	// E.g., aws_s3_bucket has nested block "logging" → AwsS3BucketLogging,
+	// but aws_s3_bucket_logging is also a standalone resource → AwsS3BucketLogging.
+	g.reservedNames = make(map[string]bool)
+	for name := range g.schema.ResourceSchemas {
+		g.reservedNames[toGoName(name)] = true
+	}
+	for name := range g.schema.DataSourceSchemas {
+		g.reservedNames[toGoName(name)+"Data"] = true
+	}
 
 	// Generate provider configuration
 	if err := g.generateProvider(); err != nil {
@@ -254,6 +266,12 @@ func (g *Generator) generateNestedTypes(f *jen.File, block *provider.BlockType, 
 	for _, nb := range sortedNestedBlocks(block) {
 		// Prefix with parent type name to make unique
 		typeName := parentTypeName + toGoName(nb.Name)
+
+		// Skip if this name collides with a top-level resource or data source.
+		// The standalone resource type takes precedence.
+		if g.reservedNames[typeName] {
+			continue
+		}
 
 		// Type name comment first (Go convention), then description
 		f.Commentf("%s represents a %s block in %s.", typeName, nb.Name, parentTypeName)
