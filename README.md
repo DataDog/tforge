@@ -37,7 +37,6 @@ tforge takes a different approach:
 | Package    | Description                                           |
 |------------|-------------------------------------------------------|
 | `provider` | Fetch provider binaries and load provider schemas     |
-| `schema`   | Normalize and navigate provider schema structures     |
 | `generate` | Generate Go SDK code from provider schemas            |
 | `config`   | Build Terraform configurations with typed Go structs  |
 | `render`   | Serialize configurations to `.tf.json` format         |
@@ -143,6 +142,9 @@ tforge -v
 ## Development
 
 ```bash
+# First-time setup (installs pre-commit hook)
+make setup
+
 # Run tests
 make test
 

@@ -10,7 +10,6 @@ tforge/
 ├── config/             # Stack, Provider, Resource, DataSource, Variable, Output, Local types
 ├── generate/           # Code generation from provider schemas -> Go SDK
 ├── provider/           # Fetch provider binaries and load schemas
-├── schema/             # Normalize and navigate provider schema structures
 ├── render/             # Serialize configurations to .tf.json
 ├── internal/           # Internal utilities
 ├── example/            # Example usage with Datadog provider (uses go:generate)
