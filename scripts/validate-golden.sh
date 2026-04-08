@@ -63,8 +63,6 @@ TMPDIR_BASE=$(mktemp -d)
 cleanup() { rm -rf "${TMPDIR_BASE}"; }
 trap cleanup EXIT
 
-# --- Helpers ---
-
 # Resolve hash command once (sha256sum on Linux, shasum on macOS)
 if command -v sha256sum &> /dev/null; then
   hash_cmd() { sha256sum | cut -d' ' -f1; }
@@ -76,15 +74,12 @@ cache_vol_name() { echo "tforge-init-${1}-${2}"; }
 
 outfile_for_label() { echo "${TMPDIR_BASE}/out-${1//[:\/]/_}"; }
 
-# Run a created container, then always remove it.
 run_and_rm() {
   local container_id="$1"
-  local ok=true
-  if ! docker start -a "${container_id}" 2>&1; then
-    ok=false
-  fi
+  local rc=0
+  docker start -a "${container_id}" 2>&1 || rc=$?
   docker rm "${container_id}" > /dev/null 2>&1 || true
-  "${ok}"
+  return "${rc}"
 }
 
 # --- Provider set grouping ---
@@ -136,8 +131,8 @@ init_providers() {
   fi
 }
 
-# Batch-check which volumes have valid caches. Returns a newline-separated list
-# of "vol:hash" pairs that are valid. Runs a single Alpine container.
+# Batch-check which volumes have valid caches. Prints the volume name of each
+# valid cache (one per line). Runs a single Alpine container.
 batch_check_caches() {
   local vol_hash_pairs=("$@")
   if [ ${#vol_hash_pairs[@]} -eq 0 ]; then
@@ -275,22 +270,18 @@ ensure_init_caches
 pids=()
 labels=()
 
-for tool_info in "${TOOLS[@]}"; do
-  IFS='|' read -r tool_key image_base cmd <<< "${tool_info}"
+for version in "${TF_VERSIONS[@]}"; do
+  label="hashicorp/terraform:${version}"
+  validate_version "${label}" "terraform" "tf" &
+  pids+=($!)
+  labels+=("${label}")
+done
 
-  if [ "${tool_key}" = "tf" ]; then
-    versions_ref=("${TF_VERSIONS[@]}")
-  else
-    versions_ref=("${OT_VERSIONS[@]}")
-  fi
-
-  for version in "${versions_ref[@]}"; do
-    # Init images include :latest; validation images use the specific version
-    label="${image_base%:*}:${version}"
-    validate_version "${label}" "${cmd}" "${tool_key}" &
-    pids+=($!)
-    labels+=("${label}")
-  done
+for version in "${OT_VERSIONS[@]}"; do
+  label="ghcr.io/opentofu/opentofu:${version}"
+  validate_version "${label}" "tofu" "tofu" &
+  pids+=($!)
+  labels+=("${label}")
 done
 
 # Wait for all containers and collect results
