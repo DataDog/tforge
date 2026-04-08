@@ -69,10 +69,6 @@ func main() {
 		Type:        "string",
 		Description: "Deployment environment",
 		Default:     "production",
-		Validation: &config.VariableValidation{
-			Condition:    "length(var.environment) > 0",
-			ErrorMessage: "Environment must not be empty.",
-		},
 	})
 
 	stack.AddVariable(config.Variable{

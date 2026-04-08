@@ -62,11 +62,7 @@
     "environment": {
       "type": "string",
       "description": "Deployment environment",
-      "default": "production",
-      "validation": {
-        "condition": "length(var.environment) > 0",
-        "error_message": "Environment must not be empty."
-      }
+      "default": "production"
     }
   },
   "output": {
