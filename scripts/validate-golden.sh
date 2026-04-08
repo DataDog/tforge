@@ -11,6 +11,11 @@
 
 set -euo pipefail
 
+if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
+  echo "SKIP: Docker not available, skipping golden file validation"
+  exit 0
+fi
+
 # Read versions from env (space-separated) or use defaults
 IFS=' ' read -ra TF_VERSIONS <<< "${TERRAFORM_VERSIONS:-1.5 1.9 latest}"
 IFS=' ' read -ra OT_VERSIONS <<< "${TOFU_VERSIONS:-1.8 latest}"

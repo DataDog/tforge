@@ -64,7 +64,7 @@ validate-golden:
 
 # Run full CI validation locally (pre-commit).
 # Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.
-validate: lint coverage-check snapshot-tests
+validate: lint coverage-check snapshot-tests validate-golden
 
 # Clean build artifacts
 clean:
