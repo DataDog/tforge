@@ -84,6 +84,53 @@ func newTestProviderSchema() *provider.ProviderSchema {
 							},
 							Optional: true,
 						},
+						"nested_set_attr": {
+							NestedType: &provider.NestedType{
+								Attributes: map[string]*provider.Attribute{
+									"key": {
+										Type:     json.RawMessage(`"string"`),
+										Required: true,
+									},
+									"value": {
+										Type:     json.RawMessage(`"string"`),
+										Optional: true,
+									},
+								},
+								NestingMode: "set",
+							},
+							Optional: true,
+						},
+						"nested_map_attr": {
+							NestedType: &provider.NestedType{
+								Attributes: map[string]*provider.Attribute{
+									"setting": {
+										Type:     json.RawMessage(`"string"`),
+										Required: true,
+									},
+								},
+								NestingMode: "map",
+							},
+							Optional: true,
+						},
+						"nested_unknown_mode": {
+							NestedType: &provider.NestedType{
+								Attributes: map[string]*provider.Attribute{
+									"x": {
+										Type:     json.RawMessage(`"string"`),
+										Optional: true,
+									},
+								},
+								NestingMode: "unknown_mode",
+							},
+							Optional: true,
+						},
+						"nested_empty_attrs": {
+							NestedType: &provider.NestedType{
+								Attributes:  map[string]*provider.Attribute{},
+								NestingMode: "single",
+							},
+							Optional: true,
+						},
 					},
 					BlockTypes: map[string]*provider.NestedBlock{
 						"config_block": {
@@ -112,6 +159,59 @@ func newTestProviderSchema() *provider.ProviderSchema {
 			"example_other": {
 				Block: &provider.BlockType{
 					Description: "Another resource",
+				},
+			},
+			"example_deep": {
+				Block: &provider.BlockType{
+					Description: "A deeply nested resource",
+					Attributes: map[string]*provider.Attribute{
+						"name": {
+							Type:     json.RawMessage(`"string"`),
+							Required: true,
+						},
+					},
+					BlockTypes: map[string]*provider.NestedBlock{
+						"level_one": {
+							Block: &provider.BlockType{
+								Description: "First level block",
+								Attributes: map[string]*provider.Attribute{
+									"l1_attr": {
+										Type:     json.RawMessage(`"string"`),
+										Optional: true,
+									},
+								},
+								BlockTypes: map[string]*provider.NestedBlock{
+									"level_two": {
+										Block: &provider.BlockType{
+											Description: "Second level block",
+											Attributes: map[string]*provider.Attribute{
+												"l2_attr": {
+													Type:     json.RawMessage(`"number"`),
+													Optional: true,
+												},
+											},
+											BlockTypes: map[string]*provider.NestedBlock{
+												"level_three": {
+													Block: &provider.BlockType{
+														Description: "Third level block",
+														Attributes: map[string]*provider.Attribute{
+															"l3_attr": {
+																Type:     json.RawMessage(`"bool"`),
+																Required: true,
+															},
+														},
+													},
+													NestingMode: "single",
+												},
+											},
+										},
+										NestingMode: "list",
+									},
+								},
+							},
+							NestingMode: "list",
+						},
+					},
 				},
 			},
 		},
@@ -221,14 +321,17 @@ func TestDataSourceNotFound(t *testing.T) {
 func TestResources(t *testing.T) {
 	ps := Wrap(newTestProviderSchema())
 	resources := ps.Resources()
-	if len(resources) != 2 {
-		t.Fatalf("expected 2 resources, got %d", len(resources))
+	if len(resources) != 3 {
+		t.Fatalf("expected 3 resources, got %d", len(resources))
 	}
-	if resources[0].Name() != "example_other" {
-		t.Errorf("expected first resource %q, got %q", "example_other", resources[0].Name())
+	if resources[0].Name() != "example_deep" {
+		t.Errorf("expected first resource %q, got %q", "example_deep", resources[0].Name())
 	}
-	if resources[1].Name() != "example_thing" {
-		t.Errorf("expected second resource %q, got %q", "example_thing", resources[1].Name())
+	if resources[1].Name() != "example_other" {
+		t.Errorf("expected second resource %q, got %q", "example_other", resources[1].Name())
+	}
+	if resources[2].Name() != "example_thing" {
+		t.Errorf("expected third resource %q, got %q", "example_thing", resources[2].Name())
 	}
 }
 
@@ -642,5 +745,179 @@ func TestDataSourceNilBlock(t *testing.T) {
 	}
 	if ds.Block() != nil {
 		t.Error("nil raw should return nil block")
+	}
+}
+
+func TestNestedTypeSetAttribute(t *testing.T) {
+	ps := Wrap(newTestProviderSchema())
+	block := ps.Resource("example_thing").Block()
+
+	attr := block.Attribute("nested_set_attr")
+	if attr == nil {
+		t.Fatal("nested_set_attr not found")
+	}
+	if !attr.HasNestedType() {
+		t.Error("expected HasNestedType to be true")
+	}
+	if got := attr.Type(); got != "set(object)" {
+		t.Errorf("expected type %q, got %q", "set(object)", got)
+	}
+	innerAttrs := attr.NestedAttributes()
+	if len(innerAttrs) != 2 {
+		t.Fatalf("expected 2 nested attributes, got %d", len(innerAttrs))
+	}
+	// Sorted by name: key, value
+	if innerAttrs[0].Name() != "key" {
+		t.Errorf("expected first nested attr %q, got %q", "key", innerAttrs[0].Name())
+	}
+	if innerAttrs[1].Name() != "value" {
+		t.Errorf("expected second nested attr %q, got %q", "value", innerAttrs[1].Name())
+	}
+}
+
+func TestNestedTypeMapAttribute(t *testing.T) {
+	ps := Wrap(newTestProviderSchema())
+	block := ps.Resource("example_thing").Block()
+
+	attr := block.Attribute("nested_map_attr")
+	if attr == nil {
+		t.Fatal("nested_map_attr not found")
+	}
+	if !attr.HasNestedType() {
+		t.Error("expected HasNestedType to be true")
+	}
+	if got := attr.Type(); got != "map(object)" {
+		t.Errorf("expected type %q, got %q", "map(object)", got)
+	}
+	innerAttrs := attr.NestedAttributes()
+	if len(innerAttrs) != 1 {
+		t.Fatalf("expected 1 nested attribute, got %d", len(innerAttrs))
+	}
+	if innerAttrs[0].Name() != "setting" {
+		t.Errorf("expected nested attr %q, got %q", "setting", innerAttrs[0].Name())
+	}
+}
+
+func TestNestedTypeUnknownMode(t *testing.T) {
+	ps := Wrap(newTestProviderSchema())
+	block := ps.Resource("example_thing").Block()
+
+	attr := block.Attribute("nested_unknown_mode")
+	if attr == nil {
+		t.Fatal("nested_unknown_mode not found")
+	}
+	if !attr.HasNestedType() {
+		t.Error("expected HasNestedType to be true")
+	}
+	// Unknown nesting mode falls back to "object"
+	if got := attr.Type(); got != "object" {
+		t.Errorf("expected type %q for unknown nesting mode, got %q", "object", got)
+	}
+}
+
+func TestNestedTypeEmptyAttributes(t *testing.T) {
+	ps := Wrap(newTestProviderSchema())
+	block := ps.Resource("example_thing").Block()
+
+	attr := block.Attribute("nested_empty_attrs")
+	if attr == nil {
+		t.Fatal("nested_empty_attrs not found")
+	}
+	if !attr.HasNestedType() {
+		t.Error("expected HasNestedType to be true")
+	}
+	innerAttrs := attr.NestedAttributes()
+	if innerAttrs == nil {
+		t.Fatal("expected non-nil slice for empty nested attributes")
+	}
+	if len(innerAttrs) != 0 {
+		t.Errorf("expected 0 nested attributes, got %d", len(innerAttrs))
+	}
+}
+
+func TestDeeplyNestedBlocks(t *testing.T) {
+	ps := Wrap(newTestProviderSchema())
+	r := ps.Resource("example_deep")
+	if r == nil {
+		t.Fatal("example_deep resource not found")
+	}
+	block := r.Block()
+	if block == nil {
+		t.Fatal("Block() returned nil")
+	}
+
+	// Verify top-level attribute
+	nameAttr := block.Attribute("name")
+	if nameAttr == nil {
+		t.Fatal("name attribute not found at top level")
+	}
+	if got := nameAttr.Type(); got != "string" {
+		t.Errorf("expected type %q, got %q", "string", got)
+	}
+
+	// Level 1
+	l1 := block.NestedBlock("level_one")
+	if l1 == nil {
+		t.Fatal("level_one nested block not found")
+	}
+	if l1.NestingMode() != "list" {
+		t.Errorf("expected nesting mode %q, got %q", "list", l1.NestingMode())
+	}
+	if l1.Description() != "First level block" {
+		t.Errorf("expected description %q, got %q", "First level block", l1.Description())
+	}
+	l1Block := l1.Block()
+	if l1Block == nil {
+		t.Fatal("level_one Block() returned nil")
+	}
+	l1Attr := l1Block.Attribute("l1_attr")
+	if l1Attr == nil {
+		t.Fatal("l1_attr not found at level 1")
+	}
+
+	// Level 2
+	l2 := l1Block.NestedBlock("level_two")
+	if l2 == nil {
+		t.Fatal("level_two nested block not found")
+	}
+	if l2.NestingMode() != "list" {
+		t.Errorf("expected nesting mode %q, got %q", "list", l2.NestingMode())
+	}
+	l2Block := l2.Block()
+	if l2Block == nil {
+		t.Fatal("level_two Block() returned nil")
+	}
+	l2Attr := l2Block.Attribute("l2_attr")
+	if l2Attr == nil {
+		t.Fatal("l2_attr not found at level 2")
+	}
+	if got := l2Attr.Type(); got != "number" {
+		t.Errorf("expected type %q at level 2, got %q", "number", got)
+	}
+
+	// Level 3
+	l3 := l2Block.NestedBlock("level_three")
+	if l3 == nil {
+		t.Fatal("level_three nested block not found")
+	}
+	if l3.NestingMode() != "single" {
+		t.Errorf("expected nesting mode %q, got %q", "single", l3.NestingMode())
+	}
+	if l3.Description() != "Third level block" {
+		t.Errorf("expected description %q, got %q", "Third level block", l3.Description())
+	}
+	l3Block := l3.Block()
+	if l3Block == nil {
+		t.Fatal("level_three Block() returned nil")
+	}
+	l3Attr := l3Block.Attribute("l3_attr")
+	if l3Attr == nil {
+		t.Fatal("l3_attr not found at level 3")
+	}
+	if got := l3Attr.Type(); got != "bool" {
+		t.Errorf("expected type %q at level 3, got %q", "bool", got)
+	}
+	if !l3Attr.Required() {
+		t.Error("expected l3_attr to be required")
 	}
 }
