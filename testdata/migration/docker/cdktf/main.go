@@ -40,7 +40,7 @@ func NewExampleCdktfGoDockerStack(scope constructs.Construct, id string) cdktf.T
 	})
 
 	container.NewContainer(stack, jsii.String("nginxContainer"), &container.ContainerConfig{
-		Image: dockerImage.Latest(),
+		Image: dockerImage.ImageId(),
 		Name:  jsii.String("tutorial"),
 		Ports: &[]*container.ContainerPorts{{
 			Internal: jsii.Number(80), External: jsii.Number(8000),

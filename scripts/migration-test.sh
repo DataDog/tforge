@@ -117,10 +117,41 @@ for example_dir in "${MIGRATION_DIR}"/*/; do
     continue
   fi
 
-  # Step 4: Diff tforge output against CDKTF expected output
-  if ! diff -u "${expected_file}" "${tmpdir}/main.tf.json" > /dev/null 2>&1; then
-    echo "FAIL: ${name} (output mismatch)"
-    diff -u "${expected_file}" "${tmpdir}/main.tf.json" || true
+  # Step 4: Normalize both outputs and diff
+  # CDKTF adds "//" metadata blocks and "backend" config that tforge doesn't produce.
+  # Strip these for semantic comparison of provider/resource/data blocks.
+  normalize_tf_json() {
+    python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+# Remove top-level CDKTF metadata
+d.pop('//', None)
+# Remove backend from terraform block
+tf = d.get('terraform', {})
+tf.pop('backend', None)
+# Remove per-resource '//' metadata and cdktf-specific false values
+def clean(obj):
+    if isinstance(obj, dict):
+        return {k: clean(v) for k, v in obj.items() if k != '//' and v is not False}
+    if isinstance(obj, list):
+        return [clean(i) for i in obj]
+    return obj
+d = clean(d)
+# Remove empty blocks
+if not d.get('terraform'): d.pop('terraform', None)
+json.dump(d, sys.stdout, indent=2, sort_keys=True)
+print()
+" < "$1"
+  }
+
+  cdktf_normalized="${tmpdir}/cdktf_normalized.json"
+  tforge_normalized="${tmpdir}/tforge_normalized.json"
+  normalize_tf_json "${expected_file}" > "${cdktf_normalized}"
+  normalize_tf_json "${tmpdir}/main.tf.json" > "${tforge_normalized}"
+
+  if ! diff -u "${cdktf_normalized}" "${tforge_normalized}" > /dev/null 2>&1; then
+    echo "FAIL: ${name} (output mismatch after normalization)"
+    diff -u "${cdktf_normalized}" "${tforge_normalized}" || true
     failed=$((failed + 1))
     rm -rf "${tmpdir}"
     continue

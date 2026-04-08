@@ -16,11 +16,9 @@ func NewExampleCdktfGoDockerStack() *config.Stack {
 	stack := config.NewStack("ExampleCdktfGoDockerStack")
 
 	stack.AddProvider(config.Provider{
-		Name:   "docker",
-		Source: "kreuzwerker/docker",
-		// Note: CDKTF used ~> 2.11 but that version lacks darwin_arm64 support.
-		// Using 3.x which is compatible and available on all platforms.
-		Version: "~> 3.0",
+		Name:    "docker",
+		Source:  "kreuzwerker/docker",
+		Version: "3.0.2",
 	})
 
 	nginxImage := config.Resource{Type: "docker_image", Name: "nginxImage"}
