@@ -45,6 +45,11 @@ func run(args []string, stdout, stderr io.Writer) int {
 			fmt.Fprintln(stderr, err)
 			return 1
 		}
+	case "migrate":
+		if err := runMigrate(args[2:], stdout, stderr); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
 	case "version", "-v", "--version":
 		fmt.Fprintf(stdout, "tforge version %s\n", version)
 	case "help", "-h", "--help":
@@ -66,6 +71,7 @@ Usage:
 Commands:
   generate    Generate Go SDK code from a provider schema
   schema      Fetch and save a provider schema as JSON
+  migrate     Migrate a CDKTF Go project to tforge
   version     Print version information
   help        Show this help message
 
