@@ -75,9 +75,13 @@ func main() {
 	}
 
 	if err := stack.AddResource(config.Resource{
-		Type:    "aws_s3_bucket",
-		Name:    "logs",
-		ForEach: `toset(["access-logs", "app-logs", "audit-logs"])`,
+		Type: "aws_s3_bucket",
+		Name: "logs",
+		ForEach: map[string]string{
+			"access-logs": "access-logs",
+			"app-logs":    "app-logs",
+			"audit-logs":  "audit-logs",
+		},
 		Config: map[string]any{
 			"bucket": "${each.key}-${random_pet.name.id}",
 			"tags": map[string]string{

@@ -20,65 +20,44 @@ fi
 IFS=' ' read -ra TF_VERSIONS <<< "${TERRAFORM_VERSIONS:-1.5 1.9 latest}"
 IFS=' ' read -ra OT_VERSIONS <<< "${TOFU_VERSIONS:-1.8 latest}"
 
-failed=0
-
 validate() {
   local image="$1"
   local version="$2"
   local cmd="$3"
-  local golden_dir="$4"
+  local golden_file="$4"
   local label="${image}:${version}"
 
-  local tmpdir
-  tmpdir=$(mktemp -d)
-
-  cp "${golden_dir}main.tf.golden.json" "${tmpdir}/main.tf.json"
-
-  echo "--- ${cmd} init (${label}) ---"
-  if ! docker run --rm --entrypoint sh -v "${tmpdir}:/work" -w /work "${label}" \
-    -c "${cmd} init -backend=false"; then
-    echo "FAIL: ${golden_dir} init failed with ${label}"
-    rm -rf "${tmpdir}"
-    return 1
-  fi
-
   echo "--- ${cmd} validate (${label}) ---"
-  if ! docker run --rm --entrypoint sh -v "${tmpdir}:/work" -w /work "${label}" \
-    -c "${cmd} validate"; then
-    echo "FAIL: ${golden_dir} validate failed with ${label}"
-    rm -rf "${tmpdir}"
+
+  # Use docker cp approach to avoid tmpdir mount issues
+  local container_id
+  container_id=$(docker create --entrypoint sh "${label}" -c "${cmd} init -backend=false 2>&1 && ${cmd} validate")
+  docker cp "${golden_file}" "${container_id}:/main.tf.json"
+  if ! docker start -a "${container_id}"; then
+    echo "FAIL: ${golden_file} with ${label}"
+    docker rm "${container_id}" > /dev/null 2>&1
     return 1
   fi
-
-  rm -rf "${tmpdir}"
+  docker rm "${container_id}" > /dev/null 2>&1
 }
 
 for dir in testdata/golden/*/; do
-  if [ ! -f "${dir}main.tf.golden.json" ]; then
+  golden="${dir}main.tf.golden.json"
+  if [ ! -f "${golden}" ]; then
     echo "SKIP: ${dir} (no golden file)"
     continue
   fi
 
   for version in "${TF_VERSIONS[@]}"; do
     echo "=== Validating ${dir} with terraform:${version} ==="
-    if ! validate "hashicorp/terraform" "${version}" "terraform" "${dir}"; then
-      failed=1
-    fi
+    validate "hashicorp/terraform" "${version}" "terraform" "${golden}"
   done
 
   for version in "${OT_VERSIONS[@]}"; do
     echo "=== Validating ${dir} with opentofu:${version} ==="
-    if ! validate "ghcr.io/opentofu/opentofu" "${version}" "tofu" "${dir}"; then
-      failed=1
-    fi
+    validate "ghcr.io/opentofu/opentofu" "${version}" "tofu" "${golden}"
   done
 done
-
-if [ "${failed}" -ne 0 ]; then
-  echo ""
-  echo "Some validations failed."
-  exit 1
-fi
 
 echo ""
 echo "All golden files validated against ${#TF_VERSIONS[@]} Terraform + ${#OT_VERSIONS[@]} OpenTofu versions."
