@@ -15,13 +15,18 @@
 #   ./scripts/validate-golden.sh                      # uses default versions
 #   TERRAFORM_VERSIONS="1.9 latest" ./scripts/validate-golden.sh  # override
 #
-# Requires: docker
+# Requires: docker, jq
 
 set -euo pipefail
 
 if ! command -v docker &> /dev/null || ! docker info &> /dev/null; then
   echo "SKIP: Docker not available, skipping golden file validation"
   exit 0
+fi
+
+if ! command -v jq &> /dev/null; then
+  echo "ERROR: jq is required but not found"
+  exit 1
 fi
 
 # Read versions from env (space-separated) or use defaults
@@ -54,19 +59,15 @@ TMPDIR_BASE=$(mktemp -d)
 cleanup() { rm -rf "${TMPDIR_BASE}"; }
 trap cleanup EXIT
 
-# Superset config: union of all providers across all golden files.
+# Build superset config: merge required_providers from all golden files.
+# This ensures the init cache covers every provider any golden file needs.
 SUPERSET="${TMPDIR_BASE}/superset.tf.json"
-cat > "${SUPERSET}" << 'EOF'
-{
-  "terraform": {
-    "required_providers": {
-      "aws": { "source": "hashicorp/aws", "version": "~> 5.0" },
-      "random": { "source": "hashicorp/random", "version": "~> 3.5" },
-      "datadog": { "source": "datadog/datadog", "version": "~> 3.39" }
-    }
-  }
-}
-EOF
+merged_providers='{}'
+for gf in "${golden_files[@]}"; do
+  providers=$(jq -c '.terraform.required_providers // {}' "${gf}")
+  merged_providers=$(printf '%s\n%s' "${merged_providers}" "${providers}" | jq -s '.[0] * .[1]')
+done
+jq -n --argjson p "${merged_providers}" '{"terraform":{"required_providers":$p}}' > "${SUPERSET}"
 
 # init_providers <image> <cmd> <volume>
 # Runs init in a container and saves .terraform/providers + lock file to a volume.
@@ -90,30 +91,58 @@ init_providers() {
     return 1
   fi
   docker rm "${container_id}" > /dev/null 2>&1 || true
+
+  # Store the superset hash so we can detect when providers change
+  docker run --rm -v "${vol}:/cache" alpine \
+    sh -c "echo '${SUPERSET_HASH}' > /cache/superset.hash"
 }
 
-# Ensure both init caches are populated.
-# On warm runs, both volumes already have providers — fast no-op check.
+# Hash of the superset config — used to invalidate caches when providers change.
+# Use sha256sum (Linux) or shasum (macOS).
+if command -v sha256sum &> /dev/null; then
+  SUPERSET_HASH=$(sha256sum "${SUPERSET}" | cut -d' ' -f1)
+else
+  SUPERSET_HASH=$(shasum -a 256 "${SUPERSET}" | cut -d' ' -f1)
+fi
+
+# Check if a volume's cache matches the current superset config.
+cache_is_valid() {
+  local vol="$1"
+  local stored_hash
+  stored_hash=$(docker run --rm -v "${vol}:/c" alpine \
+    cat /c/superset.hash 2>/dev/null) || return 1
+  [ "${stored_hash}" = "${SUPERSET_HASH}" ]
+}
+
+# Wipe and recreate a volume when cache is stale.
+reset_volume() {
+  local vol="$1"
+  docker volume rm "${vol}" > /dev/null 2>&1 || true
+  docker volume create "${vol}" > /dev/null 2>&1 || true
+}
+
+# Ensure both init caches are populated and up-to-date.
+# On warm runs with unchanged providers, this is a fast no-op.
 ensure_init_caches() {
   local need_tf=true need_tofu=true
 
-  if docker run --rm -v "${TF_INIT_VOL}:/c" alpine \
-    sh -c 'test -f /c/lock.hcl' 2>/dev/null; then
+  if cache_is_valid "${TF_INIT_VOL}"; then
     need_tf=false
   fi
 
-  if docker run --rm -v "${TOFU_INIT_VOL}:/c" alpine \
-    sh -c 'test -f /c/lock.hcl' 2>/dev/null; then
+  if cache_is_valid "${TOFU_INIT_VOL}"; then
     need_tofu=false
   fi
 
   if [ "${need_tf}" = true ]; then
-    echo "Initializing Terraform provider cache (first run)..."
+    echo "Initializing Terraform provider cache..."
+    reset_volume "${TF_INIT_VOL}"
     init_providers "hashicorp/terraform:latest" "terraform" "${TF_INIT_VOL}"
   fi
 
   if [ "${need_tofu}" = true ]; then
-    echo "Initializing OpenTofu provider cache (first run)..."
+    echo "Initializing OpenTofu provider cache..."
+    reset_volume "${TOFU_INIT_VOL}"
     init_providers "ghcr.io/opentofu/opentofu:latest" "tofu" "${TOFU_INIT_VOL}"
   fi
 }
