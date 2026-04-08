@@ -64,8 +64,8 @@
       "description": "Deployment environment",
       "default": "production",
       "validation": {
-        "condition": "contains([\"dev\", \"staging\", \"production\"], var.environment)",
-        "error_message": "Environment must be dev, staging, or production."
+        "condition": "length(var.environment) > 0",
+        "error_message": "Environment must not be empty."
       }
     }
   },

@@ -70,8 +70,8 @@ func main() {
 		Description: "Deployment environment",
 		Default:     "production",
 		Validation: &config.VariableValidation{
-			Condition:    "contains([\"dev\", \"staging\", \"production\"], var.environment)",
-			ErrorMessage: "Environment must be dev, staging, or production.",
+			Condition:    "length(var.environment) > 0",
+			ErrorMessage: "Environment must not be empty.",
 		},
 	})
 
