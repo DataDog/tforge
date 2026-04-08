@@ -42,7 +42,7 @@ make fmt                # check formatting
 
 ## Code Style
 
-- Go 1.22+, standard library preferred
+- Go 1.23+, standard library preferred
 - Single external dependency (minimal footprint)
 - `gofmt` for formatting, `golangci-lint` for linting
 - Check error returns (errcheck is enabled)
