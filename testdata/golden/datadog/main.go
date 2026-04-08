@@ -37,6 +37,7 @@ func main() {
 		NoDataTimeframe:   10,
 		RenotifyInterval:  60,
 		RequireFullWindow: true,
+		Locked:            true, // removed in v4 — validates that ~> 3.39 constraint matters
 	}
 
 	if err := stack.AddResource(config.Resource{

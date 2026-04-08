@@ -17,6 +17,7 @@
   "resource": {
     "datadog_monitor": {
       "cpu_alert": {
+        "locked": true,
         "message": "CPU usage is above threshold. @slack-alerts",
         "monitor_thresholds": [
           {

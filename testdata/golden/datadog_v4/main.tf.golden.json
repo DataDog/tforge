@@ -1,0 +1,59 @@
+{
+  "terraform": {
+    "required_providers": {
+      "datadog": {
+        "source": "datadog/datadog",
+        "version": "~> 4.4"
+      }
+    }
+  },
+  "provider": {
+    "datadog": [
+      {
+        "api_url": "https://api.datadoghq.eu/"
+      }
+    ]
+  },
+  "resource": {
+    "datadog_compliance_custom_framework": {
+      "security": {
+        "handle": "tforge-security",
+        "icon_url": "https://example.com/icon.png",
+        "name": "tforge Security Framework",
+        "requirements": [
+          {
+            "controls": [
+              {
+                "name": "mfa-required",
+                "rules_id": [
+                  "rule-001",
+                  "rule-002"
+                ]
+              },
+              {
+                "name": "least-privilege",
+                "rules_id": [
+                  "rule-003"
+                ]
+              }
+            ],
+            "name": "access-control"
+          },
+          {
+            "controls": [
+              {
+                "name": "encryption-at-rest",
+                "rules_id": [
+                  "rule-010"
+                ]
+              }
+            ],
+            "name": "data-protection"
+          }
+        ],
+        "version": "1.0.0"
+      }
+    }
+  }
+}
+
