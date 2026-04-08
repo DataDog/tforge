@@ -14,6 +14,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 
 	"tforge/generate"
@@ -23,29 +24,41 @@ import (
 const version = "0.1.0"
 
 func main() {
-	if len(os.Args) < 2 {
-		printUsage()
-		os.Exit(1)
-	}
-
-	switch os.Args[1] {
-	case "generate", "gen":
-		generateCmd(os.Args[2:])
-	case "schema":
-		schemaCmd(os.Args[2:])
-	case "version", "-v", "--version":
-		fmt.Printf("tforge version %s\n", version)
-	case "help", "-h", "--help":
-		printUsage()
-	default:
-		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", os.Args[1])
-		printUsage()
-		os.Exit(1)
-	}
+	os.Exit(run(os.Args, os.Stdout, os.Stderr))
 }
 
-func printUsage() {
-	fmt.Println(`tforge - Generate Go SDK from Terraform provider schemas
+// run is the testable entry point. Returns exit code.
+func run(args []string, stdout, stderr io.Writer) int {
+	if len(args) < 2 {
+		printUsage(stdout)
+		return 1
+	}
+
+	switch args[1] {
+	case "generate", "gen":
+		if err := runGenerate(args[2:], stderr); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+	case "schema":
+		if err := runSchema(args[2:], stdout, stderr); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+	case "version", "-v", "--version":
+		fmt.Fprintf(stdout, "tforge version %s\n", version)
+	case "help", "-h", "--help":
+		printUsage(stdout)
+	default:
+		fmt.Fprintf(stderr, "Unknown command: %s\n", args[1])
+		printUsage(stderr)
+		return 1
+	}
+	return 0
+}
+
+func printUsage(w io.Writer) {
+	fmt.Fprintln(w, `tforge - Generate Go SDK from Terraform provider schemas
 
 Usage:
   tforge <command> [options]
@@ -67,8 +80,9 @@ Examples:
   tforge generate -schema ./schema.json -package mypackage -output ./generated`)
 }
 
-func generateCmd(args []string) {
-	fs := flag.NewFlagSet("generate", flag.ExitOnError)
+func runGenerate(args []string, stderr io.Writer) error {
+	fs := flag.NewFlagSet("generate", flag.ContinueOnError)
+	fs.SetOutput(stderr)
 
 	providerSource := fs.String("provider", "", "Provider source (namespace/name), e.g., datadog/datadog")
 	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0")
@@ -76,13 +90,13 @@ func generateCmd(args []string) {
 	outputDir := fs.String("output", "./generated", "Output directory for generated code")
 	packageName := fs.String("package", "", "Go package name (defaults to provider name)")
 	fs.Usage = func() {
-		fmt.Println(`Usage: tforge generate [options]
+		fmt.Fprintln(stderr, `Usage: tforge generate [options]
 
 Generate Go SDK code from a Terraform provider schema.
 
 Options:`)
 		fs.PrintDefaults()
-		fmt.Println(`
+		fmt.Fprintln(stderr, `
 Examples:
   # Generate from provider registry
   tforge generate -provider datadog/datadog -version 3.39.0 -package datadog -output ./datadog
@@ -95,40 +109,33 @@ Examples:
 	}
 
 	if err := fs.Parse(args); err != nil {
-		os.Exit(1)
+		return err
 	}
 
-	// Validate inputs
 	if *schemaFile == "" && (*providerSource == "" || *providerVersion == "") {
-		fmt.Fprintln(os.Stderr, "Error: either -schema or both -provider and -version are required")
 		fs.Usage()
-		os.Exit(1)
+		return fmt.Errorf("either -schema or both -provider and -version are required")
 	}
 
 	var schema *provider.Schema
 	var err error
 
 	if *schemaFile != "" {
-		// Load from file
-		fmt.Fprintf(os.Stderr, "Loading schema from %s...\n", *schemaFile)
+		fmt.Fprintf(stderr, "Loading schema from %s...\n", *schemaFile)
 		schema, err = provider.LoadSchemaFromFile(*schemaFile)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error loading schema: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("loading schema: %w", err)
 		}
 	} else {
-		// Fetch from registry
-		fmt.Fprintf(os.Stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
+		fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
 		schema, err = provider.FetchSchema(*providerSource, *providerVersion)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error fetching schema: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("fetching schema: %w", err)
 		}
 		schema.Source, _ = provider.ParseSource(*providerSource)
 		schema.Version = *providerVersion
 	}
 
-	// Determine package name
 	pkg := *packageName
 	if pkg == "" {
 		if schema.Source.Name != "" {
@@ -138,39 +145,39 @@ Examples:
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "Generating Go code to %s (package %s)...\n", *outputDir, pkg)
+	fmt.Fprintf(stderr, "Generating Go code to %s (package %s)...\n", *outputDir, pkg)
 
-	// Generate code
 	gen := generate.New(generate.Config{
 		OutputDir:   *outputDir,
 		PackageName: pkg,
 	})
 
 	if err := gen.Generate(schema); err != nil {
-		fmt.Fprintf(os.Stderr, "Error generating code: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("generating code: %w", err)
 	}
 
-	fmt.Fprintf(os.Stderr, "Generated %d resources and %d data sources\n",
+	fmt.Fprintf(stderr, "Generated %d resources and %d data sources\n",
 		len(schema.Provider.ResourceSchemas),
 		len(schema.Provider.DataSourceSchemas))
+	return nil
 }
 
-func schemaCmd(args []string) {
-	fs := flag.NewFlagSet("schema", flag.ExitOnError)
+func runSchema(args []string, stdout, stderr io.Writer) error {
+	fs := flag.NewFlagSet("schema", flag.ContinueOnError)
+	fs.SetOutput(stderr)
 
 	providerSource := fs.String("provider", "", "Provider source (namespace/name), e.g., datadog/datadog")
 	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0")
 	outputFile := fs.String("output", "", "Output file path (default: stdout)")
 
 	fs.Usage = func() {
-		fmt.Println(`Usage: tforge schema [options]
+		fmt.Fprintln(stderr, `Usage: tforge schema [options]
 
 Fetch a provider schema and output as JSON.
 
 Options:`)
 		fs.PrintDefaults()
-		fmt.Println(`
+		fmt.Fprintln(stderr, `
 Examples:
   # Save schema to file
   tforge schema -provider datadog/datadog -version 3.39.0 -output datadog-schema.json
@@ -180,36 +187,33 @@ Examples:
 	}
 
 	if err := fs.Parse(args); err != nil {
-		os.Exit(1)
+		return err
 	}
 
 	if *providerSource == "" || *providerVersion == "" {
-		fmt.Fprintln(os.Stderr, "Error: -provider and -version are required")
 		fs.Usage()
-		os.Exit(1)
+		return fmt.Errorf("-provider and -version are required")
 	}
 
-	fmt.Fprintf(os.Stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
+	fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
 
 	schema, err := provider.FetchSchema(*providerSource, *providerVersion)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error fetching schema: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("fetching schema: %w", err)
 	}
 
 	data, err := json.MarshalIndent(schema.Provider, "", "  ")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error encoding schema: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("encoding schema: %w", err)
 	}
 
 	if *outputFile != "" {
 		if err := os.WriteFile(*outputFile, data, 0644); err != nil {
-			fmt.Fprintf(os.Stderr, "Error writing file: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("writing file: %w", err)
 		}
-		fmt.Fprintf(os.Stderr, "Schema saved to %s\n", *outputFile)
+		fmt.Fprintf(stderr, "Schema saved to %s\n", *outputFile)
 	} else {
-		fmt.Println(string(data))
+		fmt.Fprintln(stdout, string(data))
 	}
+	return nil
 }
