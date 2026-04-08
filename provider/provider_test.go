@@ -1,11 +1,14 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestParseSourceValid(t *testing.T) {
@@ -430,5 +433,86 @@ func TestLoadSchemaFromJSON_EmptyObject(t *testing.T) {
 	}
 	if schema.Provider == nil {
 		t.Fatal("Provider is nil")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Context cancellation tests
+// ---------------------------------------------------------------------------
+
+// skipIfNoCLI skips the test if neither tofu nor terraform is in PATH.
+func skipIfNoCLI(t *testing.T) {
+	t.Helper()
+	if _, err := exec.LookPath("tofu"); err == nil {
+		return
+	}
+	if _, err := exec.LookPath("terraform"); err == nil {
+		return
+	}
+	t.Skip("skipping: neither tofu nor terraform found in PATH")
+}
+
+func TestFetchSchemaContext_CancelledContext(t *testing.T) {
+	skipIfNoCLI(t)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel() // cancel immediately
+
+	start := time.Now()
+	_, err := FetchSchemaContext(ctx, "hashicorp/null", "3.2.1")
+	elapsed := time.Since(start)
+
+	if err == nil {
+		t.Fatal("expected error for cancelled context, got nil")
+	}
+	// The error should originate from the cancelled context propagating
+	// through exec.CommandContext. It should not hang.
+	if !strings.Contains(err.Error(), "context canceled") && !strings.Contains(err.Error(), "signal: killed") {
+		t.Errorf("expected context cancellation error, got: %v", err)
+	}
+	// Should return quickly (well under 10 seconds), not hang waiting for init.
+	if elapsed > 10*time.Second {
+		t.Errorf("FetchSchemaContext with cancelled context took %v, expected fast return", elapsed)
+	}
+}
+
+func TestFetchSchemaContext_DeadlineExceeded(t *testing.T) {
+	skipIfNoCLI(t)
+
+	// Use a very short timeout so the init command cannot complete.
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
+	defer cancel()
+
+	// Give the timeout a moment to expire before calling, to ensure
+	// the context is already expired when exec.CommandContext runs.
+	time.Sleep(5 * time.Millisecond)
+
+	start := time.Now()
+	_, err := FetchSchemaContext(ctx, "hashicorp/null", "3.2.1")
+	elapsed := time.Since(start)
+
+	if err == nil {
+		t.Fatal("expected error for expired context, got nil")
+	}
+	if !strings.Contains(err.Error(), "context deadline exceeded") && !strings.Contains(err.Error(), "signal: killed") {
+		t.Errorf("expected deadline exceeded error, got: %v", err)
+	}
+	if elapsed > 10*time.Second {
+		t.Errorf("FetchSchemaContext with expired context took %v, expected fast return", elapsed)
+	}
+}
+
+func TestFetchSchemaContext_InvalidSourceWithCancelledContext(t *testing.T) {
+	// Even with a cancelled context, invalid source should fail fast
+	// at the parse stage (before any CLI commands).
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := FetchSchemaContext(ctx, "invalid", "1.0.0")
+	if err == nil {
+		t.Fatal("expected error for invalid source, got nil")
+	}
+	if !strings.Contains(err.Error(), "invalid provider source") {
+		t.Errorf("expected parse error, got: %v", err)
 	}
 }
