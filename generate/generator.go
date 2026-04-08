@@ -153,6 +153,9 @@ func (g *Generator) generateResources() error {
 		if res.Schema != nil && res.Schema.Block != nil {
 			g.generateNestedTypes(f, res.Schema.Block, structName)
 		}
+
+		// Generate typed constructor: NewXxx(stack, name, cfg) error
+		g.generateConstructor(f, structName, res.Name, "AddResource")
 	}
 
 	return g.writeFile(f, "resources_gen.go")
@@ -187,6 +190,9 @@ func (g *Generator) generateDataSources() error {
 		if ds.Schema != nil && ds.Schema.Block != nil {
 			g.generateNestedTypes(f, ds.Schema.Block, structName)
 		}
+
+		// Generate typed constructor: NewXxx(stack, name, cfg) error
+		g.generateConstructor(f, structName, ds.Name, "AddDataSource")
 	}
 
 	return g.writeFile(f, "data_sources_gen.go")
@@ -290,6 +296,45 @@ func (g *Generator) generateNestedTypes(f *jen.File, block *provider.BlockType, 
 			g.generateNestedTypes(f, nb.Block.Block, typeName)
 		}
 	}
+}
+
+// generateConstructor generates a typed constructor function for a resource or data source.
+// Example output: func NewAwsInstance(stack *config.Stack, name string, cfg AwsInstance) error { ... }
+func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, addMethod string) {
+	funcName := "New" + structName
+
+	// Determine the config type name based on whether this is a resource or data source
+	configType := "Resource"
+	if addMethod == "AddDataSource" {
+		configType = "DataSource"
+	}
+
+	f.Commentf("%s creates a %s %s and adds it to the stack.", funcName, tfTypeName, configType)
+	f.Func().Id(funcName).Params(
+		jen.Id("stack").Op("*").Qual("tforge/config", "Stack"),
+		jen.Id("name").String(),
+		jen.Id("cfg").Id(structName),
+	).Error().Block(
+		jen.List(jen.Id("data"), jen.Id("err")).Op(":=").Qual("encoding/json", "Marshal").Call(jen.Id("cfg")),
+		jen.If(jen.Id("err").Op("!=").Nil()).Block(
+			jen.Return(jen.Qual("fmt", "Errorf").Call(jen.Lit("marshaling "+tfTypeName+" config: %w"), jen.Id("err"))),
+		),
+		jen.Var().Id("m").Map(jen.String()).Any(),
+		jen.If(
+			jen.Id("err").Op(":=").Qual("encoding/json", "Unmarshal").Call(jen.Id("data"), jen.Op("&").Id("m")),
+			jen.Id("err").Op("!=").Nil(),
+		).Block(
+			jen.Return(jen.Qual("fmt", "Errorf").Call(jen.Lit("converting "+tfTypeName+" config: %w"), jen.Id("err"))),
+		),
+		jen.Return(jen.Id("stack").Dot(addMethod).Call(
+			jen.Qual("tforge/config", configType).Values(jen.Dict{
+				jen.Id("Type"):   jen.Lit(tfTypeName),
+				jen.Id("Name"):   jen.Id("name"),
+				jen.Id("Config"): jen.Id("m"),
+			}),
+		)),
+	)
+	f.Line()
 }
 
 // jsonTag generates a JSON struct tag, adding omitempty for optional fields.

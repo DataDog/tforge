@@ -10,7 +10,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -33,7 +32,7 @@ func main() {
 		},
 	})
 
-	// Create a Datadog monitor using generated types
+	// Create a Datadog monitor using generated types and constructor
 	monitor := datadog.DatadogMonitor{
 		Name:    "High CPU Usage Alert",
 		Type:    "metric alert",
@@ -52,12 +51,7 @@ func main() {
 		RequireFullWindow: true,
 	}
 
-	// Add to stack
-	if err := stack.AddResource(config.Resource{
-		Type:   "datadog_monitor",
-		Name:   "cpu_alert",
-		Config: structToMap(monitor),
-	}); err != nil {
+	if err := datadog.NewDatadogMonitor(stack, "cpu_alert", monitor); err != nil {
 		log.Fatal(err)
 	}
 
@@ -68,16 +62,4 @@ func main() {
 	}
 
 	fmt.Println(string(data))
-}
-
-func structToMap(v any) map[string]any {
-	data, err := json.Marshal(v)
-	if err != nil {
-		panic(fmt.Sprintf("structToMap: marshal failed: %v", err))
-	}
-	var result map[string]any
-	if err := json.Unmarshal(data, &result); err != nil {
-		panic(fmt.Sprintf("structToMap: unmarshal failed: %v", err))
-	}
-	return result
 }

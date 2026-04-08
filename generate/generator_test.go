@@ -3,6 +3,7 @@ package generate
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -16,8 +17,9 @@ import (
 func compileGeneratedCode(t *testing.T, dir, pkgName string) {
 	t.Helper()
 
-	// Write a go.mod so the directory is a valid Go module
-	goMod := "module testcompile\n\ngo 1.22\n"
+	// Write a go.mod that can resolve tforge/config (used by generated constructors)
+	tforgeRoot, _ := filepath.Abs(filepath.Join("..", "."))
+	goMod := fmt.Sprintf("module testcompile\n\ngo 1.23\n\nrequire tforge v0.0.0\nreplace tforge => %s\n", tforgeRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("writing go.mod: %v", err)
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 
@@ -54,11 +53,7 @@ func main() {
 		},
 	}
 
-	if err := stack.AddResource(config.Resource{
-		Type:   "datadog_compliance_custom_framework",
-		Name:   "security",
-		Config: structToMap(framework),
-	}); err != nil {
+	if err := NewDatadogComplianceCustomFramework(stack, "security", framework); err != nil {
 		log.Fatal(err)
 	}
 
@@ -68,16 +63,4 @@ func main() {
 	}
 
 	fmt.Println(string(data))
-}
-
-func structToMap(v any) map[string]any {
-	data, err := json.Marshal(v)
-	if err != nil {
-		panic(fmt.Sprintf("structToMap: marshal failed: %v", err))
-	}
-	var result map[string]any
-	if err := json.Unmarshal(data, &result); err != nil {
-		panic(fmt.Sprintf("structToMap: unmarshal failed: %v", err))
-	}
-	return result
 }
