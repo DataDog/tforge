@@ -53,7 +53,7 @@ install:
 update-snapshots: install
 	go generate ./testdata/golden/...
 	@for dir in testdata/golden/*/; do \
-		go run ./$$dir > $${dir}main.tf.golden.json; \
+		go run ./$$dir > $${dir}main.tf.golden.json || exit 1; \
 	done
 
 # Verify golden files match generated output (runs go generate with both CLIs)
