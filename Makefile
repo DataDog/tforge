@@ -56,14 +56,14 @@ update-snapshots: install
 		go run ./$$dir > $${dir}main.tf.golden.json; \
 	done
 
-# Verify golden files match generated output (runs with both CLIs)
+# Verify golden files match generated output (runs go generate with both CLIs)
 snapshot-tests: install
 	@for cli in terraform tofu; do \
 		echo "=== Snapshot tests with $$cli ==="; \
-		TFORGE_CLI=$$cli go generate ./testdata/golden/...; \
+		TFORGE_CLI=$$cli go generate ./testdata/golden/... || exit 1; \
 		for dir in testdata/golden/*/; do \
 			echo "Testing $$dir..."; \
-			TFORGE_CLI=$$cli go run ./$$dir | diff - $${dir}main.tf.golden.json || exit 1; \
+			go run ./$$dir | diff - $${dir}main.tf.golden.json || exit 1; \
 		done; \
 	done
 
@@ -78,7 +78,7 @@ clear-golden-cache:
 migration-test: install
 	@for cli in terraform tofu; do \
 		echo "=== Migration tests with $$cli ==="; \
-		TFORGE_CLI=$$cli ./scripts/migration-test.sh; \
+		TFORGE_CLI=$$cli ./scripts/migration-test.sh || exit 1; \
 	done
 
 # Run full CI validation locally (pre-commit).
