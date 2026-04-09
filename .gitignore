@@ -21,3 +21,6 @@ terraform.tfstate*
 # OS
 .DS_Store
 
+# Claude Code
+.claude/worktrees/
+

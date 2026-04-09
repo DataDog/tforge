@@ -6,6 +6,7 @@ import (
 
 	"tforge/config"
 	"tforge/render"
+	"tforge/testdata/golden/datadog_v4/datadog"
 )
 
 func main() {
@@ -22,15 +23,15 @@ func main() {
 
 	// datadog_compliance_custom_framework is a v4-only resource
 	// (not available in datadog provider 3.x).
-	framework := DatadogComplianceCustomFramework{
+	framework := datadog.ComplianceCustomFramework{
 		Handle:  "tforge-security",
 		Name:    "tforge Security Framework",
 		Version: "1.0.0",
 		IconURL: "https://example.com/icon.png",
-		Requirements: []*DatadogComplianceCustomFrameworkRequirements{
+		Requirements: []*datadog.ComplianceCustomFrameworkRequirements{
 			{
 				Name: "access-control",
-				Controls: []*DatadogComplianceCustomFrameworkRequirementsControls{
+				Controls: []*datadog.ComplianceCustomFrameworkRequirementsControls{
 					{
 						Name:    "mfa-required",
 						RulesID: []string{"rule-001", "rule-002"},
@@ -43,7 +44,7 @@ func main() {
 			},
 			{
 				Name: "data-protection",
-				Controls: []*DatadogComplianceCustomFrameworkRequirementsControls{
+				Controls: []*datadog.ComplianceCustomFrameworkRequirementsControls{
 					{
 						Name:    "encryption-at-rest",
 						RulesID: []string{"rule-010"},
@@ -53,7 +54,7 @@ func main() {
 		},
 	}
 
-	if err := NewDatadogComplianceCustomFramework(stack, "security", framework); err != nil {
+	if err := datadog.NewComplianceCustomFramework(stack, "security", datadog.FromComplianceCustomFramework(framework)); err != nil {
 		log.Fatal(err)
 	}
 

@@ -343,7 +343,7 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 		t.Fatalf("reading resources_gen.go: %v", err)
 	}
 	resourceContent := string(resourceData)
-	for _, want := range []string{"TestThing", "Config", "TestThingConfig"} {
+	for _, want := range []string{"Thing", "Config", "ThingConfig"} {
 		if !contains(resourceContent, want) {
 			t.Errorf("resources_gen.go does not contain %q", want)
 		}
@@ -355,7 +355,7 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 		t.Fatalf("reading data_sources_gen.go: %v", err)
 	}
 	dsContent := string(dsData)
-	for _, want := range []string{"TestDataData", "Filter", "ID"} {
+	for _, want := range []string{"DataData", "Filter", "ID"} {
 		if !contains(dsContent, want) {
 			t.Errorf("data_sources_gen.go does not contain %q", want)
 		}
@@ -423,7 +423,7 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 	resourceContent := string(resourceData)
 
 	// Check that set and map nesting modes produce correct types
-	for _, want := range []string{"TestMulti", "TestMultiTags", "TestMultiMetadata"} {
+	for _, want := range []string{"Multi", "MultiTags", "MultiMetadata"} {
 		if !contains(resourceContent, want) {
 			t.Errorf("resources_gen.go does not contain %q", want)
 		}

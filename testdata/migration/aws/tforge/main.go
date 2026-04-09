@@ -22,22 +22,22 @@ func NewExampleCdktfGoAwsStack() *config.Stack {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
-	must(aws.NewAwsInstance(stack, "Hello", aws.AwsInstance{
-		Ami:          "ami-2757f631",
-		InstanceType: "t2.micro",
-		Tags:         map[string]string{"environment": "development"},
-	}))
+	must(aws.NewInstance(stack, "Hello",
+		aws.Instance_SetAmi("ami-2757f631"),
+		aws.Instance_SetInstanceType("t2.micro"),
+		aws.Instance_SetTags(map[string]string{"environment": "development"}),
+	))
 
 	// Note: original CDKTF example used terraform-aws-modules/eks/aws module.
 	// tforge does not support modules — using aws_eks_cluster resource instead.
-	must(aws.NewAwsEKSCluster(stack, "EKS", aws.AwsEKSCluster{
-		Name:    "my-eks",
-		Version: "1.17",
-		RoleARN: "arn:aws:iam::012345678910:role/eks-role",
-		VPCConfig: []*aws.AwsEKSClusterVPCConfig{
-			{SubnetIDS: []string{"subnet-a", "subnet-b"}},
-		},
-	}))
+	must(aws.NewEKSCluster(stack, "EKS",
+		aws.EKSCluster_SetName("my-eks"),
+		aws.EKSCluster_SetVersion("1.17"),
+		aws.EKSCluster_SetRoleARN("arn:aws:iam::012345678910:role/eks-role"),
+		aws.EKSCluster_SetVPCConfig(&aws.EKSClusterVPCConfig{
+			SubnetIDS: []string{"subnet-a", "subnet-b"},
+		}),
+	))
 
 	return stack
 }

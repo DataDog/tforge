@@ -28,6 +28,25 @@ go generate ./example/...   # generates example/datadog/resources_gen.go
 
 Run `go generate` before testing examples locally.
 
+**Important:** The `generate.go` file for a given provider must always be in a **separate package** named after the provider, not in `package main`. This keeps generated types in their own namespace and avoids polluting the main package:
+
+```
+example/
+├── main.go                 # package main — imports example/datadog
+└── datadog/
+    └── generate.go         # package datadog — //go:generate tforge generate -package datadog -output .
+
+testdata/golden/datadog/
+├── main.go                 # package main — imports testdata/golden/datadog/datadog
+└── datadog/
+    └── generate.go         # package datadog
+
+testdata/golden/name_collision/
+├── main.go                 # package main — imports testdata/golden/name_collision/aws
+└── aws/
+    └── generate.go         # package aws
+```
+
 ## Development
 
 ```bash

@@ -32,26 +32,22 @@ func main() {
 		},
 	})
 
-	// Create a Datadog monitor using generated types and constructor
-	monitor := datadog.DatadogMonitor{
-		Name:    "High CPU Usage Alert",
-		Type:    "metric alert",
-		Message: "CPU usage is above threshold. @slack-alerts",
-		Query:   "avg(last_5m):avg:system.cpu.user{*} by {host} > 80",
-		Tags:    []string{"env:production", "managed-by:tforge"},
-		MonitorThresholds: []*datadog.DatadogMonitorMonitorThresholds{
-			{
-				Critical: "80",
-				Warning:  "60",
-			},
-		},
-		NotifyNoData:      true,
-		NoDataTimeframe:   10,
-		RenotifyInterval:  60,
-		RequireFullWindow: true,
-	}
-
-	if err := datadog.NewDatadogMonitor(stack, "cpu_alert", monitor); err != nil {
+	// Create a Datadog monitor using functional options
+	if err := datadog.NewMonitor(stack, "cpu_alert",
+		datadog.Monitor_SetName("High CPU Usage Alert"),
+		datadog.Monitor_SetType("metric alert"),
+		datadog.Monitor_SetMessage("CPU usage is above threshold. @slack-alerts"),
+		datadog.Monitor_SetQuery("avg(last_5m):avg:system.cpu.user{*} by {host} > 80"),
+		datadog.Monitor_SetTags([]string{"env:production", "managed-by:tforge"}),
+		datadog.Monitor_SetMonitorThresholds(&datadog.MonitorMonitorThresholds{
+			Critical: "80",
+			Warning:  "60",
+		}),
+		datadog.Monitor_SetNotifyNoData(true),
+		datadog.Monitor_SetNoDataTimeframe(10),
+		datadog.Monitor_SetRenotifyInterval(60),
+		datadog.Monitor_SetRequireFullWindow(true),
+	); err != nil {
 		log.Fatal(err)
 	}
 
