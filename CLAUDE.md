@@ -11,7 +11,6 @@ tforge/
 ├── generate/           # Code generation from provider schemas -> Go SDK
 ├── provider/           # Fetch provider binaries and load schemas
 ├── render/             # Serialize configurations to .tf.json
-├── internal/           # Internal utilities
 ├── example/            # Example usage with Datadog provider (uses go:generate)
 │   └── datadog/        # Generated types (gitignored, created by go generate)
 ├── testdata/           # Test fixtures
@@ -52,8 +51,8 @@ make fmt                # check formatting
 
 - Unit tests alongside source files
 - Integration tests use `//go:build integration` tag (snapshot, migration, golden validation)
-- Snapshot tests in `render/` with golden files (`render/testdata/*.golden.json`)
-- Update snapshots: `go test ./render/ -run TestSnapshot -update`
+- Snapshot tests with golden files (`testdata/golden/*/main.tf.golden.json`)
+- Update snapshots: `make update-snapshots`
 - Example validation: `go test ./example/ -v` (requires `go generate` first)
 - CI enforces 80% coverage threshold (excludes `cmd/` and `example/`)
 
