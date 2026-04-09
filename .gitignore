@@ -1,13 +1,14 @@
 # Generated files
 *_gen.go
 *.tf.json
+# Migration test fixtures (force-tracked)
+!testdata/migration/**/*.tf.json
 
 # Binaries
 /tforge
 
 # Test artifacts
 coverage.out
-*.tf.json
 .terraform/
 .terraform.lock.hcl
 terraform.tfstate*
