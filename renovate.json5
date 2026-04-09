@@ -1,0 +1,39 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  // Wait 30 days after release before proposing updates
+  "minimumReleaseAge": "30 days",
+  "schedule": ["before 6am on monday"],
+  "packageRules": [
+    // Go directive in go.mod: do NOT bump (keep at lowest non-EOL)
+    {
+      "matchManagers": ["gomod"],
+      "matchDepNames": ["go"],
+      "enabled": false
+    },
+    // Go module dependencies: allow minor+patch, block major
+    {
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    // GitHub Actions: allow minor+patch, block major
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    // Group all non-major gomod updates together
+    {
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "go dependencies (non-major)"
+    },
+    // Group all non-major GitHub Actions updates together
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "github-actions (non-major)"
+    }
+  ]
+}
