@@ -44,7 +44,7 @@ func WriteFile(f *jen.File, path string) error {
 // toGoName converts a snake_case Terraform name to PascalCase Go name.
 // If the result would start with a digit (invalid Go identifier), it is
 // prefixed with "X". An empty input returns an empty string.
-func toGoName(tfName string) string {
+func (g *Generator) toGoName(tfName string) string {
 	parts := strings.Split(tfName, "_")
 	var result strings.Builder
 
@@ -52,9 +52,8 @@ func toGoName(tfName string) string {
 		if part == "" {
 			continue
 		}
-		// Handle common abbreviations
 		upper := strings.ToUpper(part)
-		if isCommonAbbreviation(upper) {
+		if g.initialisms[upper] {
 			result.WriteString(upper)
 		} else {
 			result.WriteString(capitalizeFirst(part))
@@ -79,48 +78,30 @@ func capitalizeFirst(s string) string {
 	return string(runes)
 }
 
-// commonAbbreviations is the set of abbreviations that should remain
-// fully uppercased in Go identifiers (e.g. "ID", "API", "URL").
-var commonAbbreviations = map[string]bool{
-	"ID":    true,
-	"IDS":   true,
-	"API":   true,
-	"URL":   true,
-	"URI":   true,
-	"HTTP":  true,
-	"HTTPS": true,
-	"JSON":  true,
-	"XML":   true,
-	"HTML":  true,
-	"CSS":   true,
-	"SQL":   true,
-	"SSH":   true,
-	"TCP":   true,
-	"UDP":   true,
-	"IP":    true,
-	"DNS":   true,
-	"VPC":   true,
-	"ARN":   true,
-	"IAM":   true,
-	"EC2":   true,
-	"ECS":   true,
-	"EKS":   true,
-	"RDS":   true,
-	"S3":    true,
-	"SQS":   true,
-	"SNS":   true,
-	"KMS":   true,
-	"ACL":   true,
-	"TTL":   true,
-	"CPU":   true,
-	"RAM":   true,
-	"OS":    true,
-	"VM":    true,
-}
-
-// isCommonAbbreviation returns true if the string is a common abbreviation.
-func isCommonAbbreviation(s string) bool {
-	return commonAbbreviations[s]
+// DefaultInitialisms is the default set of terms that are kept fully
+// uppercased in generated Go identifiers (e.g. "api_key" → APIKey).
+//
+// The base list is Go's canonical set of initialisms, sourced from the
+// now-archived golang.org/x/lint module. That list was never exported as
+// a reusable API (golang/lint#272 requested it, but the repo was frozen
+// before it happened). Its successor, staticcheck ST1003, expanded the
+// list and made it configurable, but still does not export it as a
+// library. There is no shared Go package for this — every code generator
+// (gqlgen, oapi-codegen, sqlc, etc.) vendors its own copy.
+//
+// On top of the golang.org/x/lint entries we add a small set of terms
+// commonly found in Terraform provider schemas (IDS, VPC, ARN, IAM, …).
+// Users can fully override this list via Config.Initialisms.
+var DefaultInitialisms = []string{
+	// Go canonical initialisms (from golang.org/x/lint, frozen 2021-05)
+	"ACL", "API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID",
+	"HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "LHS", "QPS",
+	"RAM", "RHS", "RPC", "SLA", "SMTP", "SQL", "SSH", "TCP",
+	"TLS", "TTL", "UDP", "UI", "UID", "UUID", "URI", "URL",
+	"UTF8", "VM", "XML", "XMPP", "XSRF", "XSS",
+	// Terraform / cloud-provider terms
+	"ARN", "EC2", "ECS", "EKS", "IAM", "IDS", "KMS",
+	"OS", "RDS", "S3", "SNS", "SQS", "SSL", "VPC",
 }
 
 // cleanDescription cleans a description string for use in Go comments.
