@@ -19,9 +19,10 @@ TFORGE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MIGRATION_DIR="${TFORGE_ROOT}/testdata/migration"
 TFORGE_BIN="${TFORGE_ROOT}/tforge"
 
-# Always rebuild to ensure binary is current
+# Always rebuild and install to ensure binary is current and in PATH
 echo "Building tforge..."
 go build -o "${TFORGE_BIN}" ./cmd/tforge
+export PATH="${TFORGE_ROOT}:${PATH}"
 
 failed=0
 total=0
