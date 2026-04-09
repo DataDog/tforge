@@ -12,7 +12,6 @@ package config
 
 import (
 	"fmt"
-	"sort"
 )
 
 // Stack represents a Terraform configuration stack.
@@ -138,36 +137,6 @@ func (s *Stack) AddOutput(o Output) {
 // SetLocal sets a local value.
 func (s *Stack) SetLocal(name string, value any) {
 	s.Locals[name] = value
-}
-
-// ResourceByAddress returns a resource by its address (type.name).
-func (s *Stack) ResourceByAddress(address string) *Resource {
-	for i := range s.Resources {
-		if s.Resources[i].Address() == address {
-			return &s.Resources[i]
-		}
-	}
-	return nil
-}
-
-// SortedResources returns resources sorted by address.
-func (s *Stack) SortedResources() []Resource {
-	sorted := make([]Resource, len(s.Resources))
-	copy(sorted, s.Resources)
-	sort.Slice(sorted, func(i, j int) bool {
-		return sorted[i].Address() < sorted[j].Address()
-	})
-	return sorted
-}
-
-// SortedDataSources returns data sources sorted by address.
-func (s *Stack) SortedDataSources() []DataSource {
-	sorted := make([]DataSource, len(s.DataSources))
-	copy(sorted, s.DataSources)
-	sort.Slice(sorted, func(i, j int) bool {
-		return sorted[i].Address() < sorted[j].Address()
-	})
-	return sorted
 }
 
 // Backend represents a Terraform backend configuration.
