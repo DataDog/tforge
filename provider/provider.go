@@ -7,7 +7,7 @@
 //
 // Example usage:
 //
-//	schema, err := provider.FetchSchema("datadog/datadog", "3.39.0")
+//	schema, err := provider.FetchSchema(context.Background(), "datadog/datadog", "3.39.0")
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
@@ -130,12 +130,7 @@ type NestedBlock struct {
 
 // FetchSchema fetches a provider schema using tofu CLI.
 // The source should be in the format "namespace/name" (e.g., "datadog/datadog").
-func FetchSchema(source, version string) (*Schema, error) {
-	return FetchSchemaContext(context.Background(), source, version)
-}
-
-// FetchSchemaContext fetches a provider schema with context.
-func FetchSchemaContext(ctx context.Context, source, version string) (*Schema, error) {
+func FetchSchema(ctx context.Context, source, version string) (*Schema, error) {
 	src, err := ParseSource(source)
 	if err != nil {
 		return nil, err

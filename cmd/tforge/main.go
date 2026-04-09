@@ -17,6 +17,8 @@ import (
 	"io"
 	"os"
 
+	"context"
+
 	"tforge/generate"
 	"tforge/provider"
 	"tforge/render"
@@ -136,7 +138,7 @@ Examples:
 		}
 	} else {
 		fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
-		schema, err = provider.FetchSchema(*providerSource, *providerVersion)
+		schema, err = provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
 		if err != nil {
 			return fmt.Errorf("fetching schema: %w", err)
 		}
@@ -205,7 +207,7 @@ Examples:
 
 	fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
 
-	schema, err := provider.FetchSchema(*providerSource, *providerVersion)
+	schema, err := provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
 	if err != nil {
 		return fmt.Errorf("fetching schema: %w", err)
 	}

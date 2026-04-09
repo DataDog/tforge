@@ -452,14 +452,101 @@ func skipIfNoCLI(t *testing.T) {
 	t.Skip("skipping: neither tofu nor terraform found in PATH")
 }
 
-func TestFetchSchemaContext_CancelledContext(t *testing.T) {
+// ---------------------------------------------------------------------------
+// filterEnv tests
+// ---------------------------------------------------------------------------
+
+func TestFilterEnv(t *testing.T) {
+	tests := []struct {
+		name string
+		env  []string
+		keys []string
+		want []string
+	}{
+		{
+			name: "remove single key",
+			env:  []string{"FOO=1", "BAR=2", "BAZ=3"},
+			keys: []string{"BAR"},
+			want: []string{"FOO=1", "BAZ=3"},
+		},
+		{
+			name: "remove multiple keys",
+			env:  []string{"FOO=1", "BAR=2", "BAZ=3"},
+			keys: []string{"FOO", "BAZ"},
+			want: []string{"BAR=2"},
+		},
+		{
+			name: "no matches keeps all",
+			env:  []string{"FOO=1", "BAR=2"},
+			keys: []string{"NOPE"},
+			want: []string{"FOO=1", "BAR=2"},
+		},
+		{
+			name: "empty env",
+			env:  []string{},
+			keys: []string{"FOO"},
+			want: []string{},
+		},
+		{
+			name: "key is prefix of another key",
+			env:  []string{"FOO=1", "FOO_BAR=2"},
+			keys: []string{"FOO"},
+			want: []string{"FOO_BAR=2"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := filterEnv(tt.env, tt.keys...)
+			if len(got) != len(tt.want) {
+				t.Fatalf("filterEnv() returned %d entries, want %d\ngot:  %v\nwant: %v", len(got), len(tt.want), got, tt.want)
+			}
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Errorf("filterEnv()[%d] = %q, want %q", i, got[i], tt.want[i])
+				}
+			}
+		})
+	}
+}
+
+// ---------------------------------------------------------------------------
+// findCLI tests
+// ---------------------------------------------------------------------------
+
+func TestFindCLI_ForcedValid(t *testing.T) {
+	t.Setenv("TFORGE_CLI", "echo")
+	path, err := findCLI()
+	if err != nil {
+		t.Fatalf("findCLI() with TFORGE_CLI=echo returned error: %v", err)
+	}
+	if path == "" {
+		t.Error("findCLI() returned empty path")
+	}
+}
+
+func TestFindCLI_ForcedInvalid(t *testing.T) {
+	t.Setenv("TFORGE_CLI", "nonexistent_binary_xyz")
+	_, err := findCLI()
+	if err == nil {
+		t.Fatal("findCLI() with TFORGE_CLI=nonexistent_binary_xyz expected error, got nil")
+	}
+	if !strings.Contains(err.Error(), "TFORGE_CLI") {
+		t.Errorf("error = %q, want it to mention TFORGE_CLI", err.Error())
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Context cancellation tests
+// ---------------------------------------------------------------------------
+
+func TestFetchSchema_CancelledContext(t *testing.T) {
 	skipIfNoCLI(t)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // cancel immediately
 
 	start := time.Now()
-	_, err := FetchSchemaContext(ctx, "hashicorp/null", "3.2.1")
+	_, err := FetchSchema(ctx, "hashicorp/null", "3.2.1")
 	elapsed := time.Since(start)
 
 	if err == nil {
@@ -472,11 +559,11 @@ func TestFetchSchemaContext_CancelledContext(t *testing.T) {
 	}
 	// Should return quickly (well under 10 seconds), not hang waiting for init.
 	if elapsed > 10*time.Second {
-		t.Errorf("FetchSchemaContext with cancelled context took %v, expected fast return", elapsed)
+		t.Errorf("FetchSchema with cancelled context took %v, expected fast return", elapsed)
 	}
 }
 
-func TestFetchSchemaContext_DeadlineExceeded(t *testing.T) {
+func TestFetchSchema_DeadlineExceeded(t *testing.T) {
 	skipIfNoCLI(t)
 
 	// Use a very short timeout so the init command cannot complete.
@@ -488,7 +575,7 @@ func TestFetchSchemaContext_DeadlineExceeded(t *testing.T) {
 	time.Sleep(5 * time.Millisecond)
 
 	start := time.Now()
-	_, err := FetchSchemaContext(ctx, "hashicorp/null", "3.2.1")
+	_, err := FetchSchema(ctx, "hashicorp/null", "3.2.1")
 	elapsed := time.Since(start)
 
 	if err == nil {
@@ -498,17 +585,17 @@ func TestFetchSchemaContext_DeadlineExceeded(t *testing.T) {
 		t.Errorf("expected deadline exceeded error, got: %v", err)
 	}
 	if elapsed > 10*time.Second {
-		t.Errorf("FetchSchemaContext with expired context took %v, expected fast return", elapsed)
+		t.Errorf("FetchSchema with expired context took %v, expected fast return", elapsed)
 	}
 }
 
-func TestFetchSchemaContext_InvalidSourceWithCancelledContext(t *testing.T) {
+func TestFetchSchema_InvalidSourceWithCancelledContext(t *testing.T) {
 	// Even with a cancelled context, invalid source should fail fast
 	// at the parse stage (before any CLI commands).
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	_, err := FetchSchemaContext(ctx, "invalid", "1.0.0")
+	_, err := FetchSchema(ctx, "invalid", "1.0.0")
 	if err == nil {
 		t.Fatal("expected error for invalid source, got nil")
 	}
