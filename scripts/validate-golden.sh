@@ -63,6 +63,10 @@ TMPDIR_BASE=$(mktemp -d)
 cleanup() { rm -rf "${TMPDIR_BASE}"; }
 trap cleanup EXIT
 
+# Shared host-side plugin cache so provider binaries are downloaded once
+PLUGIN_CACHE_DIR="/tmp/tforge-cache"
+mkdir -p "${PLUGIN_CACHE_DIR}"
+
 # Resolve hash command once (sha256sum on Linux, shasum on macOS)
 if command -v sha256sum &> /dev/null; then
   hash_cmd() { sha256sum | cut -d' ' -f1; }
@@ -120,6 +124,8 @@ init_providers() {
   container_id=$(docker create \
     --entrypoint sh \
     -v "${vol}:/cache" \
+    -v "${PLUGIN_CACHE_DIR}:/plugin-cache" \
+    -e TF_PLUGIN_CACHE_DIR=/plugin-cache \
     "${image}" \
     -c "mkdir /work && cd /work && cp /tmp/config.tf.json main.tf.json && ${cmd} init -backend=false && cp -a .terraform/providers /cache/providers && cp .terraform.lock.hcl /cache/lock.hcl && echo '${config_hash}' > /cache/config.hash")
 
@@ -248,6 +254,8 @@ ${cmd} validate"
   container_id=$(docker create \
     --entrypoint sh \
     "${vol_args[@]}" \
+    -v "${PLUGIN_CACHE_DIR}:/plugin-cache:ro" \
+    -e TF_PLUGIN_CACHE_DIR=/plugin-cache \
     "${label}" \
     -c "${script}")
 

@@ -164,9 +164,16 @@ provider "%s" {}
 		return nil, fmt.Errorf("writing config: %w", err)
 	}
 
+	// Set up provider plugin cache to avoid re-downloading providers
+	cacheDir := "/tmp/tforge-cache"
+	if err := os.MkdirAll(cacheDir, 0755); err != nil {
+		return nil, fmt.Errorf("creating cache dir: %w", err)
+	}
+
 	// Run init
 	initCmd := exec.CommandContext(ctx, cliPath, "init", "-input=false", "-no-color")
 	initCmd.Dir = tmpDir
+	initCmd.Env = append(os.Environ(), "TF_PLUGIN_CACHE_DIR="+cacheDir)
 	initOut, err := initCmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("init failed: %w\n%s", err, initOut)
