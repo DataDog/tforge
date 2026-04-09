@@ -62,6 +62,7 @@ GitHub Actions (`.github/workflows/ci.yml`):
 - **Lint**: gofmt check + golangci-lint
 - **Test**: race detector + coverage with 80% threshold
 - **Snapshot Tests**: golden file comparison
+- **Migration Tests**: CDKTF migration correctness
 
 ## Review Guidelines
 
