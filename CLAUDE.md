@@ -51,6 +51,7 @@ make fmt                # check formatting
 ## Testing
 
 - Unit tests alongside source files
+- Integration tests use `//go:build integration` tag (snapshot, migration, golden validation)
 - Snapshot tests in `render/` with golden files (`render/testdata/*.golden.json`)
 - Update snapshots: `go test ./render/ -run TestSnapshot -update`
 - Example validation: `go test ./example/ -v` (requires `go generate` first)

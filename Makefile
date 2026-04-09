@@ -1,4 +1,4 @@
-.PHONY: fmt lint shellcheck test coverage coverage-check build install clean setup update-snapshots pre-commit snapshot-tests validate-golden clear-golden-cache migration-test
+.PHONY: fmt lint test coverage coverage-check build install clean setup update-snapshots pre-commit snapshot-tests validate-golden clear-golden-cache migration-test
 
 # Terraform/OpenTofu versions to validate golden files against (requires Docker)
 TERRAFORM_VERSIONS = 1.5 1.9 latest
@@ -15,12 +15,8 @@ fmt:
 	@test -z "$$(gofmt -l .)" || (echo "Files need formatting:" && gofmt -l . && exit 1)
 
 # Lint (requires golangci-lint installed locally)
-lint: fmt shellcheck
+lint: fmt
 	golangci-lint run $(LINT_PKGS)
-
-# Lint shell scripts (requires shellcheck)
-shellcheck:
-	shellcheck scripts/*.sh
 
 # Run tests with race detector
 test:
@@ -56,36 +52,27 @@ update-snapshots: install
 		go run ./$$dir > $${dir}main.tf.golden.json || exit 1; \
 	done
 
-# Verify golden files match generated output (runs go generate with both CLIs)
+# Verify golden files match generated output (runs with both CLIs via Go tests)
 snapshot-tests: install
-	@for cli in terraform tofu; do \
-		echo "=== Snapshot tests with $$cli ==="; \
-		TFORGE_CLI=$$cli go generate ./testdata/golden/... || exit 1; \
-		for dir in testdata/golden/*/; do \
-			echo "Testing $$dir..."; \
-			go run ./$$dir | diff - $${dir}main.tf.golden.json || exit 1; \
-		done; \
-	done
+	go test -tags integration -run TestSnapshots -v -count=1 -timeout 10m .
 
 # Validate golden files against multiple Terraform and OpenTofu versions (requires Docker)
 validate-golden:
-	TERRAFORM_VERSIONS="$(TERRAFORM_VERSIONS)" TOFU_VERSIONS="$(TOFU_VERSIONS)" ./scripts/validate-golden.sh
+	TERRAFORM_VERSIONS="$(TERRAFORM_VERSIONS)" TOFU_VERSIONS="$(TOFU_VERSIONS)" \
+		go test -tags integration -run TestValidateGolden -v -count=1 -timeout 15m .
 
 clear-golden-cache:
-	./scripts/validate-golden.sh --clear-cache
+	@docker volume ls --format '{{.Name}}' | grep '^tforge-' | xargs -r docker volume rm 2>/dev/null || true
+	@echo "Provider cache volumes cleared."
 
-# Run migration tests with both CLIs
+# Run migration tests with both CLIs via Go tests
 migration-test: install
-	@for cli in terraform tofu; do \
-		echo "=== Migration tests with $$cli ==="; \
-		TFORGE_CLI=$$cli ./scripts/migration-test.sh || exit 1; \
-	done
+	go test -tags integration -run TestMigration -v -count=1 -timeout 10m .
 
 # Run full CI validation locally (pre-commit).
 # Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.
 pre-commit: lint coverage-check snapshot-tests validate-golden migration-test
 
-# Clean build artifacts
 # One-time setup after cloning (installs pre-commit hook)
 setup:
 	ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit
