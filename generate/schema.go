@@ -126,23 +126,6 @@ func nestedTypeString(nt *provider.NestedType) string {
 	}
 }
 
-// nestedBlockGoType returns the Go type string for a nested block.
-func nestedBlockGoType(nb *provider.NestedBlock, typeName string) string {
-	if nb == nil {
-		return typeName
-	}
-	switch nb.NestingMode {
-	case "single", "group":
-		return fmt.Sprintf("*%s", typeName)
-	case "list", "set":
-		return fmt.Sprintf("[]*%s", typeName)
-	case "map":
-		return fmt.Sprintf("map[string]*%s", typeName)
-	default:
-		return typeName
-	}
-}
-
 // parseTypeJSON parses a cty type from JSON.
 func parseTypeJSON(data json.RawMessage) string {
 	if len(data) == 0 {

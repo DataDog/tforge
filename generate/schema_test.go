@@ -355,32 +355,6 @@ func TestAttributeTypeNested(t *testing.T) {
 	}
 }
 
-func TestNestedBlockGoType(t *testing.T) {
-	tests := []struct {
-		mode     string
-		typeName string
-		want     string
-	}{
-		{"single", "SingleBlock", "*SingleBlock"},
-		{"group", "GroupBlock", "*GroupBlock"},
-		{"list", "ListBlock", "[]*ListBlock"},
-		{"set", "SetBlock", "[]*SetBlock"},
-		{"map", "MapBlock", "map[string]*MapBlock"},
-		{"unknown", "Baz", "Baz"},
-	}
-	for _, tt := range tests {
-		nb := &provider.NestedBlock{NestingMode: tt.mode}
-		if got := nestedBlockGoType(nb, tt.typeName); got != tt.want {
-			t.Errorf("nestedBlockGoType(%q, %q) = %q, want %q", tt.mode, tt.typeName, got, tt.want)
-		}
-	}
-
-	// nil nested block
-	if got := nestedBlockGoType(nil, "Foo"); got != "Foo" {
-		t.Errorf("nestedBlockGoType(nil, %q) = %q, want %q", "Foo", got, "Foo")
-	}
-}
-
 func TestSortedResources(t *testing.T) {
 	ps := newTestProviderSchema()
 	resources := sortedResources(ps.ResourceSchemas)
