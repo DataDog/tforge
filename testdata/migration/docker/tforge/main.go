@@ -18,7 +18,7 @@ func NewExampleCdktfGoDockerStack() *config.Stack {
 	stack.AddProvider(config.Provider{
 		Name:    "docker",
 		Source:  "kreuzwerker/docker",
-		Version: "3.0.2",
+		Version: "4.0.0",
 	})
 
 	nginxImage := config.Resource{Type: "docker_image", Name: "nginxImage"}

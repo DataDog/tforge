@@ -17,12 +17,12 @@ set -euo pipefail
 
 TFORGE_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MIGRATION_DIR="${TFORGE_ROOT}/testdata/migration"
-TFORGE_BIN="${TFORGE_ROOT}/tforge"
+TFORGE_BIN="$(command -v tforge)"
 
-# Always rebuild and install to ensure binary is current and in PATH
-echo "Building tforge..."
-go build -o "${TFORGE_BIN}" ./cmd/tforge
-export PATH="${TFORGE_ROOT}:${PATH}"
+if [ -z "${TFORGE_BIN}" ]; then
+  echo "ERROR: tforge not found in PATH (run 'make install' first)"
+  exit 1
+fi
 
 failed=0
 total=0

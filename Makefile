@@ -1,4 +1,4 @@
-.PHONY: fmt lint shellcheck test coverage coverage-check build clean setup update-snapshots pre-commit snapshot-tests validate-golden clear-golden-cache migration-test
+.PHONY: fmt lint shellcheck test coverage coverage-check build install clean setup update-snapshots pre-commit snapshot-tests validate-golden clear-golden-cache migration-test
 
 # Terraform/OpenTofu versions to validate golden files against (requires Docker)
 TERRAFORM_VERSIONS = 1.5 1.9 latest
@@ -45,21 +45,26 @@ coverage-check: coverage
 build:
 	go build -o tforge ./cmd/tforge
 
-# Regenerate golden files
-update-snapshots:
+# Install the CLI binary to GOPATH/bin
+install:
 	go install ./cmd/tforge
+
+# Regenerate golden files
+update-snapshots: install
 	go generate ./testdata/golden/...
 	@for dir in testdata/golden/*/; do \
 		go run ./$$dir > $${dir}main.tf.golden.json; \
 	done
 
-# Verify golden files match generated output
-snapshot-tests:
-	go install ./cmd/tforge
-	go generate ./testdata/golden/...
-	@for dir in testdata/golden/*/; do \
-		echo "Testing $$dir..."; \
-		go run ./$$dir | diff - $${dir}main.tf.golden.json || exit 1; \
+# Verify golden files match generated output (runs with both CLIs)
+snapshot-tests: install
+	@for cli in terraform tofu; do \
+		echo "=== Snapshot tests with $$cli ==="; \
+		TFORGE_CLI=$$cli go generate ./testdata/golden/...; \
+		for dir in testdata/golden/*/; do \
+			echo "Testing $$dir..."; \
+			TFORGE_CLI=$$cli go run ./$$dir | diff - $${dir}main.tf.golden.json || exit 1; \
+		done; \
 	done
 
 # Validate golden files against multiple Terraform and OpenTofu versions (requires Docker)
@@ -69,8 +74,12 @@ validate-golden:
 clear-golden-cache:
 	./scripts/validate-golden.sh --clear-cache
 
-migration-test:
-	./scripts/migration-test.sh
+# Run migration tests with both CLIs
+migration-test: install
+	@for cli in terraform tofu; do \
+		echo "=== Migration tests with $$cli ==="; \
+		TFORGE_CLI=$$cli ./scripts/migration-test.sh; \
+	done
 
 # Run full CI validation locally (pre-commit).
 # Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.

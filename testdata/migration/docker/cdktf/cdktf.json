@@ -3,7 +3,7 @@
   "app": "go run main.go",
   "codeMakerOutput": "generated",
   "terraformProviders": [
-    "kreuzwerker/docker@~> 3.0.2"
+    "kreuzwerker/docker@~> 4.0.0"
   ],
   "terraformModules": []
 }

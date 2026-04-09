@@ -29,8 +29,17 @@ import (
 // ErrCLINotFound indicates neither tofu nor terraform binary was found.
 var ErrCLINotFound = errors.New("neither tofu nor terraform binary found in PATH")
 
-// findCLI finds the tofu or terraform binary, preferring tofu.
+// findCLI finds the tofu or terraform binary.
+// If TFORGE_CLI is set to "tofu" or "terraform", only that binary is used.
+// Otherwise, tofu is preferred with terraform as fallback.
 func findCLI() (string, error) {
+	if forced := os.Getenv("TFORGE_CLI"); forced != "" {
+		path, err := exec.LookPath(forced)
+		if err != nil {
+			return "", fmt.Errorf("%s not found in PATH (set via TFORGE_CLI)", forced)
+		}
+		return path, nil
+	}
 	// Prefer tofu
 	if path, err := exec.LookPath("tofu"); err == nil {
 		return path, nil
@@ -170,10 +179,15 @@ provider "%s" {}
 		return nil, fmt.Errorf("creating cache dir: %w", err)
 	}
 
+	// Build a clean env: inherit parent env, filter out vars that conflict
+	// with OpenTofu (e.g. OTEL_TRACES_EXPORTER), and add our overrides.
+	cmdEnv := filterEnv(os.Environ(), "OTEL_TRACES_EXPORTER")
+	cmdEnv = append(cmdEnv, "TF_PLUGIN_CACHE_DIR="+cacheDir)
+
 	// Run init
 	initCmd := exec.CommandContext(ctx, cliPath, "init", "-input=false", "-no-color")
 	initCmd.Dir = tmpDir
-	initCmd.Env = append(os.Environ(), "TF_PLUGIN_CACHE_DIR="+cacheDir)
+	initCmd.Env = cmdEnv
 	initOut, err := initCmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("init failed: %w\n%s", err, initOut)
@@ -182,6 +196,7 @@ provider "%s" {}
 	// Run providers schema -json
 	schemaCmd := exec.CommandContext(ctx, cliPath, "providers", "schema", "-json")
 	schemaCmd.Dir = tmpDir
+	schemaCmd.Env = cmdEnv
 	var stdout, stderr bytes.Buffer
 	schemaCmd.Stdout = &stdout
 	schemaCmd.Stderr = &stderr
@@ -275,6 +290,24 @@ func LoadSchemaFromFile(path string) (*Schema, error) {
 		return nil, fmt.Errorf("reading schema file: %w", err)
 	}
 	return LoadSchemaFromJSON(data)
+}
+
+// filterEnv returns a copy of env with entries matching any of the given keys removed.
+func filterEnv(env []string, keys ...string) []string {
+	out := make([]string, 0, len(env))
+	for _, e := range env {
+		skip := false
+		for _, k := range keys {
+			if strings.HasPrefix(e, k+"=") {
+				skip = true
+				break
+			}
+		}
+		if !skip {
+			out = append(out, e)
+		}
+	}
+	return out
 }
 
 // LoadSchemaFromJSON parses a provider schema from JSON bytes.
