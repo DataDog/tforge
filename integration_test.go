@@ -261,7 +261,7 @@ func TestSnapshots(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
-// TestValidateGolden — validate golden files against multiple TF/OpenTofu
+// TestTerraformValidate — validate golden files against multiple TF/OpenTofu
 // versions via Docker (replaces validate-golden.sh)
 // ---------------------------------------------------------------------------
 
@@ -279,7 +279,7 @@ type providerGroup struct {
 	files      []string
 }
 
-func TestValidateGolden(t *testing.T) {
+func TestTerraformValidate(t *testing.T) {
 	requireDocker(t)
 
 	root := tforgeRoot(t)

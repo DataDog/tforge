@@ -59,7 +59,7 @@ snapshot-tests: install
 # Validate golden files against multiple Terraform and OpenTofu versions (requires Docker)
 validate-golden:
 	TERRAFORM_VERSIONS="$(TERRAFORM_VERSIONS)" TOFU_VERSIONS="$(TOFU_VERSIONS)" \
-		go test -tags integration -run TestValidateGolden -v -count=1 -timeout 15m .
+		go test -tags integration -run TestTerraformValidate -v -count=1 -timeout 15m .
 
 clear-golden-cache:
 	@docker volume ls --format '{{.Name}}' | grep '^tforge-' | xargs -r docker volume rm 2>/dev/null || true
