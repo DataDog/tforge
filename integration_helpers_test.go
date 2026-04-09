@@ -4,6 +4,7 @@ package tforge_test
 
 import (
 	"encoding/json"
+	"flag"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -11,6 +12,8 @@ import (
 	"strings"
 	"testing"
 )
+
+var update = flag.Bool("update", false, "update golden files")
 
 // requireCLI fails the test immediately if the given CLI binary is not found in PATH.
 func requireCLI(t *testing.T, name string) {

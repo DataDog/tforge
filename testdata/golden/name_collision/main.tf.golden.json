@@ -1,0 +1,45 @@
+{
+  "//": {
+    "metadata": {
+      "stackName": "name-collision-golden",
+      "tool": "tforge",
+      "version": "dev"
+    }
+  },
+  "terraform": {
+    "required_providers": {
+      "aws": {
+        "source": "hashicorp/aws",
+        "version": "~> 5.100"
+      }
+    }
+  },
+  "provider": {
+    "aws": [
+      {
+        "region": "us-east-1"
+      }
+    ]
+  },
+  "resource": {
+    "aws_s3_bucket": {
+      "logs": {
+        "bucket": "my-app-logs"
+      },
+      "main": {
+        "bucket": "my-app-bucket",
+        "tags": {
+          "Environment": "production"
+        }
+      }
+    },
+    "aws_s3_bucket_logging": {
+      "example": {
+        "bucket": "${aws_s3_bucket.main.id}",
+        "target_bucket": "${aws_s3_bucket.logs.id}",
+        "target_prefix": "access-logs/"
+      }
+    }
+  }
+}
+

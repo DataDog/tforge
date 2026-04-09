@@ -245,6 +245,13 @@ func TestSnapshots(t *testing.T) {
 						t.Fatalf("go run failed: %v\n%s", err, stderr)
 					}
 
+					if *update {
+						if err := os.WriteFile(goldenFile, actual, 0644); err != nil {
+							t.Fatalf("updating golden file: %v", err)
+						}
+						return
+					}
+
 					golden, err := os.ReadFile(goldenFile)
 					if err != nil {
 						t.Fatalf("reading golden file: %v", err)

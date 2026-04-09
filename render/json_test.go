@@ -353,6 +353,132 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 	}
 }
 
+func TestToJSON_MultipleResourcesSameType(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{"ami": "ami-web"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "api",
+		Config: map[string]any{"ami": "ami-api"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+
+	instances := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)
+
+	web := instances["web"].(map[string]any)
+	if web["ami"] != "ami-web" {
+		t.Errorf("expected web ami 'ami-web', got %v", web["ami"])
+	}
+
+	api := instances["api"].(map[string]any)
+	if api["ami"] != "ami-api" {
+		t.Errorf("expected api ami 'ami-api', got %v", api["ami"])
+	}
+}
+
+func TestToJSON_MultipleResourceTypes(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{"ami": "ami-123"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_vpc",
+		Name:   "main",
+		Config: map[string]any{"cidr_block": "10.0.0.0/16"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_subnet",
+		Name:   "public",
+		Config: map[string]any{"cidr_block": "10.0.1.0/24"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+
+	resources := obj["resource"].(map[string]any)
+	if _, ok := resources["aws_instance"]; !ok {
+		t.Error("missing aws_instance resource type")
+	}
+	if _, ok := resources["aws_vpc"]; !ok {
+		t.Error("missing aws_vpc resource type")
+	}
+	if _, ok := resources["aws_subnet"]; !ok {
+		t.Error("missing aws_subnet resource type")
+	}
+}
+
+func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddDataSource(config.DataSource{
+		Type:   "aws_ami",
+		Name:   "ubuntu",
+		Config: map[string]any{"most_recent": true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := stack.AddDataSource(config.DataSource{
+		Type:   "aws_ami",
+		Name:   "amazon_linux",
+		Config: map[string]any{"most_recent": false},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+
+	amis := obj["data"].(map[string]any)["aws_ami"].(map[string]any)
+
+	ubuntu := amis["ubuntu"].(map[string]any)
+	if ubuntu["most_recent"] != true {
+		t.Errorf("expected ubuntu most_recent true, got %v", ubuntu["most_recent"])
+	}
+
+	amazonLinux := amis["amazon_linux"].(map[string]any)
+	if amazonLinux["most_recent"] != false {
+		t.Errorf("expected amazon_linux most_recent false, got %v", amazonLinux["most_recent"])
+	}
+}
+
 func TestToJSON_DataSource(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddDataSource(config.DataSource{
@@ -375,6 +501,113 @@ func TestToJSON_DataSource(t *testing.T) {
 	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
 	if ds["most_recent"] != true {
 		t.Errorf("expected most_recent true, got %v", ds["most_recent"])
+	}
+}
+
+func TestToJSON_DataSourceProvider(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddDataSource(config.DataSource{
+		Type:     "aws_ami",
+		Name:     "latest",
+		Config:   map[string]any{"most_recent": true},
+		Provider: "aws.west",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
+	if ds["provider"] != "aws.west" {
+		t.Errorf("expected provider aws.west, got %v", ds["provider"])
+	}
+}
+
+func TestToJSON_DataSourceDependsOn(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddDataSource(config.DataSource{
+		Type:      "aws_ami",
+		Name:      "latest",
+		Config:    map[string]any{},
+		DependsOn: []string{"aws_vpc.main"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
+	deps := ds["depends_on"].([]any)
+	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
+		t.Errorf("unexpected depends_on: %v", deps)
+	}
+}
+
+func TestToJSON_DataSourceCount(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddDataSource(config.DataSource{
+		Type:   "aws_ami",
+		Name:   "latest",
+		Config: map[string]any{},
+		Count:  3,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
+	// JSON numbers unmarshal as float64
+	if ds["count"] != float64(3) {
+		t.Errorf("expected count 3, got %v", ds["count"])
+	}
+}
+
+func TestToJSON_DataSourceForEach(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddDataSource(config.DataSource{
+		Type:    "aws_ami",
+		Name:    "latest",
+		Config:  map[string]any{},
+		ForEach: map[string]any{"a": "1", "b": "2"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
+	forEach := ds["for_each"].(map[string]any)
+	if forEach["a"] != "1" {
+		t.Errorf("unexpected for_each: %v", forEach)
 	}
 }
 

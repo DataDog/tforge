@@ -48,9 +48,7 @@ install:
 # Regenerate golden files
 update-snapshots: install
 	go generate ./testdata/golden/...
-	@for dir in testdata/golden/*/; do \
-		go run ./$$dir > $${dir}main.tf.golden.json || exit 1; \
-	done
+	go test -tags integration -run TestSnapshots -update -count=1 -timeout 10m .
 
 # Verify golden files match generated output (runs with both CLIs via Go tests)
 snapshot-tests: install
