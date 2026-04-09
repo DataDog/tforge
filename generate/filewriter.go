@@ -29,8 +29,7 @@ func WriteFile(f *jen.File, path string) error {
 	// Format the code
 	formatted, err := format.Source(buf.Bytes())
 	if err != nil {
-		// Write unformatted if formatting fails (for debugging)
-		formatted = buf.Bytes()
+		return fmt.Errorf("formatting generated code: %w", err)
 	}
 
 	// Write to file
