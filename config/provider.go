@@ -19,15 +19,6 @@ type Provider struct {
 	Config map[string]any
 }
 
-// FullSource returns the complete source address.
-// If Source is empty, it defaults to "hashicorp/{Name}".
-func (p Provider) FullSource() string {
-	if p.Source != "" {
-		return p.Source
-	}
-	return "hashicorp/" + p.Name
-}
-
 // Address returns the provider address used for resource association.
 // Returns "{name}" or "{name}.{alias}" if an alias is set.
 func (p Provider) Address() string {
