@@ -1120,3 +1120,158 @@ func TestToJSON_ProvisionerConnection(t *testing.T) {
 		t.Errorf("expected private_key, got %v", conn["private_key"])
 	}
 }
+
+func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{"ami": "ami-123"},
+		Connection: &config.Connection{
+			Type: "ssh",
+			Host: "1.2.3.4",
+			Extra: map[string]any{
+				"type": "winrm",
+				"host": "evil.example.com",
+			},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	conn := res["connection"].(map[string]any)
+	if conn["type"] != "ssh" {
+		t.Errorf("expected known field type=ssh to take precedence, got %v", conn["type"])
+	}
+	if conn["host"] != "1.2.3.4" {
+		t.Errorf("expected known field host=1.2.3.4 to take precedence, got %v", conn["host"])
+	}
+}
+
+func TestConnectionJSON_NilExtra(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{"ami": "ami-123"},
+		Connection: &config.Connection{
+			Type: "ssh",
+			Host: "1.2.3.4",
+			User: "admin",
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	conn := res["connection"].(map[string]any)
+	if conn["type"] != "ssh" {
+		t.Errorf("expected type ssh, got %v", conn["type"])
+	}
+	if conn["host"] != "1.2.3.4" {
+		t.Errorf("expected host 1.2.3.4, got %v", conn["host"])
+	}
+	if conn["user"] != "admin" {
+		t.Errorf("expected user admin, got %v", conn["user"])
+	}
+}
+
+func TestConnectionJSON_EmptyExtra(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{"ami": "ami-123"},
+		Connection: &config.Connection{
+			Type:  "ssh",
+			Host:  "1.2.3.4",
+			Extra: map[string]any{},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	conn := res["connection"].(map[string]any)
+	if conn["type"] != "ssh" {
+		t.Errorf("expected type ssh, got %v", conn["type"])
+	}
+	if conn["host"] != "1.2.3.4" {
+		t.Errorf("expected host 1.2.3.4, got %v", conn["host"])
+	}
+}
+
+func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{"ami": "ami-123"},
+		Connection: &config.Connection{
+			Type: "ssh",
+			Host: "1.2.3.4",
+			User: "deploy",
+			Extra: map[string]any{
+				"bastion_host": "10.0.0.1",
+				"bastion_user": "bastion",
+			},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	conn := res["connection"].(map[string]any)
+	if conn["type"] != "ssh" {
+		t.Errorf("expected type ssh, got %v", conn["type"])
+	}
+	if conn["host"] != "1.2.3.4" {
+		t.Errorf("expected host 1.2.3.4, got %v", conn["host"])
+	}
+	if conn["user"] != "deploy" {
+		t.Errorf("expected user deploy, got %v", conn["user"])
+	}
+	if conn["bastion_host"] != "10.0.0.1" {
+		t.Errorf("expected bastion_host 10.0.0.1, got %v", conn["bastion_host"])
+	}
+	if conn["bastion_user"] != "bastion" {
+		t.Errorf("expected bastion_user bastion, got %v", conn["bastion_user"])
+	}
+}
