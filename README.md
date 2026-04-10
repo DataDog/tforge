@@ -58,15 +58,25 @@ make build
 
 ### 2. Generate provider bindings
 
-```bash
-# Generate Go SDK for the Datadog provider
-tforge generate -provider datadog/datadog -version 3.39.0 -output ./generated/datadog -package datadog
+Create a sub-package for each provider with a `go:generate` directive. The provider package **must be separate from `package main`** to keep generated types in their own namespace:
+
+```
+my-project/
+├── main.go              # package main — imports ./datadog
+└── datadog/
+    └── generate.go      # package datadog — go:generate directive
 ```
 
-Or use `go generate` in your code:
-
 ```go
-//go:generate tforge generate -provider datadog/datadog -version 3.39.0 -output ./generated/datadog -package datadog
+// datadog/generate.go
+//go:generate tforge generate -provider datadog/datadog -version 3.39.0 -package datadog -output .
+package datadog
+```
+
+Then generate the bindings:
+
+```bash
+go generate ./...
 ```
 
 ### 3. Define your infrastructure
@@ -79,7 +89,7 @@ import (
 
     "tforge/config"
     "tforge/render"
-    "your-project/generated/datadog"
+    "your-project/datadog"
 )
 
 func main() {
@@ -114,6 +124,17 @@ func main() {
 tofu init && tofu plan
 ```
 
+## Migrating from CDKTF
+
+If you have an existing CDKTF Go project, tforge can automate the scaffolding:
+
+```bash
+tforge migrate              # converts cdktf.json to go:generate directives
+tforge migrate -dry-run     # preview changes without applying
+```
+
+See the full [Migration Guide](docs/migration-guide.md) for step-by-step instructions and before/after examples.
+
 ## CLI Usage
 
 ```bash
@@ -122,6 +143,9 @@ tforge generate -provider <namespace/name> -version <version> [flags]
 
 # Fetch and save a provider schema
 tforge schema -provider <namespace/name> -version <version> [-output schema.json]
+
+# Migrate a CDKTF project to tforge
+tforge migrate [-dir .] [-dry-run]
 
 # Show version
 tforge -v
