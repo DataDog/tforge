@@ -86,31 +86,31 @@ func (d DataSource) Ref(attr string) string {
 // Lifecycle contains resource lifecycle customizations.
 type Lifecycle struct {
 	// CreateBeforeDestroy creates replacement before destroying original.
-	CreateBeforeDestroy bool
+	CreateBeforeDestroy bool `json:"create_before_destroy,omitempty"`
 
 	// PreventDestroy prevents resource destruction.
-	PreventDestroy bool
+	PreventDestroy bool `json:"prevent_destroy,omitempty"`
 
 	// IgnoreChanges lists attributes to ignore during updates.
-	IgnoreChanges []string
+	IgnoreChanges []string `json:"ignore_changes,omitempty"`
 
 	// ReplaceTriggeredBy lists references that trigger replacement.
-	ReplaceTriggeredBy []string
+	ReplaceTriggeredBy []string `json:"replace_triggered_by,omitempty"`
 
 	// Precondition defines conditions that must be true.
-	Precondition *Condition
+	Precondition *Condition `json:"precondition,omitempty"`
 
 	// Postcondition defines conditions that must be true after apply.
-	Postcondition *Condition
+	Postcondition *Condition `json:"postcondition,omitempty"`
 }
 
 // Condition represents a lifecycle condition.
 type Condition struct {
 	// Condition is the condition expression.
-	Condition string
+	Condition string `json:"condition"`
 
 	// ErrorMessage is shown when the condition fails.
-	ErrorMessage string
+	ErrorMessage string `json:"error_message"`
 }
 
 // Connection configures how provisioners connect to the resource.
@@ -160,8 +160,8 @@ type Provisioner struct {
 
 // Timeouts configures operation timeouts for a resource.
 type Timeouts struct {
-	Create string
-	Read   string
-	Update string
-	Delete string
+	Create string `json:"create,omitempty"`
+	Read   string `json:"read,omitempty"`
+	Update string `json:"update,omitempty"`
+	Delete string `json:"delete,omitempty"`
 }

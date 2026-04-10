@@ -55,10 +55,10 @@ type Variable struct {
 // VariableValidation defines custom validation for a variable.
 type VariableValidation struct {
 	// Condition is the validation expression.
-	Condition string
+	Condition string `json:"condition"`
 
 	// ErrorMessage is shown when validation fails.
-	ErrorMessage string
+	ErrorMessage string `json:"error_message"`
 }
 
 // Output represents a Terraform output value.

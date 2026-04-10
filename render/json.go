@@ -100,51 +100,21 @@ type requiredProviderJSON struct {
 
 // variableJSON represents a Terraform variable definition.
 type variableJSON struct {
-	Type        string          `json:"type,omitempty"`
-	Description string          `json:"description,omitempty"`
-	Default     any             `json:"default,omitempty"`
-	Sensitive   bool            `json:"sensitive,omitempty"`
-	Nullable    bool            `json:"nullable,omitempty"`
-	Validation  *validationJSON `json:"validation,omitempty"`
-}
-
-// validationJSON represents a variable validation block.
-type validationJSON struct {
-	Condition    string `json:"condition"`
-	ErrorMessage string `json:"error_message"`
+	Type        string                     `json:"type,omitempty"`
+	Description string                     `json:"description,omitempty"`
+	Default     any                        `json:"default,omitempty"`
+	Sensitive   bool                       `json:"sensitive,omitempty"`
+	Nullable    bool                       `json:"nullable,omitempty"`
+	Validation  *config.VariableValidation `json:"validation,omitempty"`
 }
 
 // outputJSON represents a Terraform output definition.
 type outputJSON struct {
-	Value        any            `json:"value"`
-	Description  string         `json:"description,omitempty"`
-	Sensitive    bool           `json:"sensitive,omitempty"`
-	DependsOn    []string       `json:"depends_on,omitempty"`
-	Precondition *conditionJSON `json:"precondition,omitempty"`
-}
-
-// conditionJSON represents a precondition or postcondition block.
-type conditionJSON struct {
-	Condition    string `json:"condition"`
-	ErrorMessage string `json:"error_message"`
-}
-
-// lifecycleJSON represents a resource lifecycle block.
-type lifecycleJSON struct {
-	CreateBeforeDestroy bool           `json:"create_before_destroy,omitempty"`
-	PreventDestroy      bool           `json:"prevent_destroy,omitempty"`
-	IgnoreChanges       []string       `json:"ignore_changes,omitempty"`
-	ReplaceTriggeredBy  []string       `json:"replace_triggered_by,omitempty"`
-	Precondition        *conditionJSON `json:"precondition,omitempty"`
-	Postcondition       *conditionJSON `json:"postcondition,omitempty"`
-}
-
-// timeoutsJSON represents a resource timeouts block.
-type timeoutsJSON struct {
-	Create string `json:"create,omitempty"`
-	Read   string `json:"read,omitempty"`
-	Update string `json:"update,omitempty"`
-	Delete string `json:"delete,omitempty"`
+	Value        any               `json:"value"`
+	Description  string            `json:"description,omitempty"`
+	Sensitive    bool              `json:"sensitive,omitempty"`
+	DependsOn    []string          `json:"depends_on,omitempty"`
+	Precondition *config.Condition `json:"precondition,omitempty"`
 }
 
 // buildTerraformJSON converts a Stack to the terraform JSON structure.
@@ -364,10 +334,7 @@ func buildVariables(variables []config.Variable) map[string]variableJSON {
 		}
 
 		if v.Validation != nil {
-			vj.Validation = &validationJSON{
-				Condition:    v.Validation.Condition,
-				ErrorMessage: v.Validation.ErrorMessage,
-			}
+			vj.Validation = v.Validation
 		}
 
 		result[v.Name] = vj
@@ -389,10 +356,7 @@ func buildOutputs(outputs []config.Output) map[string]outputJSON {
 		}
 
 		if o.Precondition != nil {
-			oj.Precondition = &conditionJSON{
-				Condition:    o.Precondition.Condition,
-				ErrorMessage: o.Precondition.ErrorMessage,
-			}
+			oj.Precondition = o.Precondition
 		}
 
 		result[o.Name] = oj
@@ -402,39 +366,13 @@ func buildOutputs(outputs []config.Output) map[string]outputJSON {
 }
 
 // buildLifecycle builds the lifecycle block.
-func buildLifecycle(lc *config.Lifecycle) lifecycleJSON {
-	lcj := lifecycleJSON{
-		CreateBeforeDestroy: lc.CreateBeforeDestroy,
-		PreventDestroy:      lc.PreventDestroy,
-		IgnoreChanges:       lc.IgnoreChanges,
-		ReplaceTriggeredBy:  lc.ReplaceTriggeredBy,
-	}
-
-	if lc.Precondition != nil {
-		lcj.Precondition = &conditionJSON{
-			Condition:    lc.Precondition.Condition,
-			ErrorMessage: lc.Precondition.ErrorMessage,
-		}
-	}
-
-	if lc.Postcondition != nil {
-		lcj.Postcondition = &conditionJSON{
-			Condition:    lc.Postcondition.Condition,
-			ErrorMessage: lc.Postcondition.ErrorMessage,
-		}
-	}
-
-	return lcj
+func buildLifecycle(lc *config.Lifecycle) *config.Lifecycle {
+	return lc
 }
 
 // buildTimeouts builds the timeouts block.
-func buildTimeouts(t *config.Timeouts) timeoutsJSON {
-	return timeoutsJSON{
-		Create: t.Create,
-		Read:   t.Read,
-		Update: t.Update,
-		Delete: t.Delete,
-	}
+func buildTimeouts(t *config.Timeouts) *config.Timeouts {
+	return t
 }
 
 // buildProvisioners builds the provisioner blocks.
@@ -508,7 +446,9 @@ func (c connectionJSON) MarshalJSON() ([]byte, error) {
 	}
 
 	for k, v := range c.Extra {
-		m[k] = v
+		if _, exists := m[k]; !exists {
+			m[k] = v
+		}
 	}
 
 	return json.Marshal(m)
