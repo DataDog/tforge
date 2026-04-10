@@ -252,6 +252,14 @@ func TestParseTypeJSON(t *testing.T) {
 		{"tuple", `["tuple"]`, "tuple"},
 		{"empty", ``, "dynamic"},
 		{"nested list", `["list",["list","string"]]`, "list(list(string))"},
+		{"array with non-string first element", `[123]`, "dynamic"},
+		{"deeply nested map of list", `["map",["list","string"]]`, "map(list(string))"},
+		{"list with no inner type", `["list"]`, "list(dynamic)"},
+		{"set with no inner type", `["set"]`, "set(dynamic)"},
+		{"map with no inner type", `["map"]`, "map(dynamic)"},
+		{"number literal", `42`, "dynamic"},
+		{"boolean literal", `true`, "dynamic"},
+		{"unknown type kind", `["unknown_kind","string"]`, "dynamic"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
