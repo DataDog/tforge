@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"tforge/provider"
@@ -449,16 +450,18 @@ func TestGenerateWithComments(t *testing.T) {
 		Provider: &provider.ProviderSchema{
 			ConfigSchema: &provider.SchemaBlock{
 				Block: &provider.BlockType{
+					Description: "Provider configuration for the test provider",
 					Attributes: map[string]*provider.Attribute{
-						"token": {Type: json.RawMessage(`"string"`), Required: true},
+						"token": {Type: json.RawMessage(`"string"`), Required: true, Description: "Authentication token"},
 					},
 				},
 			},
 			ResourceSchemas: map[string]*provider.SchemaBlock{
 				"test_item": {
 					Block: &provider.BlockType{
+						Description: "Manages a test item resource",
 						Attributes: map[string]*provider.Attribute{
-							"name": {Type: json.RawMessage(`"string"`), Required: true},
+							"name": {Type: json.RawMessage(`"string"`), Required: true, Description: "The name of the item"},
 						},
 					},
 				},
@@ -466,8 +469,9 @@ func TestGenerateWithComments(t *testing.T) {
 			DataSourceSchemas: map[string]*provider.SchemaBlock{
 				"test_lookup": {
 					Block: &provider.BlockType{
+						Description: "Reads a test lookup data source",
 						Attributes: map[string]*provider.Attribute{
-							"query": {Type: json.RawMessage(`"string"`), Optional: true},
+							"query": {Type: json.RawMessage(`"string"`), Optional: true, Description: "Search query string"},
 						},
 					},
 				},
@@ -479,10 +483,36 @@ func TestGenerateWithComments(t *testing.T) {
 		t.Fatalf("Generate failed: %v", err)
 	}
 
-	// Verify all three files exist
-	for _, name := range []string{"provider_gen.go", "resources_gen.go", "data_sources_gen.go"} {
-		if _, err := os.Stat(filepath.Join(tmpDir, name)); err != nil {
-			t.Errorf("%s not found: %v", name, err)
+	// Verify all three files exist and contain expected comments
+	checks := []struct {
+		file     string
+		expected []string
+	}{
+		{
+			file:     "provider_gen.go",
+			expected: []string{"Provider configuration for the test provider"},
+		},
+		{
+			file:     "resources_gen.go",
+			expected: []string{"Manages a test item resource"},
+		},
+		{
+			file:     "data_sources_gen.go",
+			expected: []string{"Reads a test lookup data source"},
+		},
+	}
+
+	for _, tc := range checks {
+		data, err := os.ReadFile(filepath.Join(tmpDir, tc.file))
+		if err != nil {
+			t.Errorf("%s not found: %v", tc.file, err)
+			continue
+		}
+		content := string(data)
+		for _, exp := range tc.expected {
+			if !strings.Contains(content, exp) {
+				t.Errorf("%s: expected comment %q not found in generated output", tc.file, exp)
+			}
 		}
 	}
 
