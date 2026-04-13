@@ -62,7 +62,7 @@ func keys(m map[string]any) []string {
 }
 
 func TestToJSON_NilStack(t *testing.T) {
-	_, err := ToJSON(nil)
+	_, err := ToJSON(nil, "")
 	if err == nil {
 		t.Fatal("expected error for nil stack, got nil")
 	}
@@ -70,7 +70,7 @@ func TestToJSON_NilStack(t *testing.T) {
 
 func TestToJSON_EmptyStack(t *testing.T) {
 	stack := config.NewStack("empty")
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -92,7 +92,7 @@ func TestToJSON_ProviderNoAlias(t *testing.T) {
 		Config: map[string]any{"region": "us-east-1"},
 	})
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestToJSON_ProviderWithAlias(t *testing.T) {
 		Config: map[string]any{"region": "us-west-2"},
 	})
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -156,7 +156,7 @@ func TestToJSON_ProviderWithConfig(t *testing.T) {
 		},
 	})
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -186,7 +186,7 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -202,6 +202,57 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 	}
 }
 
+func TestToJSON_ResourceProvider(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:     "aws_instance",
+		Name:     "web",
+		Config:   map[string]any{"ami": "ami-123"},
+		Provider: "aws.west",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	if res["provider"] != "aws.west" {
+		t.Errorf("expected provider aws.west, got %v", res["provider"])
+	}
+}
+
+func TestToJSON_ResourceProviderAbsentWhenEmpty(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResource(config.Resource{
+		Type:   "aws_instance",
+		Name:   "web",
+		Config: map[string]any{"ami": "ami-123"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	if _, exists := res["provider"]; exists {
+		t.Error("provider key should not be present when Provider is empty")
+	}
+}
+
 func TestToJSON_ResourceDependsOn(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
@@ -213,7 +264,7 @@ func TestToJSON_ResourceDependsOn(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -240,7 +291,7 @@ func TestToJSON_ResourceCount(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -267,7 +318,7 @@ func TestToJSON_ResourceForEach(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -299,7 +350,7 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -336,7 +387,7 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -376,7 +427,7 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -419,7 +470,7 @@ func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -466,7 +517,7 @@ func TestToJSON_MultipleResourceTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -505,7 +556,7 @@ func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -538,7 +589,7 @@ func TestToJSON_DataSource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -564,7 +615,7 @@ func TestToJSON_DataSourceProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -590,7 +641,7 @@ func TestToJSON_DataSourceDependsOn(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -617,7 +668,7 @@ func TestToJSON_DataSourceCount(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -644,7 +695,7 @@ func TestToJSON_DataSourceForEach(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -677,7 +728,7 @@ func TestToJSON_Variables(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -723,7 +774,7 @@ func TestToJSON_Outputs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -753,7 +804,7 @@ func TestToJSON_Locals(t *testing.T) {
 	stack.SetLocal("env", "production")
 	stack.SetLocal("tags", map[string]string{"team": "platform"})
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -783,7 +834,7 @@ func TestToJSON_Backend(t *testing.T) {
 		},
 	})
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -808,7 +859,7 @@ func TestToJSON_RequiredProviders(t *testing.T) {
 		Version: "~> 5.0",
 	})
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -876,7 +927,7 @@ func TestToJSON_FullStack(t *testing.T) {
 
 	stack.SetLocal("name", "my-app")
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -907,7 +958,7 @@ func TestToFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "main.tf.json")
 
-	if err := ToFile(stack, path); err != nil {
+	if err := ToFile(stack, path, ""); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -916,7 +967,7 @@ func TestToFile(t *testing.T) {
 		t.Fatalf("reading file: %v", err)
 	}
 
-	expected, err := ToJSON(stack)
+	expected, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("ToJSON: %v", err)
 	}
@@ -932,7 +983,7 @@ func TestToFile_CreatesDirectory(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "subdir", "nested", "main.tf.json")
 
-	if err := ToFile(stack, path); err != nil {
+	if err := ToFile(stack, path, ""); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -958,7 +1009,7 @@ func TestToJSON_ResourceConnection(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1005,7 +1056,7 @@ func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1043,7 +1094,7 @@ func TestToJSON_LifecyclePrecondition(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1079,7 +1130,7 @@ func TestToJSON_LifecyclePostcondition(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1112,7 +1163,7 @@ func TestToJSON_OutputPrecondition(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1153,7 +1204,7 @@ func TestToJSON_ProvisionerConnection(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1194,7 +1245,7 @@ func TestToJSON_ModuleBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1232,7 +1283,7 @@ func TestToJSON_ModuleWithProviders(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1261,7 +1312,7 @@ func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1299,7 +1350,7 @@ func TestToJSON_ModuleForEach(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1334,7 +1385,7 @@ func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1368,7 +1419,7 @@ func TestConnectionJSON_NilExtra(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1405,7 +1456,7 @@ func TestConnectionJSON_EmptyExtra(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -1443,7 +1494,7 @@ func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := ToJSON(stack)
+	data, err := ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
