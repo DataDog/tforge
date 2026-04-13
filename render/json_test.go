@@ -9,6 +9,58 @@ import (
 	"tforge/config"
 )
 
+// mustMap extracts a map[string]any value from a parent map by key.
+// It calls t.Fatal with a descriptive message instead of panicking on
+// missing keys or type mismatches.
+func mustMap(t *testing.T, m map[string]any, key string) map[string]any {
+	t.Helper()
+	v, ok := m[key]
+	if !ok {
+		t.Fatalf("key %q not found in map (keys: %v)", key, keys(m))
+	}
+	typed, ok := v.(map[string]any)
+	if !ok {
+		t.Fatalf("key %q: expected map[string]any, got %T", key, v)
+	}
+	return typed
+}
+
+// mustSlice extracts a []any value from a parent map by key.
+func mustSlice(t *testing.T, m map[string]any, key string) []any {
+	t.Helper()
+	v, ok := m[key]
+	if !ok {
+		t.Fatalf("key %q not found in map (keys: %v)", key, keys(m))
+	}
+	typed, ok := v.([]any)
+	if !ok {
+		t.Fatalf("key %q: expected []any, got %T", key, v)
+	}
+	return typed
+}
+
+// mustIndexMap extracts a map[string]any from a slice at the given index.
+func mustIndexMap(t *testing.T, s []any, idx int) map[string]any {
+	t.Helper()
+	if idx >= len(s) {
+		t.Fatalf("index %d out of range (len %d)", idx, len(s))
+	}
+	typed, ok := s[idx].(map[string]any)
+	if !ok {
+		t.Fatalf("index %d: expected map[string]any, got %T", idx, s[idx])
+	}
+	return typed
+}
+
+// keys returns the keys of a map for diagnostic messages.
+func keys(m map[string]any) []string {
+	ks := make([]string, 0, len(m))
+	for k := range m {
+		ks = append(ks, k)
+	}
+	return ks
+}
+
 func TestToJSON_NilStack(t *testing.T) {
 	_, err := ToJSON(nil)
 	if err == nil {
@@ -53,15 +105,12 @@ func TestToJSON_ProviderNoAlias(t *testing.T) {
 		t.Fatalf("unmarshal: %v", err)
 	}
 
-	providers, ok := obj["provider"]
-	if !ok {
-		t.Fatal("missing provider key")
-	}
-	awsList := providers.(map[string]any)["aws"].([]any)
+	providers := mustMap(t, obj, "provider")
+	awsList := mustSlice(t, providers, "aws")
 	if len(awsList) != 1 {
 		t.Fatalf("expected 1 aws provider, got %d", len(awsList))
 	}
-	awsCfg := awsList[0].(map[string]any)
+	awsCfg := mustIndexMap(t, awsList, 0)
 	if awsCfg["region"] != "us-east-1" {
 		t.Errorf("expected region us-east-1, got %v", awsCfg["region"])
 	}
@@ -88,8 +137,8 @@ func TestToJSON_ProviderWithAlias(t *testing.T) {
 		t.Fatalf("unmarshal: %v", err)
 	}
 
-	awsList := obj["provider"].(map[string]any)["aws"].([]any)
-	awsCfg := awsList[0].(map[string]any)
+	awsList := mustSlice(t, mustMap(t, obj, "provider"), "aws")
+	awsCfg := mustIndexMap(t, awsList, 0)
 	if awsCfg["alias"] != "west" {
 		t.Errorf("expected alias west, got %v", awsCfg["alias"])
 	}
@@ -117,8 +166,8 @@ func TestToJSON_ProviderWithConfig(t *testing.T) {
 		t.Fatalf("unmarshal: %v", err)
 	}
 
-	awsList := obj["provider"].(map[string]any)["aws"].([]any)
-	awsCfg := awsList[0].(map[string]any)
+	awsList := mustSlice(t, mustMap(t, obj, "provider"), "aws")
+	awsCfg := mustIndexMap(t, awsList, 0)
 	if awsCfg["region"] != "eu-west-1" {
 		t.Errorf("expected region eu-west-1, got %v", awsCfg["region"])
 	}
@@ -147,7 +196,7 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 		t.Fatalf("unmarshal: %v", err)
 	}
 
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	if res["ami"] != "ami-123" {
 		t.Errorf("expected ami ami-123, got %v", res["ami"])
 	}
@@ -173,8 +222,8 @@ func TestToJSON_ResourceDependsOn(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	deps := res["depends_on"].([]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	deps := mustSlice(t, res, "depends_on")
 	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
 		t.Errorf("unexpected depends_on: %v", deps)
 	}
@@ -200,7 +249,7 @@ func TestToJSON_ResourceCount(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	// JSON numbers unmarshal as float64
 	if res["count"] != float64(3) {
 		t.Errorf("expected count 3, got %v", res["count"])
@@ -227,8 +276,8 @@ func TestToJSON_ResourceForEach(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	forEach := res["for_each"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	forEach := mustMap(t, res, "for_each")
 	if forEach["a"] != "1" {
 		t.Errorf("unexpected for_each: %v", forEach)
 	}
@@ -259,15 +308,15 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	lc := res["lifecycle"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	lc := mustMap(t, res, "lifecycle")
 	if lc["create_before_destroy"] != true {
 		t.Error("expected create_before_destroy true")
 	}
 	if lc["prevent_destroy"] != true {
 		t.Error("expected prevent_destroy true")
 	}
-	ignoreChanges := lc["ignore_changes"].([]any)
+	ignoreChanges := mustSlice(t, lc, "ignore_changes")
 	if len(ignoreChanges) != 1 || ignoreChanges[0] != "tags" {
 		t.Errorf("unexpected ignore_changes: %v", ignoreChanges)
 	}
@@ -296,8 +345,8 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	timeouts := res["timeouts"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	timeouts := mustMap(t, res, "timeouts")
 	if timeouts["create"] != "30m" {
 		t.Errorf("expected create 30m, got %v", timeouts["create"])
 	}
@@ -336,12 +385,12 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	provs := res["provisioner"].([]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	provs := mustSlice(t, res, "provisioner")
 	if len(provs) != 1 {
 		t.Fatalf("expected 1 provisioner, got %d", len(provs))
 	}
-	localExec := provs[0].(map[string]any)["local-exec"].(map[string]any)
+	localExec := mustMap(t, mustIndexMap(t, provs, 0), "local-exec")
 	if localExec["command"] != "echo hello" {
 		t.Errorf("expected command 'echo hello', got %v", localExec["command"])
 	}
@@ -380,14 +429,14 @@ func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	instances := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)
+	instances := mustMap(t, mustMap(t, obj, "resource"), "aws_instance")
 
-	web := instances["web"].(map[string]any)
+	web := mustMap(t, instances, "web")
 	if web["ami"] != "ami-web" {
 		t.Errorf("expected web ami 'ami-web', got %v", web["ami"])
 	}
 
-	api := instances["api"].(map[string]any)
+	api := mustMap(t, instances, "api")
 	if api["ami"] != "ami-api" {
 		t.Errorf("expected api ami 'ami-api', got %v", api["ami"])
 	}
@@ -427,7 +476,7 @@ func TestToJSON_MultipleResourceTypes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resources := obj["resource"].(map[string]any)
+	resources := mustMap(t, obj, "resource")
 	if _, ok := resources["aws_instance"]; !ok {
 		t.Error("missing aws_instance resource type")
 	}
@@ -466,14 +515,14 @@ func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	amis := obj["data"].(map[string]any)["aws_ami"].(map[string]any)
+	amis := mustMap(t, mustMap(t, obj, "data"), "aws_ami")
 
-	ubuntu := amis["ubuntu"].(map[string]any)
+	ubuntu := mustMap(t, amis, "ubuntu")
 	if ubuntu["most_recent"] != true {
 		t.Errorf("expected ubuntu most_recent true, got %v", ubuntu["most_recent"])
 	}
 
-	amazonLinux := amis["amazon_linux"].(map[string]any)
+	amazonLinux := mustMap(t, amis, "amazon_linux")
 	if amazonLinux["most_recent"] != false {
 		t.Errorf("expected amazon_linux most_recent false, got %v", amazonLinux["most_recent"])
 	}
@@ -498,7 +547,7 @@ func TestToJSON_DataSource(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
+	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
 	if ds["most_recent"] != true {
 		t.Errorf("expected most_recent true, got %v", ds["most_recent"])
 	}
@@ -524,7 +573,7 @@ func TestToJSON_DataSourceProvider(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
+	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
 	if ds["provider"] != "aws.west" {
 		t.Errorf("expected provider aws.west, got %v", ds["provider"])
 	}
@@ -550,8 +599,8 @@ func TestToJSON_DataSourceDependsOn(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
-	deps := ds["depends_on"].([]any)
+	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
+	deps := mustSlice(t, ds, "depends_on")
 	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
 		t.Errorf("unexpected depends_on: %v", deps)
 	}
@@ -577,7 +626,7 @@ func TestToJSON_DataSourceCount(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
+	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
 	// JSON numbers unmarshal as float64
 	if ds["count"] != float64(3) {
 		t.Errorf("expected count 3, got %v", ds["count"])
@@ -604,8 +653,8 @@ func TestToJSON_DataSourceForEach(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	ds := obj["data"].(map[string]any)["aws_ami"].(map[string]any)["latest"].(map[string]any)
-	forEach := ds["for_each"].(map[string]any)
+	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
+	forEach := mustMap(t, ds, "for_each")
 	if forEach["a"] != "1" {
 		t.Errorf("unexpected for_each: %v", forEach)
 	}
@@ -637,7 +686,7 @@ func TestToJSON_Variables(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	v := obj["variable"].(map[string]any)["instance_type"].(map[string]any)
+	v := mustMap(t, mustMap(t, obj, "variable"), "instance_type")
 	if v["type"] != "string" {
 		t.Errorf("expected type string, got %v", v["type"])
 	}
@@ -653,7 +702,7 @@ func TestToJSON_Variables(t *testing.T) {
 	if v["nullable"] != true {
 		t.Error("expected nullable true")
 	}
-	validation := v["validation"].(map[string]any)
+	validation := mustMap(t, v, "validation")
 	if validation["condition"] != "length(var.instance_type) > 0" {
 		t.Errorf("unexpected condition: %v", validation["condition"])
 	}
@@ -683,7 +732,7 @@ func TestToJSON_Outputs(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	o := obj["output"].(map[string]any)["instance_ip"].(map[string]any)
+	o := mustMap(t, mustMap(t, obj, "output"), "instance_ip")
 	if o["value"] != "${aws_instance.web.public_ip}" {
 		t.Errorf("unexpected value: %v", o["value"])
 	}
@@ -693,7 +742,7 @@ func TestToJSON_Outputs(t *testing.T) {
 	if o["sensitive"] != true {
 		t.Error("expected sensitive true")
 	}
-	deps := o["depends_on"].([]any)
+	deps := mustSlice(t, o, "depends_on")
 	if len(deps) != 1 || deps[0] != "aws_instance.web" {
 		t.Errorf("unexpected depends_on: %v", deps)
 	}
@@ -713,11 +762,11 @@ func TestToJSON_Locals(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	locals := obj["locals"].(map[string]any)
+	locals := mustMap(t, obj, "locals")
 	if locals["env"] != "production" {
 		t.Errorf("unexpected env: %v", locals["env"])
 	}
-	tags := locals["tags"].(map[string]any)
+	tags := mustMap(t, locals, "tags")
 	if tags["team"] != "platform" {
 		t.Errorf("unexpected tags: %v", tags)
 	}
@@ -743,9 +792,9 @@ func TestToJSON_Backend(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	tf := obj["terraform"].(map[string]any)
-	backend := tf["backend"].(map[string]any)
-	s3 := backend["s3"].(map[string]any)
+	tf := mustMap(t, obj, "terraform")
+	backend := mustMap(t, tf, "backend")
+	s3 := mustMap(t, backend, "s3")
 	if s3["bucket"] != "my-state" {
 		t.Errorf("unexpected bucket: %v", s3["bucket"])
 	}
@@ -768,9 +817,9 @@ func TestToJSON_RequiredProviders(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	tf := obj["terraform"].(map[string]any)
-	rp := tf["required_providers"].(map[string]any)
-	aws := rp["aws"].(map[string]any)
+	tf := mustMap(t, obj, "terraform")
+	rp := mustMap(t, tf, "required_providers")
+	aws := mustMap(t, rp, "aws")
 	if aws["source"] != "hashicorp/aws" {
 		t.Errorf("unexpected source: %v", aws["source"])
 	}
@@ -918,8 +967,8 @@ func TestToJSON_ResourceConnection(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	conn := res["connection"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	conn := mustMap(t, res, "connection")
 	if conn["type"] != "ssh" {
 		t.Errorf("expected type ssh, got %v", conn["type"])
 	}
@@ -965,8 +1014,8 @@ func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	conn := res["connection"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	conn := mustMap(t, res, "connection")
 	if conn["type"] != "winrm" {
 		t.Errorf("expected type winrm, got %v", conn["type"])
 	}
@@ -1003,9 +1052,9 @@ func TestToJSON_LifecyclePrecondition(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	lc := res["lifecycle"].(map[string]any)
-	pre := lc["precondition"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	lc := mustMap(t, res, "lifecycle")
+	pre := mustMap(t, lc, "precondition")
 	if pre["condition"] != "var.x > 0" {
 		t.Errorf("expected condition 'var.x > 0', got %v", pre["condition"])
 	}
@@ -1039,9 +1088,9 @@ func TestToJSON_LifecyclePostcondition(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	lc := res["lifecycle"].(map[string]any)
-	post := lc["postcondition"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	lc := mustMap(t, res, "lifecycle")
+	post := mustMap(t, lc, "postcondition")
 	if post["condition"] != "self.public_ip != \"\"" {
 		t.Errorf("expected condition, got %v", post["condition"])
 	}
@@ -1072,8 +1121,8 @@ func TestToJSON_OutputPrecondition(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	o := obj["output"].(map[string]any)["ip"].(map[string]any)
-	pre := o["precondition"].(map[string]any)
+	o := mustMap(t, mustMap(t, obj, "output"), "ip")
+	pre := mustMap(t, o, "precondition")
 	if pre["condition"] != "aws_instance.web.public_ip != \"\"" {
 		t.Errorf("expected condition, got %v", pre["condition"])
 	}
@@ -1113,10 +1162,10 @@ func TestToJSON_ProvisionerConnection(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	provs := res["provisioner"].([]any)
-	remoteExec := provs[0].(map[string]any)["remote-exec"].(map[string]any)
-	conn := remoteExec["connection"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	provs := mustSlice(t, res, "provisioner")
+	remoteExec := mustMap(t, mustIndexMap(t, provs, 0), "remote-exec")
+	conn := mustMap(t, remoteExec, "connection")
 	if conn["type"] != "ssh" {
 		t.Errorf("expected type ssh, got %v", conn["type"])
 	}
@@ -1155,7 +1204,7 @@ func TestToJSON_ModuleBasic(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mod := obj["module"].(map[string]any)["eks"].(map[string]any)
+	mod := mustMap(t, mustMap(t, obj, "module"), "eks")
 	if mod["source"] != "terraform-aws-modules/eks/aws" {
 		t.Errorf("expected source terraform-aws-modules/eks/aws, got %v", mod["source"])
 	}
@@ -1193,8 +1242,8 @@ func TestToJSON_ModuleWithProviders(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mod := obj["module"].(map[string]any)["vpc"].(map[string]any)
-	providers := mod["providers"].(map[string]any)
+	mod := mustMap(t, mustMap(t, obj, "module"), "vpc")
+	providers := mustMap(t, mod, "providers")
 	if providers["aws"] != "aws.west" {
 		t.Errorf("expected providers.aws = aws.west, got %v", providers["aws"])
 	}
@@ -1222,11 +1271,11 @@ func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mod := obj["module"].(map[string]any)["server"].(map[string]any)
+	mod := mustMap(t, mustMap(t, obj, "module"), "server")
 	if mod["source"] != "./modules/server" {
 		t.Errorf("expected source ./modules/server, got %v", mod["source"])
 	}
-	deps := mod["depends_on"].([]any)
+	deps := mustSlice(t, mod, "depends_on")
 	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
 		t.Errorf("unexpected depends_on: %v", deps)
 	}
@@ -1260,8 +1309,8 @@ func TestToJSON_ModuleForEach(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	mod := obj["module"].(map[string]any)["bucket"].(map[string]any)
-	forEach := mod["for_each"].(map[string]any)
+	mod := mustMap(t, mustMap(t, obj, "module"), "bucket")
+	forEach := mustMap(t, mod, "for_each")
 	if forEach["logs"] != "logs" {
 		t.Errorf("unexpected for_each: %v", forEach)
 	}
@@ -1294,8 +1343,8 @@ func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	conn := res["connection"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	conn := mustMap(t, res, "connection")
 	if conn["type"] != "ssh" {
 		t.Errorf("expected known field type=ssh to take precedence, got %v", conn["type"])
 	}
@@ -1328,8 +1377,8 @@ func TestConnectionJSON_NilExtra(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	conn := res["connection"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	conn := mustMap(t, res, "connection")
 	if conn["type"] != "ssh" {
 		t.Errorf("expected type ssh, got %v", conn["type"])
 	}
@@ -1365,8 +1414,8 @@ func TestConnectionJSON_EmptyExtra(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	conn := res["connection"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	conn := mustMap(t, res, "connection")
 	if conn["type"] != "ssh" {
 		t.Errorf("expected type ssh, got %v", conn["type"])
 	}
@@ -1403,8 +1452,8 @@ func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatal(err)
 	}
-	res := obj["resource"].(map[string]any)["aws_instance"].(map[string]any)["web"].(map[string]any)
-	conn := res["connection"].(map[string]any)
+	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
+	conn := mustMap(t, res, "connection")
 	if conn["type"] != "ssh" {
 		t.Errorf("expected type ssh, got %v", conn["type"])
 	}
@@ -1430,14 +1479,20 @@ func TestApplyCommonMeta(t *testing.T) {
 		if cfg["provider"] != "aws.west" {
 			t.Errorf("provider = %v, want aws.west", cfg["provider"])
 		}
-		deps := cfg["depends_on"].([]string)
+		deps, ok := cfg["depends_on"].([]string)
+		if !ok {
+			t.Fatalf("depends_on: expected []string, got %T", cfg["depends_on"])
+		}
 		if len(deps) != 1 || deps[0] != "aws_vpc.main" {
 			t.Errorf("depends_on = %v, want [aws_vpc.main]", deps)
 		}
 		if cfg["count"] != 3 {
 			t.Errorf("count = %v, want 3", cfg["count"])
 		}
-		fe := cfg["for_each"].(map[string]string)
+		fe, ok := cfg["for_each"].(map[string]string)
+		if !ok {
+			t.Fatalf("for_each: expected map[string]string, got %T", cfg["for_each"])
+		}
 		if fe["a"] != "1" {
 			t.Errorf("for_each = %v, want map[a:1]", fe)
 		}
