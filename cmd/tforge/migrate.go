@@ -117,9 +117,9 @@ Examples:
 		}
 	}
 
-	// Update .gitignore
+	// Update .gitignore to prevent generated files from being committed.
 	if err := updateGitignore(*dir, stderr); err != nil {
-		fmt.Fprintf(stderr, "Warning: could not update .gitignore: %v\n", err)
+		return fmt.Errorf("updating .gitignore: %w", err)
 	}
 
 	// Create a sub-package per provider with generate.go

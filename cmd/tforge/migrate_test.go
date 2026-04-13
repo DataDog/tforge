@@ -77,6 +77,27 @@ func TestRunMigrate_DryRun(t *testing.T) {
 	}
 }
 
+func TestRunMigrate_GitignoreWriteError(t *testing.T) {
+	dir := t.TempDir()
+	cdktf := `{"terraformProviders": ["hashicorp/aws@~> 5.0"]}`
+	os.WriteFile(filepath.Join(dir, "cdktf.json"), []byte(cdktf), 0644)
+
+	// Create .gitignore as a read-only directory to provoke a write error.
+	gitignorePath := filepath.Join(dir, ".gitignore")
+	if err := os.Mkdir(gitignorePath, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	var stdout, stderr bytes.Buffer
+	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected error when .gitignore cannot be written, got nil")
+	}
+	if !strings.Contains(err.Error(), ".gitignore") {
+		t.Errorf("expected .gitignore error, got: %v", err)
+	}
+}
+
 func TestRunMigrate_StringProvider(t *testing.T) {
 	dir := t.TempDir()
 	cdktf := `{"terraformProviders": ["hashicorp/aws@~> 5.0"]}`
