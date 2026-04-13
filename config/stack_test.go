@@ -334,8 +334,12 @@ func TestNewStackIncludesModules(t *testing.T) {
 
 func TestAddVariable(t *testing.T) {
 	s := NewStack("test")
-	s.AddVariable(Variable{Name: "region", Type: "string"})
-	s.AddVariable(Variable{Name: "count", Type: "number"})
+	if err := s.AddVariable(Variable{Name: "region", Type: "string"}); err != nil {
+		t.Fatalf("AddVariable(region) error = %v", err)
+	}
+	if err := s.AddVariable(Variable{Name: "count", Type: "number"}); err != nil {
+		t.Fatalf("AddVariable(count) error = %v", err)
+	}
 
 	if len(s.Variables) != 2 {
 		t.Fatalf("len(Variables) = %d, want 2", len(s.Variables))
@@ -348,9 +352,33 @@ func TestAddVariable(t *testing.T) {
 	}
 }
 
+func TestAddVariableErrors(t *testing.T) {
+	t.Run("empty name", func(t *testing.T) {
+		s := NewStack("test")
+		if err := s.AddVariable(Variable{Name: "", Type: "string"}); err == nil {
+			t.Fatal("AddVariable with empty name should return error")
+		}
+	})
+
+	t.Run("duplicate", func(t *testing.T) {
+		s := NewStack("test")
+		if err := s.AddVariable(Variable{Name: "region", Type: "string"}); err != nil {
+			t.Fatalf("first AddVariable() error = %v", err)
+		}
+		if err := s.AddVariable(Variable{Name: "region", Type: "number"}); err == nil {
+			t.Fatal("second AddVariable() with same name should return error")
+		}
+		if len(s.Variables) != 1 {
+			t.Fatalf("len(Variables) = %d, want 1 after duplicate rejected", len(s.Variables))
+		}
+	})
+}
+
 func TestAddOutput(t *testing.T) {
 	s := NewStack("test")
-	s.AddOutput(Output{Name: "ip", Value: "${aws_instance.web.public_ip}"})
+	if err := s.AddOutput(Output{Name: "ip", Value: "${aws_instance.web.public_ip}"}); err != nil {
+		t.Fatalf("AddOutput() error = %v", err)
+	}
 
 	if len(s.Outputs) != 1 {
 		t.Fatalf("len(Outputs) = %d, want 1", len(s.Outputs))
@@ -358,6 +386,28 @@ func TestAddOutput(t *testing.T) {
 	if s.Outputs[0].Name != "ip" {
 		t.Fatalf("Outputs[0].Name = %q, want %q", s.Outputs[0].Name, "ip")
 	}
+}
+
+func TestAddOutputErrors(t *testing.T) {
+	t.Run("empty name", func(t *testing.T) {
+		s := NewStack("test")
+		if err := s.AddOutput(Output{Name: "", Value: "foo"}); err == nil {
+			t.Fatal("AddOutput with empty name should return error")
+		}
+	})
+
+	t.Run("duplicate", func(t *testing.T) {
+		s := NewStack("test")
+		if err := s.AddOutput(Output{Name: "ip", Value: "1.2.3.4"}); err != nil {
+			t.Fatalf("first AddOutput() error = %v", err)
+		}
+		if err := s.AddOutput(Output{Name: "ip", Value: "5.6.7.8"}); err == nil {
+			t.Fatal("second AddOutput() with same name should return error")
+		}
+		if len(s.Outputs) != 1 {
+			t.Fatalf("len(Outputs) = %d, want 1 after duplicate rejected", len(s.Outputs))
+		}
+	})
 }
 
 func TestSetLocal(t *testing.T) {

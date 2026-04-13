@@ -95,11 +95,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	stack.AddVariable(config.Variable{
+	if err := stack.AddVariable(config.Variable{
 		Name:      "db_password",
 		Type:      "string",
 		Sensitive: true,
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
 	data, err := render.ToJSON(stack)
 	if err != nil {

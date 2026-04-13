@@ -299,7 +299,7 @@ stack.AddResource(config.Resource{
 
 ```go
 // Variables
-stack.AddVariable(config.Variable{
+if err := stack.AddVariable(config.Variable{
     Name:        "environment",
     Type:        "string",
     Description: "Deployment environment",
@@ -308,15 +308,19 @@ stack.AddVariable(config.Variable{
         Condition:    "length(var.environment) > 0",
         ErrorMessage: "Environment must not be empty",
     },
-})
+}); err != nil {
+    log.Fatal(err)
+}
 
 // Outputs
-stack.AddOutput(config.Output{
+if err := stack.AddOutput(config.Output{
     Name:      "instance_ip",
     Value:     "${aws_instance.web.public_ip}",
     Sensitive: true,
     DependsOn: []string{"aws_instance.web"},
-})
+}); err != nil {
+    log.Fatal(err)
+}
 
 // Locals
 stack.SetLocal("project_name", "my-app")

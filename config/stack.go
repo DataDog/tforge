@@ -151,13 +151,35 @@ func (s *Stack) AddModule(m Module) error {
 }
 
 // AddVariable adds an input variable to the stack.
-func (s *Stack) AddVariable(v Variable) {
+// It returns an error if the variable name is empty or if a variable
+// with the same name already exists.
+func (s *Stack) AddVariable(v Variable) error {
+	if v.Name == "" {
+		return fmt.Errorf("variable name is required")
+	}
+	for _, existing := range s.Variables {
+		if existing.Name == v.Name {
+			return fmt.Errorf("duplicate variable: %s", v.Name)
+		}
+	}
 	s.Variables = append(s.Variables, v)
+	return nil
 }
 
 // AddOutput adds an output value to the stack.
-func (s *Stack) AddOutput(o Output) {
+// It returns an error if the output name is empty or if an output
+// with the same name already exists.
+func (s *Stack) AddOutput(o Output) error {
+	if o.Name == "" {
+		return fmt.Errorf("output name is required")
+	}
+	for _, existing := range s.Outputs {
+		if existing.Name == o.Name {
+			return fmt.Errorf("duplicate output: %s", o.Name)
+		}
+	}
 	s.Outputs = append(s.Outputs, o)
+	return nil
 }
 
 // SetLocal sets a local value.

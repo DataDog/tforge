@@ -613,7 +613,7 @@ func TestToJSON_DataSourceForEach(t *testing.T) {
 
 func TestToJSON_Variables(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddVariable(config.Variable{
+	if err := stack.AddVariable(config.Variable{
 		Name:        "instance_type",
 		Type:        "string",
 		Description: "The instance type",
@@ -624,7 +624,9 @@ func TestToJSON_Variables(t *testing.T) {
 			Condition:    "length(var.instance_type) > 0",
 			ErrorMessage: "Must not be empty",
 		},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -662,13 +664,15 @@ func TestToJSON_Variables(t *testing.T) {
 
 func TestToJSON_Outputs(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddOutput(config.Output{
+	if err := stack.AddOutput(config.Output{
 		Name:        "instance_ip",
 		Value:       "${aws_instance.web.public_ip}",
 		Description: "The public IP",
 		Sensitive:   true,
 		DependsOn:   []string{"aws_instance.web"},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {
@@ -806,16 +810,20 @@ func TestToJSON_FullStack(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	stack.AddVariable(config.Variable{
+	if err := stack.AddVariable(config.Variable{
 		Name:    "env",
 		Type:    "string",
 		Default: "dev",
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
-	stack.AddOutput(config.Output{
+	if err := stack.AddOutput(config.Output{
 		Name:  "ip",
 		Value: "${aws_instance.web.public_ip}",
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	stack.SetLocal("name", "my-app")
 
@@ -1044,14 +1052,16 @@ func TestToJSON_LifecyclePostcondition(t *testing.T) {
 
 func TestToJSON_OutputPrecondition(t *testing.T) {
 	stack := config.NewStack("test")
-	stack.AddOutput(config.Output{
+	if err := stack.AddOutput(config.Output{
 		Name:  "ip",
 		Value: "${aws_instance.web.public_ip}",
 		Precondition: &config.Condition{
 			Condition:    "aws_instance.web.public_ip != \"\"",
 			ErrorMessage: "instance must have a public IP",
 		},
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	data, err := ToJSON(stack)
 	if err != nil {

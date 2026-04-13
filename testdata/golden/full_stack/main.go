@@ -64,33 +64,41 @@ func main() {
 		log.Fatal(err)
 	}
 
-	stack.AddVariable(config.Variable{
+	if err := stack.AddVariable(config.Variable{
 		Name:        "environment",
 		Type:        "string",
 		Description: "Deployment environment",
 		Default:     "production",
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
-	stack.AddVariable(config.Variable{
+	if err := stack.AddVariable(config.Variable{
 		Name:      "enable_monitoring",
 		Type:      "bool",
 		Default:   true,
 		Sensitive: false,
 		Nullable:  true,
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
-	stack.AddOutput(config.Output{
+	if err := stack.AddOutput(config.Output{
 		Name:        "instance_id",
 		Value:       "${aws_instance.web.id}",
 		Description: "The ID of the web server instance",
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
-	stack.AddOutput(config.Output{
+	if err := stack.AddOutput(config.Output{
 		Name:      "instance_private_ip",
 		Value:     "${aws_instance.web.private_ip}",
 		Sensitive: true,
 		DependsOn: []string{"aws_instance.web"},
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
 	stack.SetLocal("project_name", "my-app")
 	stack.SetLocal("common_tags", map[string]string{

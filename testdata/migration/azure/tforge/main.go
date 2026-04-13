@@ -108,10 +108,12 @@ func NewMyStack() *config.Stack {
 		},
 	}))
 
-	stack.AddOutput(config.Output{
+	if err := stack.AddOutput(config.Output{
 		Name:  "names",
 		Value: []string{vm.Ref("name"), rg.Ref("name"), nm.Ref("null_resource_id")},
-	})
+	}); err != nil {
+		log.Fatal(err)
+	}
 
 	return stack
 }
