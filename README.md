@@ -194,7 +194,7 @@ make build
 | **No HashiCorp deps** | Zero `github.com/hashicorp/*` imports |
 | **Minimal** | Standard library where possible, small dependency footprint |
 | **OpenTofu-first** | Prefers OpenTofu registry and CLI, falls back to Terraform |
-| **Idiomatic** | Small packages, clear APIs, `go generate` friendly |
+| **Idiomatic** | Small packages, clear APIs, `go generate` friendly, [functional options](https://github.com/uber-go/guide/blob/master/style.md#functional-options) for configuration |
 
 ## Requirements
 

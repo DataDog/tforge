@@ -24,7 +24,7 @@ import (
 	"tforge/render"
 )
 
-const version = "0.1.0"
+const version = "0.2.0"
 
 func main() {
 	render.Version = version

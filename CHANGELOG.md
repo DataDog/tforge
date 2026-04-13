@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-10
+
+### Added
+
+- **Terraform module support** (`config.Module`, `Stack.AddModule()`)
+  - Declare module calls with source, version, input variables, and provider mappings
+  - Meta-arguments: `depends_on`, `count`, `for_each`
+  - Renders `module {}` blocks in `.tf.json` output
+  - Reference module outputs via `Module.Ref("output_name")`
+
 ## [0.1.0] - 2026-04-10
 
 Initial release of tforge.

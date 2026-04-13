@@ -246,6 +246,92 @@ func TestAddDataSourceDuplicate(t *testing.T) {
 	}
 }
 
+func TestAddModule(t *testing.T) {
+	tests := []struct {
+		name    string
+		mod     Module
+		wantErr bool
+	}{
+		{
+			name:    "valid module",
+			mod:     Module{Name: "eks", Source: "terraform-aws-modules/eks/aws"},
+			wantErr: false,
+		},
+		{
+			name:    "empty name",
+			mod:     Module{Name: "", Source: "terraform-aws-modules/eks/aws"},
+			wantErr: true,
+		},
+		{
+			name:    "empty source",
+			mod:     Module{Name: "eks", Source: ""},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := NewStack("test")
+			err := s.AddModule(tt.mod)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("AddModule() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if !tt.wantErr && len(s.Modules) != 1 {
+				t.Fatalf("len(Modules) = %d, want 1", len(s.Modules))
+			}
+			if tt.wantErr && len(s.Modules) != 0 {
+				t.Fatalf("len(Modules) = %d, want 0 on error", len(s.Modules))
+			}
+		})
+	}
+}
+
+func TestAddModuleDuplicate(t *testing.T) {
+	s := NewStack("test")
+	err := s.AddModule(Module{Name: "eks", Source: "terraform-aws-modules/eks/aws"})
+	if err != nil {
+		t.Fatalf("first AddModule() error = %v", err)
+	}
+
+	err = s.AddModule(Module{Name: "eks", Source: "other/module"})
+	if err == nil {
+		t.Fatal("second AddModule() with same name should return error")
+	}
+	if len(s.Modules) != 1 {
+		t.Fatalf("len(Modules) = %d, want 1 after duplicate rejected", len(s.Modules))
+	}
+
+	// Different name should succeed
+	err = s.AddModule(Module{Name: "vpc", Source: "terraform-aws-modules/vpc/aws"})
+	if err != nil {
+		t.Fatalf("AddModule() with different name error = %v", err)
+	}
+	if len(s.Modules) != 2 {
+		t.Fatalf("len(Modules) = %d, want 2", len(s.Modules))
+	}
+}
+
+func TestModuleAddress(t *testing.T) {
+	m := Module{Name: "eks", Source: "terraform-aws-modules/eks/aws"}
+	if got := m.Address(); got != "module.eks" {
+		t.Errorf("Address() = %q, want %q", got, "module.eks")
+	}
+}
+
+func TestModuleRef(t *testing.T) {
+	m := Module{Name: "eks", Source: "terraform-aws-modules/eks/aws"}
+	if got := m.Ref("cluster_endpoint"); got != "${module.eks.cluster_endpoint}" {
+		t.Errorf("Ref() = %q, want %q", got, "${module.eks.cluster_endpoint}")
+	}
+}
+
+func TestNewStackIncludesModules(t *testing.T) {
+	s := NewStack("test")
+	if s.Modules == nil {
+		t.Fatal("Modules should be non-nil")
+	}
+}
+
 func TestAddVariable(t *testing.T) {
 	s := NewStack("test")
 	s.AddVariable(Variable{Name: "region", Type: "string"})

@@ -80,6 +80,7 @@ type terraformJSON struct {
 	Provider  map[string][]any          `json:"provider,omitempty"`
 	Resource  map[string]map[string]any `json:"resource,omitempty"`
 	Data      map[string]map[string]any `json:"data,omitempty"`
+	Module    map[string]map[string]any `json:"module,omitempty"`
 	Variable  map[string]variableJSON   `json:"variable,omitempty"`
 	Output    map[string]outputJSON     `json:"output,omitempty"`
 	Locals    map[string]any            `json:"locals,omitempty"`
@@ -147,6 +148,11 @@ func buildTerraformJSON(stack *config.Stack) *terraformJSON {
 	// Build data sources
 	if len(stack.DataSources) > 0 {
 		tf.Data = buildDataSources(stack.DataSources)
+	}
+
+	// Build modules
+	if len(stack.Modules) > 0 {
+		tf.Module = buildModules(stack.Modules)
 	}
 
 	// Build variables
@@ -315,6 +321,47 @@ func buildDataSources(dataSources []config.DataSource) map[string]map[string]any
 		}
 
 		result[d.Type][d.Name] = cfg
+	}
+
+	return result
+}
+
+// buildModules builds the module configurations.
+func buildModules(modules []config.Module) map[string]map[string]any {
+	result := make(map[string]map[string]any)
+
+	for _, m := range modules {
+		cfg := make(map[string]any)
+
+		cfg["source"] = m.Source
+
+		if m.Version != "" {
+			cfg["version"] = m.Version
+		}
+
+		// Copy module input variables
+		for k, v := range m.Config {
+			cfg[k] = v
+		}
+
+		// Add meta-arguments
+		if len(m.Providers) > 0 {
+			cfg["providers"] = m.Providers
+		}
+
+		if len(m.DependsOn) > 0 {
+			cfg["depends_on"] = m.DependsOn
+		}
+
+		if m.Count != nil {
+			cfg["count"] = m.Count
+		}
+
+		if m.ForEach != nil {
+			cfg["for_each"] = m.ForEach
+		}
+
+		result[m.Name] = cfg
 	}
 
 	return result

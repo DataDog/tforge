@@ -18,7 +18,7 @@ func NewExampleCdktfGoAwsStack() *config.Stack {
 	stack.AddProvider(config.Provider{
 		Name:    "aws",
 		Source:  "hashicorp/aws",
-		Version: "~> 3.70",
+		Version: "3.70.0",
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
@@ -28,16 +28,17 @@ func NewExampleCdktfGoAwsStack() *config.Stack {
 		aws.Instance_SetTags(map[string]string{"environment": "development"}),
 	))
 
-	// Note: original CDKTF example used terraform-aws-modules/eks/aws module.
-	// tforge does not support modules — using aws_eks_cluster resource instead.
-	must(aws.NewEKSCluster(stack, "EKS",
-		aws.EKSCluster_SetName("my-eks"),
-		aws.EKSCluster_SetVersion("1.17"),
-		aws.EKSCluster_SetRoleARN("arn:aws:iam::012345678910:role/eks-role"),
-		aws.EKSCluster_SetVPCConfig(&aws.EKSClusterVPCConfig{
-			SubnetIDS: []string{"subnet-a", "subnet-b"},
-		}),
-	))
+	must(stack.AddModule(config.Module{
+		Name:    "EKS",
+		Source:  "terraform-aws-modules/eks/aws",
+		Version: "~> 19.0",
+		Config: map[string]any{
+			"cluster_name":    "my-eks",
+			"cluster_version": "1.17",
+			"subnet_ids":      []string{"a", "b"},
+			"vpc_id":          "id",
+		},
+	}))
 
 	return stack
 }

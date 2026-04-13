@@ -1,10 +1,30 @@
 {
-  "terraform": {
-    "required_providers": {
-      "aws": {
-        "source": "hashicorp/aws",
-        "version": "~> 3.70"
-      }
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "ExampleCdktfGoAwsStack",
+      "version": "0.20.9"
+    },
+    "outputs": {
+    }
+  },
+  "module": {
+    "EKS": {
+      "//": {
+        "metadata": {
+          "path": "ExampleCdktfGoAwsStack/EKS",
+          "uniqueId": "EKS"
+        }
+      },
+      "cluster_name": "my-eks",
+      "cluster_version": "1.17",
+      "source": "terraform-aws-modules/eks/aws",
+      "subnet_ids": [
+        "a",
+        "b"
+      ],
+      "version": "~> 19.0",
+      "vpc_id": "id"
     }
   },
   "provider": {
@@ -15,28 +35,32 @@
     ]
   },
   "resource": {
-    "aws_eks_cluster": {
-      "EKS": {
-        "name": "my-eks",
-        "role_arn": "arn:aws:iam::012345678910:role/eks-role",
-        "version": "1.17",
-        "vpc_config": [
-          {
-            "subnet_ids": [
-              "subnet-a",
-              "subnet-b"
-            ]
-          }
-        ]
-      }
-    },
     "aws_instance": {
       "Hello": {
+        "//": {
+          "metadata": {
+            "path": "ExampleCdktfGoAwsStack/Hello",
+            "uniqueId": "Hello"
+          }
+        },
         "ami": "ami-2757f631",
         "instance_type": "t2.micro",
         "tags": {
           "environment": "development"
         }
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "local": {
+        "path": "/private/tmp/cdktf-aws/terraform.ExampleCdktfGoAwsStack.tfstate"
+      }
+    },
+    "required_providers": {
+      "aws": {
+        "source": "hashicorp/aws",
+        "version": "3.70.0"
       }
     }
   }

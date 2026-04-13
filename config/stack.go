@@ -35,6 +35,9 @@ type Stack struct {
 	// DataSources contains data source configurations.
 	DataSources []DataSource
 
+	// Modules contains module call configurations.
+	Modules []Module
+
 	// Variables contains input variable definitions.
 	Variables []Variable
 
@@ -53,6 +56,7 @@ func NewStack(name string) *Stack {
 		Providers:         make([]Provider, 0),
 		Resources:         make([]Resource, 0),
 		DataSources:       make([]DataSource, 0),
+		Modules:           make([]Module, 0),
 		Variables:         make([]Variable, 0),
 		Outputs:           make([]Output, 0),
 		Locals:            make(map[string]any),
@@ -121,6 +125,28 @@ func (s *Stack) AddDataSource(d DataSource) error {
 	}
 
 	s.DataSources = append(s.DataSources, d)
+	return nil
+}
+
+// AddModule adds a module call to the stack.
+// It returns an error if the module name or source is empty,
+// or if a module with the same name already exists.
+func (s *Stack) AddModule(m Module) error {
+	if m.Name == "" {
+		return fmt.Errorf("module name is required")
+	}
+	if m.Source == "" {
+		return fmt.Errorf("module source is required")
+	}
+
+	// Check for duplicates
+	for _, existing := range s.Modules {
+		if existing.Name == m.Name {
+			return fmt.Errorf("duplicate module: %s", m.Name)
+		}
+	}
+
+	s.Modules = append(s.Modules, m)
 	return nil
 }
 

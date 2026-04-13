@@ -1121,6 +1121,142 @@ func TestToJSON_ProvisionerConnection(t *testing.T) {
 	}
 }
 
+func TestToJSON_ModuleBasic(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddModule(config.Module{
+		Name:    "eks",
+		Source:  "terraform-aws-modules/eks/aws",
+		Version: "~> 19.0",
+		Config: map[string]any{
+			"cluster_name":    "my-eks",
+			"cluster_version": "1.27",
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+
+	mod := obj["module"].(map[string]any)["eks"].(map[string]any)
+	if mod["source"] != "terraform-aws-modules/eks/aws" {
+		t.Errorf("expected source terraform-aws-modules/eks/aws, got %v", mod["source"])
+	}
+	if mod["version"] != "~> 19.0" {
+		t.Errorf("expected version ~> 19.0, got %v", mod["version"])
+	}
+	if mod["cluster_name"] != "my-eks" {
+		t.Errorf("expected cluster_name my-eks, got %v", mod["cluster_name"])
+	}
+	if mod["cluster_version"] != "1.27" {
+		t.Errorf("expected cluster_version 1.27, got %v", mod["cluster_version"])
+	}
+}
+
+func TestToJSON_ModuleWithProviders(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddModule(config.Module{
+		Name:   "vpc",
+		Source: "terraform-aws-modules/vpc/aws",
+		Config: map[string]any{"cidr": "10.0.0.0/16"},
+		Providers: map[string]string{
+			"aws": "aws.west",
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+
+	mod := obj["module"].(map[string]any)["vpc"].(map[string]any)
+	providers := mod["providers"].(map[string]any)
+	if providers["aws"] != "aws.west" {
+		t.Errorf("expected providers.aws = aws.west, got %v", providers["aws"])
+	}
+}
+
+func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddModule(config.Module{
+		Name:      "server",
+		Source:    "./modules/server",
+		Config:    map[string]any{"name": "web"},
+		DependsOn: []string{"aws_vpc.main"},
+		Count:     3,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+
+	mod := obj["module"].(map[string]any)["server"].(map[string]any)
+	if mod["source"] != "./modules/server" {
+		t.Errorf("expected source ./modules/server, got %v", mod["source"])
+	}
+	deps := mod["depends_on"].([]any)
+	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
+		t.Errorf("unexpected depends_on: %v", deps)
+	}
+	if mod["count"] != float64(3) {
+		t.Errorf("expected count 3, got %v", mod["count"])
+	}
+	// version should not be present for local modules
+	if _, ok := mod["version"]; ok {
+		t.Error("version should not be present when empty")
+	}
+}
+
+func TestToJSON_ModuleForEach(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddModule(config.Module{
+		Name:    "bucket",
+		Source:  "terraform-aws-modules/s3-bucket/aws",
+		ForEach: map[string]string{"logs": "logs", "data": "data"},
+		Config:  map[string]any{"bucket": "${each.key}-bucket"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := ToJSON(stack)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var obj map[string]any
+	if err := json.Unmarshal(data, &obj); err != nil {
+		t.Fatal(err)
+	}
+
+	mod := obj["module"].(map[string]any)["bucket"].(map[string]any)
+	forEach := mod["for_each"].(map[string]any)
+	if forEach["logs"] != "logs" {
+		t.Errorf("unexpected for_each: %v", forEach)
+	}
+}
+
 func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
