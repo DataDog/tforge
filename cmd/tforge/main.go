@@ -96,7 +96,7 @@ func runGenerate(args []string, stderr io.Writer) error {
 	providerSource := fs.String("provider", "", "Provider source (namespace/name), e.g., datadog/datadog")
 	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0")
 	schemaFile := fs.String("schema", "", "Path to cached schema JSON file (alternative to -provider/-version)")
-	outputDir := fs.String("output", "./generated", "Output directory for generated code")
+	outputDir := fs.String("output", generate.DefaultOutputDir, "Output directory for generated code")
 	packageName := fs.String("package", "", "Go package name (defaults to provider name)")
 	fs.Usage = func() {
 		fmt.Fprintln(stderr, `Usage: tforge generate [options]
@@ -154,7 +154,7 @@ Examples:
 		if schema.Source.Name != "" {
 			pkg = schema.Source.Name
 		} else {
-			pkg = "generated"
+			pkg = generate.DefaultPackageName
 		}
 	}
 

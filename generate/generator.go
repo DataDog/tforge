@@ -58,13 +58,23 @@ type Generator struct {
 	providerPrefix string          // Go-ified provider prefix (e.g. "Datadog" for datadog_*)
 }
 
+const (
+	// DefaultPackageName is the default Go package name for generated code
+	// when no explicit name is provided.
+	DefaultPackageName = "generated"
+
+	// DefaultOutputDir is the default output directory for generated code
+	// when no explicit directory is provided.
+	DefaultOutputDir = "./generated"
+)
+
 // New creates a new Generator with the given configuration.
 func New(cfg Config) *Generator {
 	if cfg.PackageName == "" {
-		cfg.PackageName = "generated"
+		cfg.PackageName = DefaultPackageName
 	}
 	if cfg.OutputDir == "" {
-		cfg.OutputDir = "./generated"
+		cfg.OutputDir = DefaultOutputDir
 	}
 
 	initialisms := make(map[string]bool)
