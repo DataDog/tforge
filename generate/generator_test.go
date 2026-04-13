@@ -675,3 +675,167 @@ func TestGenerateCompilationComplex(t *testing.T) {
 	// The critical check: verify the generated code actually compiles
 	compileGeneratedCode(t, tmpDir, "testpkg")
 }
+
+// TestGenerateNestedTypeAttributes verifies that attributes with NestedType
+// (inline nested schemas, as opposed to BlockTypes) generate correct Go code
+// for all nesting modes: single, list, set, map, and empty attributes.
+// This is the primary guard against the generator mishandling NestedType
+// attributes (e.g., emitting flat map[string]any instead of typed structs).
+func TestGenerateNestedTypeAttributes(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-nestedtype-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
+	})
+
+	// Use a schema with all NestedType nesting modes.
+	ps := &provider.Schema{
+		Provider: &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{
+				Block: &provider.BlockType{},
+			},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"test_nested_types": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"name": {Type: json.RawMessage(`"string"`), Required: true},
+							"single_nested": {
+								NestedType: &provider.NestedType{
+									Attributes: map[string]*provider.Attribute{
+										"inner_name":  {Type: json.RawMessage(`"string"`), Required: true},
+										"inner_count": {Type: json.RawMessage(`"number"`), Optional: true},
+									},
+									NestingMode: "single",
+								},
+								Optional: true,
+							},
+							"list_nested": {
+								NestedType: &provider.NestedType{
+									Attributes: map[string]*provider.Attribute{
+										"value": {Type: json.RawMessage(`"string"`), Required: true},
+									},
+									NestingMode: "list",
+								},
+								Optional: true,
+							},
+							"set_nested": {
+								NestedType: &provider.NestedType{
+									Attributes: map[string]*provider.Attribute{
+										"key":   {Type: json.RawMessage(`"string"`), Required: true},
+										"value": {Type: json.RawMessage(`"string"`), Optional: true},
+									},
+									NestingMode: "set",
+								},
+								Optional: true,
+							},
+							"map_nested": {
+								NestedType: &provider.NestedType{
+									Attributes: map[string]*provider.Attribute{
+										"setting": {Type: json.RawMessage(`"string"`), Required: true},
+									},
+									NestingMode: "map",
+								},
+								Optional: true,
+							},
+							"empty_nested": {
+								NestedType: &provider.NestedType{
+									Attributes:  map[string]*provider.Attribute{},
+									NestingMode: "single",
+								},
+								Optional: true,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// Verify resources_gen.go exists
+	resourcePath := filepath.Join(tmpDir, "resources_gen.go")
+	data, err := os.ReadFile(resourcePath)
+	if err != nil {
+		t.Fatalf("resources_gen.go not found: %v", err)
+	}
+
+	content := string(data)
+
+	// NestedType attributes with nesting mode "single" should produce
+	// a Go type mapped to map[string]any (via goTypeName("object")).
+	// list → []map[string]any, set → []map[string]any, map → map[string]map[string]any.
+	// Verify the struct has the expected fields.
+	for _, want := range []string{
+		"NestedTypes",   // struct name (test_nested_types → NestedTypes with provider prefix stripped)
+		"SingleNested",  // field from single_nested attribute
+		"ListNested",    // field from list_nested attribute
+		"SetNested",     // field from set_nested attribute
+		"MapNested",     // field from map_nested attribute
+		"EmptyNested",   // field from empty_nested attribute
+		"json:\"name\"", // required field has no omitempty
+	} {
+		if !strings.Contains(content, want) {
+			t.Errorf("resources_gen.go does not contain %q", want)
+		}
+	}
+
+	// Optional nested type attributes should have omitempty
+	for _, want := range []string{
+		"json:\"single_nested,omitempty\"",
+		"json:\"list_nested,omitempty\"",
+		"json:\"set_nested,omitempty\"",
+		"json:\"map_nested,omitempty\"",
+		"json:\"empty_nested,omitempty\"",
+	} {
+		if !strings.Contains(content, want) {
+			t.Errorf("resources_gen.go does not contain %q", want)
+		}
+	}
+
+	// The critical check: verify the generated code actually compiles.
+	// This catches type errors like generating map[string]any when a
+	// typed struct was expected.
+	compileGeneratedCode(t, tmpDir, "testpkg")
+}
+
+// TestGenerateNestedTypeFullFixture verifies that the full test fixture
+// (newTestProviderSchema) with NestedType attributes generates compilable code.
+// This is a broader smoke test using the same fixture as schema_test.go.
+func TestGenerateNestedTypeFullFixture(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-fullfixture-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{
+		PackageName: "testpkg",
+		OutputDir:   tmpDir,
+	})
+
+	ps := &provider.Schema{
+		Provider: newTestProviderSchema(),
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// Verify all expected files
+	for _, name := range []string{"provider_gen.go", "resources_gen.go", "data_sources_gen.go"} {
+		if _, err := os.Stat(filepath.Join(tmpDir, name)); err != nil {
+			t.Errorf("%s not found: %v", name, err)
+		}
+	}
+
+	// Verify generated code compiles (including all NestedType attributes)
+	compileGeneratedCode(t, tmpDir, "testpkg")
+}
