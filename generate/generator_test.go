@@ -232,11 +232,11 @@ func TestGoTypeForAttribute(t *testing.T) {
 			// The field should contain the Go type
 			if tt.want == "any" {
 				// jen renders "any" as "interface{}" in older Go or "any" in newer
-				if !contains(content, "interface{}") && !contains(content, " any ") {
+				if !strings.Contains(content, "interface{}") && !strings.Contains(content, " any ") {
 					t.Errorf("generated code does not contain type %q or interface{}", tt.want)
 				}
 			} else {
-				if !contains(content, tt.want) {
+				if !strings.Contains(content, tt.want) {
 					t.Errorf("generated code does not contain type %q", tt.want)
 				}
 			}
@@ -333,7 +333,7 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 	}
 	providerContent := string(providerData)
 	for _, want := range []string{"ProviderConfig", "Settings", "ProviderConfigSettings"} {
-		if !contains(providerContent, want) {
+		if !strings.Contains(providerContent, want) {
 			t.Errorf("provider_gen.go does not contain %q", want)
 		}
 	}
@@ -345,7 +345,7 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 	}
 	resourceContent := string(resourceData)
 	for _, want := range []string{"Thing", "Config", "ThingConfig"} {
-		if !contains(resourceContent, want) {
+		if !strings.Contains(resourceContent, want) {
 			t.Errorf("resources_gen.go does not contain %q", want)
 		}
 	}
@@ -357,7 +357,7 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 	}
 	dsContent := string(dsData)
 	for _, want := range []string{"DataData", "Filter", "ID"} {
-		if !contains(dsContent, want) {
+		if !strings.Contains(dsContent, want) {
 			t.Errorf("data_sources_gen.go does not contain %q", want)
 		}
 	}
@@ -425,7 +425,7 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 
 	// Check that set and map nesting modes produce correct types
 	for _, want := range []string{"Multi", "MultiTags", "MultiMetadata"} {
-		if !contains(resourceContent, want) {
+		if !strings.Contains(resourceContent, want) {
 			t.Errorf("resources_gen.go does not contain %q", want)
 		}
 	}
@@ -674,17 +674,4 @@ func TestGenerateCompilationComplex(t *testing.T) {
 
 	// The critical check: verify the generated code actually compiles
 	compileGeneratedCode(t, tmpDir, "testpkg")
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && searchString(s, substr)
-}
-
-func searchString(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
