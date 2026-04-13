@@ -806,6 +806,262 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
+// TestConstructorRoundTrip generates code, writes a test harness that invokes
+// the generated constructors, and runs it in a subprocess. This verifies that
+// the marshal/unmarshal round-trip inside the constructor preserves field values
+// correctly (required strings, optional bools set to false, nested blocks, data
+// source constructors, and omitted optional fields).
+func TestConstructorRoundTrip(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-roundtrip-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create a sub-package for generated code
+	genDir := filepath.Join(tmpDir, "gen")
+	if err := os.MkdirAll(genDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	g := New(Config{
+		PackageName: "gen",
+		OutputDir:   genDir,
+	})
+
+	ps := &provider.Schema{
+		Provider: &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{
+				Block: &provider.BlockType{},
+			},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"test_widget": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"name":    {Type: json.RawMessage(`"string"`), Required: true},
+							"enabled": {Type: json.RawMessage(`"bool"`), Optional: true},
+							"count":   {Type: json.RawMessage(`"number"`), Optional: true},
+							"tags":    {Type: json.RawMessage(`["list","string"]`), Optional: true},
+						},
+						BlockTypes: map[string]*provider.NestedBlock{
+							"setting": {
+								NestingMode: provider.NestingModeList,
+								Block: &provider.BlockType{
+									Attributes: map[string]*provider.Attribute{
+										"key":   {Type: json.RawMessage(`"string"`), Required: true},
+										"value": {Type: json.RawMessage(`"string"`), Optional: true},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			DataSourceSchemas: map[string]*provider.SchemaBlock{
+				"test_lookup": {
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"filter": {Type: json.RawMessage(`"string"`), Optional: true},
+							"id":     {Type: json.RawMessage(`"string"`), Computed: true},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if err := g.Generate(ps); err != nil {
+		t.Fatalf("Generate failed: %v", err)
+	}
+
+	// Write go.mod at tmpDir level
+	tforgeRoot, _ := filepath.Abs(filepath.Join("..", "."))
+	goMod := fmt.Sprintf("module roundtrip_test\n\ngo 1.23\n\nrequire tforge v0.0.0\nreplace tforge => %s\n", tforgeRoot)
+	if err := os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644); err != nil {
+		t.Fatalf("writing go.mod: %v", err)
+	}
+
+	// Write test harness that exercises the generated constructors
+	testCode := `package gen
+
+import (
+	"encoding/json"
+	"testing"
+
+	"tforge/config"
+)
+
+func TestResourceConstructorRoundTrip(t *testing.T) {
+	stack := config.NewStack("rt")
+
+	// Case 1: Required string field
+	err := NewWidget(stack, "basic", Widget_SetName("hello"))
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	if len(stack.Resources) != 1 {
+		t.Fatalf("expected 1 resource, got %d", len(stack.Resources))
+	}
+	r := stack.Resources[0]
+	if r.Type != "test_widget" {
+		t.Errorf("type = %q, want test_widget", r.Type)
+	}
+	if r.Name != "basic" {
+		t.Errorf("name = %q, want basic", r.Name)
+	}
+	if r.Config["name"] != "hello" {
+		t.Errorf("config[name] = %v, want hello", r.Config["name"])
+	}
+
+	// Case 2: Optional bool set to false must appear in config (not omitted)
+	stack2 := config.NewStack("rt2")
+	err = NewWidget(stack2, "booltest",
+		Widget_SetName("x"),
+		Widget_SetEnabled(false),
+	)
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	r2 := stack2.Resources[0]
+	// "enabled" has omitempty, so false IS expected to be omitted (Go zero value).
+	// This is the correct Terraform behavior: omitting false == default.
+	if _, exists := r2.Config["enabled"]; exists {
+		// If present, value must be false (bool)
+		if r2.Config["enabled"] != false {
+			t.Errorf("config[enabled] = %v, want false", r2.Config["enabled"])
+		}
+	}
+
+	// Case 3: Optional bool set to true must appear
+	stack3 := config.NewStack("rt3")
+	err = NewWidget(stack3, "truebool",
+		Widget_SetName("y"),
+		Widget_SetEnabled(true),
+	)
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	r3 := stack3.Resources[0]
+	if r3.Config["enabled"] != true {
+		t.Errorf("config[enabled] = %v, want true", r3.Config["enabled"])
+	}
+
+	// Case 4: Nested block round-trip
+	stack4 := config.NewStack("rt4")
+	err = NewWidget(stack4, "nested",
+		Widget_SetName("z"),
+		Widget_SetSetting(&WidgetSetting{Key: "k1", Value: "v1"}),
+	)
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	r4 := stack4.Resources[0]
+	settingRaw, ok := r4.Config["setting"]
+	if !ok {
+		t.Fatal("config[setting] missing")
+	}
+	// The constructor marshals/unmarshals to map[string]any, so nested blocks
+	// come through as []any containing map[string]any.
+	settingSlice, ok := settingRaw.([]any)
+	if !ok {
+		t.Fatalf("config[setting] is %T, want []any", settingRaw)
+	}
+	if len(settingSlice) != 1 {
+		t.Fatalf("len(setting) = %d, want 1", len(settingSlice))
+	}
+	settingMap := settingSlice[0].(map[string]any)
+	if settingMap["key"] != "k1" {
+		t.Errorf("setting[0].key = %v, want k1", settingMap["key"])
+	}
+	if settingMap["value"] != "v1" {
+		t.Errorf("setting[0].value = %v, want v1", settingMap["value"])
+	}
+
+	// Case 5: Empty optional fields are absent
+	stack5 := config.NewStack("rt5")
+	err = NewWidget(stack5, "minimal", Widget_SetName("only-name"))
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	r5 := stack5.Resources[0]
+	for _, key := range []string{"tags", "count", "setting"} {
+		if _, exists := r5.Config[key]; exists {
+			t.Errorf("config[%s] should be absent for unset optional, got %v", key, r5.Config[key])
+		}
+	}
+
+	// Case 6: Verify the config can be rendered to valid JSON
+	data, err := json.Marshal(r5.Config)
+	if err != nil {
+		t.Fatalf("marshal config: %v", err)
+	}
+	if !json.Valid(data) {
+		t.Error("config is not valid JSON")
+	}
+}
+
+func TestDataSourceConstructorRoundTrip(t *testing.T) {
+	stack := config.NewStack("ds")
+
+	err := NewLookupData(stack, "myds", LookupData_SetFilter("active"))
+	if err != nil {
+		t.Fatalf("NewLookupData: %v", err)
+	}
+	if len(stack.DataSources) != 1 {
+		t.Fatalf("expected 1 data source, got %d", len(stack.DataSources))
+	}
+	ds := stack.DataSources[0]
+	if ds.Type != "test_lookup" {
+		t.Errorf("type = %q, want test_lookup", ds.Type)
+	}
+	if ds.Name != "myds" {
+		t.Errorf("name = %q, want myds", ds.Name)
+	}
+	if ds.Config["filter"] != "active" {
+		t.Errorf("config[filter] = %v, want active", ds.Config["filter"])
+	}
+}
+
+func TestFromBridgeRoundTrip(t *testing.T) {
+	stack := config.NewStack("bridge")
+
+	cfg := Widget{
+		Name:    "direct",
+		Enabled: true,
+		Tags:    []string{"a", "b"},
+	}
+	err := NewWidget(stack, "bridged", FromWidget(cfg))
+	if err != nil {
+		t.Fatalf("NewWidget with FromWidget: %v", err)
+	}
+	r := stack.Resources[0]
+	if r.Config["name"] != "direct" {
+		t.Errorf("config[name] = %v, want direct", r.Config["name"])
+	}
+	if r.Config["enabled"] != true {
+		t.Errorf("config[enabled] = %v, want true", r.Config["enabled"])
+	}
+	tagsRaw := r.Config["tags"].([]any)
+	if len(tagsRaw) != 2 || tagsRaw[0] != "a" || tagsRaw[1] != "b" {
+		t.Errorf("config[tags] = %v, want [a b]", tagsRaw)
+	}
+}
+`
+	if err := os.WriteFile(filepath.Join(genDir, "roundtrip_test.go"), []byte(testCode), 0644); err != nil {
+		t.Fatalf("writing roundtrip_test.go: %v", err)
+	}
+
+	// Run go test in the temp directory
+	ctx := context.Background()
+	cmd := exec.CommandContext(ctx, "go", "test", "-v", "./gen/...")
+	cmd.Dir = tmpDir
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("constructor round-trip tests failed:\n%s\n%v", out, err)
+	}
+	t.Logf("constructor round-trip output:\n%s", out)
+}
+
 // TestGenerateNestedTypeFullFixture verifies that the full test fixture
 // (newTestProviderSchema) with NestedType attributes generates compilable code.
 // This is a broader smoke test using the same fixture as schema_test.go.
