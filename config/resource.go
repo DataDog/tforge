@@ -140,6 +140,28 @@ type Connection struct {
 	Extra map[string]any
 }
 
+// ProvisionerWhen specifies when a provisioner should run.
+type ProvisionerWhen string
+
+const (
+	// WhenCreate runs the provisioner during resource creation (default).
+	WhenCreate ProvisionerWhen = "create"
+
+	// WhenDestroy runs the provisioner during resource destruction.
+	WhenDestroy ProvisionerWhen = "destroy"
+)
+
+// ProvisionerOnFailure specifies behavior when a provisioner fails.
+type ProvisionerOnFailure string
+
+const (
+	// OnFailureFail aborts on provisioner failure (default).
+	OnFailureFail ProvisionerOnFailure = "fail"
+
+	// OnFailureContinue continues on provisioner failure.
+	OnFailureContinue ProvisionerOnFailure = "continue"
+)
+
 // Provisioner represents a resource provisioner.
 type Provisioner struct {
 	// Type is the provisioner type (e.g., "local-exec", "remote-exec", "file").
@@ -148,11 +170,11 @@ type Provisioner struct {
 	// Config contains provisioner-specific configuration.
 	Config map[string]any
 
-	// When specifies when to run ("create" or "destroy").
-	When string
+	// When specifies when to run (WhenCreate or WhenDestroy).
+	When ProvisionerWhen
 
-	// OnFailure specifies behavior on failure ("continue" or "fail").
-	OnFailure string
+	// OnFailure specifies behavior on failure (OnFailureFail or OnFailureContinue).
+	OnFailure ProvisionerOnFailure
 
 	// Connection overrides the resource connection for this provisioner.
 	Connection *Connection

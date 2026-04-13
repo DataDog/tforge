@@ -319,8 +319,8 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 			{
 				Type:      "local-exec",
 				Config:    map[string]any{"command": "echo hello"},
-				When:      "create",
-				OnFailure: "continue",
+				When:      config.WhenCreate,
+				OnFailure: config.OnFailureContinue,
 			},
 		},
 	}); err != nil {

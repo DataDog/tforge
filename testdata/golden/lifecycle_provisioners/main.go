@@ -62,8 +62,8 @@ func main() {
 				Config: map[string]any{
 					"command": "echo 'Destroying instance: ${self.id}'",
 				},
-				When:      "destroy",
-				OnFailure: "continue",
+				When:      config.WhenDestroy,
+				OnFailure: config.OnFailureContinue,
 			},
 		},
 	}); err != nil {
