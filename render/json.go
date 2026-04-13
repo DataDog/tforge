@@ -274,11 +274,11 @@ func buildResourceConfig(r config.Resource) map[string]any {
 	}
 
 	if r.Lifecycle != nil {
-		cfg["lifecycle"] = buildLifecycle(r.Lifecycle)
+		cfg["lifecycle"] = r.Lifecycle
 	}
 
 	if r.Timeouts != nil {
-		cfg["timeouts"] = buildTimeouts(r.Timeouts)
+		cfg["timeouts"] = r.Timeouts
 	}
 
 	if r.Connection != nil {
@@ -417,16 +417,6 @@ func buildOutputs(outputs []config.Output) map[string]outputJSON {
 	return result
 }
 
-// buildLifecycle builds the lifecycle block.
-func buildLifecycle(lc *config.Lifecycle) *config.Lifecycle {
-	return lc
-}
-
-// buildTimeouts builds the timeouts block.
-func buildTimeouts(t *config.Timeouts) *config.Timeouts {
-	return t
-}
-
 // buildProvisioners builds the provisioner blocks.
 func buildProvisioners(provisioners []config.Provisioner) []map[string]any {
 	result := make([]map[string]any, len(provisioners))
@@ -440,11 +430,11 @@ func buildProvisioners(provisioners []config.Provisioner) []map[string]any {
 		}
 
 		if p.When != "" {
-			cfg["when"] = p.When
+			cfg["when"] = string(p.When)
 		}
 
 		if p.OnFailure != "" {
-			cfg["on_failure"] = p.OnFailure
+			cfg["on_failure"] = string(p.OnFailure)
 		}
 
 		if p.Connection != nil {
