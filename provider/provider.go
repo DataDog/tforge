@@ -26,6 +26,11 @@ import (
 	"strings"
 )
 
+const (
+	dirPerm  = os.FileMode(0755)
+	filePerm = os.FileMode(0644)
+)
+
 // ErrCLINotFound indicates neither tofu nor terraform binary was found.
 var ErrCLINotFound = errors.New("neither tofu nor terraform binary found in PATH")
 
@@ -164,13 +169,13 @@ provider "%s" {}
 `, src.Name, src.Namespace, src.Name, version, src.Name)
 
 	configPath := filepath.Join(tmpDir, "main.tf")
-	if err := os.WriteFile(configPath, []byte(tfConfig), 0644); err != nil {
+	if err := os.WriteFile(configPath, []byte(tfConfig), filePerm); err != nil {
 		return nil, fmt.Errorf("writing config: %w", err)
 	}
 
 	// Set up provider plugin cache to avoid re-downloading providers
 	cacheDir := "/tmp/tforge-cache"
-	if err := os.MkdirAll(cacheDir, 0755); err != nil {
+	if err := os.MkdirAll(cacheDir, dirPerm); err != nil {
 		return nil, fmt.Errorf("creating cache dir: %w", err)
 	}
 

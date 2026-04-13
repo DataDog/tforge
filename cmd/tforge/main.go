@@ -25,6 +25,11 @@ import (
 
 const version = "0.2.0"
 
+const (
+	dirPerm  = os.FileMode(0755)
+	filePerm = os.FileMode(0644)
+)
+
 func main() {
 	render.Version = version
 	os.Exit(run(os.Args, os.Stdout, os.Stderr))
@@ -221,7 +226,7 @@ Examples:
 	}
 
 	if *outputFile != "" {
-		if err := os.WriteFile(*outputFile, data, 0644); err != nil {
+		if err := os.WriteFile(*outputFile, data, filePerm); err != nil {
 			return fmt.Errorf("writing file: %w", err)
 		}
 		fmt.Fprintf(stderr, "Schema saved to %s\n", *outputFile)

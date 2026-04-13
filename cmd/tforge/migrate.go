@@ -125,7 +125,7 @@ Examples:
 	// Create a sub-package per provider with generate.go
 	for _, p := range providers {
 		pkgDir := filepath.Join(*dir, p.Name)
-		if err := os.MkdirAll(pkgDir, 0755); err != nil {
+		if err := os.MkdirAll(pkgDir, dirPerm); err != nil {
 			return fmt.Errorf("creating %s/: %w", p.Name, err)
 		}
 
@@ -138,7 +138,7 @@ Examples:
 			p.Name, p.Source, p.Source, p.Version, p.Name, p.Name)
 
 		fmt.Fprintf(stderr, "Writing %s\n", generateFile)
-		if err := os.WriteFile(generateFile, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(generateFile, []byte(content), filePerm); err != nil {
 			return fmt.Errorf("writing %s: %w", generateFile, err)
 		}
 	}
@@ -263,7 +263,7 @@ func updateGitignore(dir string, stderr io.Writer) error {
 	addition += "\n# tforge generated files\n" + tforgeEntry + "\n"
 
 	fmt.Fprintf(stderr, "Updating %s\n", path)
-	return os.WriteFile(path, append(content, []byte(addition)...), 0644)
+	return os.WriteFile(path, append(content, []byte(addition)...), filePerm)
 }
 
 func printManualSteps(w io.Writer, providers []parsedProvider, modules []json.RawMessage) {

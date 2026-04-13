@@ -12,11 +12,16 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+const (
+	dirPerm  = os.FileMode(0755)
+	filePerm = os.FileMode(0644)
+)
+
 // WriteFile writes a jennifer file to disk, creating directories as needed.
 func WriteFile(f *jen.File, path string) error {
 	// Ensure directory exists
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, dirPerm); err != nil {
 		return fmt.Errorf("creating directory %s: %w", dir, err)
 	}
 
@@ -33,7 +38,7 @@ func WriteFile(f *jen.File, path string) error {
 	}
 
 	// Write to file
-	if err := os.WriteFile(path, formatted, 0644); err != nil {
+	if err := os.WriteFile(path, formatted, filePerm); err != nil {
 		return fmt.Errorf("writing file %s: %w", path, err)
 	}
 

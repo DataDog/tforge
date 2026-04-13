@@ -27,6 +27,11 @@ import (
 	"tforge/config"
 )
 
+const (
+	dirPerm  = os.FileMode(0755)
+	filePerm = os.FileMode(0644)
+)
+
 // ToJSON renders a stack to JSON bytes.
 func ToJSON(stack *config.Stack) ([]byte, error) {
 	if stack == nil {
@@ -58,12 +63,12 @@ func ToFile(stack *config.Stack, path string) error {
 	// Ensure directory exists
 	dir := filepath.Dir(path)
 	if dir != "." && dir != "" {
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, dirPerm); err != nil {
 			return fmt.Errorf("creating directory: %w", err)
 		}
 	}
 
-	if err := os.WriteFile(path, data, 0644); err != nil {
+	if err := os.WriteFile(path, data, filePerm); err != nil {
 		return fmt.Errorf("writing file: %w", err)
 	}
 
