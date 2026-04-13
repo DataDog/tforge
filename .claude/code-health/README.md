@@ -9,6 +9,9 @@ This directory contains Claude Code agent configurations for automated code heal
 | `cleanup.md` | Repo Janitor | Finds committed generated files, stale docs, debug scaffolding, and other clutter. Creates GitHub issues for cleanup tasks. |
 | `test-coverage.md` | Test Strategist | Identifies high-risk test gaps based on critical paths and edge cases. Creates GitHub issues with specific test cases. |
 | `yagni-simplifier.md` | Simplicity Enforcer | Finds over-engineered abstractions, unnecessary configuration, and excess indirection. Creates GitHub issues ranked by simplicity gain. |
+| `fail-loud.md` | Fail-Loud Auditor | Finds silently ignored errors, swallowed panics, fallbacks masking failures, and warnings that should be fatal. Creates GitHub issues ranked by severity. |
+| `go-strictness.md` | Go Strictness Enforcer | Finds weak typing: `any`/`interface{}`, raw strings as enums, `map[string]any` data bags, unchecked type assertions, stringly-typed errors, and other type-system bypasses. Creates GitHub issues ranked by effort. |
+| `single-source-of-truth.md` | Single Source of Truth Enforcer | Finds duplicated knowledge: dependency versions in multiple files, repeated string/numeric constants, copy-pasted logic, parallel structs, and CI/Makefile overlap. Creates GitHub issues ranked by drift risk. |
 | `swarm-fix.md` | Code Health Fixer | Picks the top 1-3 open code-health issues and implements fixes end-to-end, one commit per issue. |
 
 ## Usage
