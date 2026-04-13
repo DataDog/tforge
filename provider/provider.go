@@ -119,18 +119,39 @@ type Attribute struct {
 	Deprecated      bool            `json:"deprecated,omitempty"`
 }
 
+// NestingMode describes how a nested block or nested attribute is repeated.
+// The underlying type is string so JSON unmarshaling works transparently.
+type NestingMode string
+
+const (
+	// NestingModeSingle represents a single nested block or attribute.
+	NestingModeSingle NestingMode = "single"
+
+	// NestingModeList represents a list of nested blocks or attributes.
+	NestingModeList NestingMode = "list"
+
+	// NestingModeSet represents a set of nested blocks or attributes.
+	NestingModeSet NestingMode = "set"
+
+	// NestingModeMap represents a map of nested blocks or attributes.
+	NestingModeMap NestingMode = "map"
+
+	// NestingModeGroup represents a group nested block.
+	NestingModeGroup NestingMode = "group"
+)
+
 // NestedType represents a nested attribute type.
 type NestedType struct {
 	Attributes  map[string]*Attribute `json:"attributes,omitempty"`
-	NestingMode string                `json:"nesting_mode,omitempty"`
+	NestingMode NestingMode           `json:"nesting_mode,omitempty"`
 }
 
 // NestedBlock represents a nested block type.
 type NestedBlock struct {
-	Block       *BlockType `json:"block,omitempty"`
-	NestingMode string     `json:"nesting_mode,omitempty"`
-	MinItems    int        `json:"min_items,omitempty"`
-	MaxItems    int        `json:"max_items,omitempty"`
+	Block       *BlockType  `json:"block,omitempty"`
+	NestingMode NestingMode `json:"nesting_mode,omitempty"`
+	MinItems    int         `json:"min_items,omitempty"`
+	MaxItems    int         `json:"max_items,omitempty"`
 }
 
 // FetchSchema fetches a provider schema using tofu CLI.

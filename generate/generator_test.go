@@ -265,7 +265,7 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 					},
 					BlockTypes: map[string]*provider.NestedBlock{
 						"settings": {
-							NestingMode: "single",
+							NestingMode: provider.NestingModeSingle,
 							Block: &provider.BlockType{
 								Attributes: map[string]*provider.Attribute{
 									"timeout": {Type: json.RawMessage(`"number"`), Optional: true},
@@ -284,7 +284,7 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 						},
 						BlockTypes: map[string]*provider.NestedBlock{
 							"config": {
-								NestingMode: "list",
+								NestingMode: provider.NestingModeList,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"key":   {Type: json.RawMessage(`"string"`), Required: true},
@@ -391,7 +391,7 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 						},
 						BlockTypes: map[string]*provider.NestedBlock{
 							"tags": {
-								NestingMode: "set",
+								NestingMode: provider.NestingModeSet,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"key": {Type: json.RawMessage(`"string"`), Required: true},
@@ -399,7 +399,7 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 								},
 							},
 							"metadata": {
-								NestingMode: "map",
+								NestingMode: provider.NestingModeMap,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"value": {Type: json.RawMessage(`"string"`), Optional: true},
@@ -548,7 +548,7 @@ func TestGenerateCompilationComplex(t *testing.T) {
 					},
 					BlockTypes: map[string]*provider.NestedBlock{
 						"auth": {
-							NestingMode: "single",
+							NestingMode: provider.NestingModeSingle,
 							Block: &provider.BlockType{
 								Attributes: map[string]*provider.Attribute{
 									"token": {Type: json.RawMessage(`"string"`), Required: true},
@@ -571,7 +571,7 @@ func TestGenerateCompilationComplex(t *testing.T) {
 						},
 						BlockTypes: map[string]*provider.NestedBlock{
 							"disk": {
-								NestingMode: "list",
+								NestingMode: provider.NestingModeList,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"size": {Type: json.RawMessage(`"number"`), Required: true},
@@ -580,7 +580,7 @@ func TestGenerateCompilationComplex(t *testing.T) {
 								},
 							},
 							"network": {
-								NestingMode: "set",
+								NestingMode: provider.NestingModeSet,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"cidr": {Type: json.RawMessage(`"string"`), Required: true},
@@ -588,7 +588,7 @@ func TestGenerateCompilationComplex(t *testing.T) {
 								},
 							},
 							"metadata": {
-								NestingMode: "map",
+								NestingMode: provider.NestingModeMap,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"value": {Type: json.RawMessage(`"string"`), Optional: true},
@@ -596,7 +596,7 @@ func TestGenerateCompilationComplex(t *testing.T) {
 								},
 							},
 							"primary_nic": {
-								NestingMode: "single",
+								NestingMode: provider.NestingModeSingle,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"mac": {Type: json.RawMessage(`"string"`), Computed: true},
@@ -614,14 +614,14 @@ func TestGenerateCompilationComplex(t *testing.T) {
 						},
 						BlockTypes: map[string]*provider.NestedBlock{
 							"replica": {
-								NestingMode: "list",
+								NestingMode: provider.NestingModeList,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"region": {Type: json.RawMessage(`"string"`), Required: true},
 									},
 									BlockTypes: map[string]*provider.NestedBlock{
 										"endpoint": {
-											NestingMode: "single",
+											NestingMode: provider.NestingModeSingle,
 											Block: &provider.BlockType{
 												Attributes: map[string]*provider.Attribute{
 													"host": {Type: json.RawMessage(`"string"`), Computed: true},
@@ -646,7 +646,7 @@ func TestGenerateCompilationComplex(t *testing.T) {
 						},
 						BlockTypes: map[string]*provider.NestedBlock{
 							"filter": {
-								NestingMode: "set",
+								NestingMode: provider.NestingModeSet,
 								Block: &provider.BlockType{
 									Attributes: map[string]*provider.Attribute{
 										"name":   {Type: json.RawMessage(`"string"`), Required: true},
@@ -710,7 +710,7 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 										"inner_name":  {Type: json.RawMessage(`"string"`), Required: true},
 										"inner_count": {Type: json.RawMessage(`"number"`), Optional: true},
 									},
-									NestingMode: "single",
+									NestingMode: provider.NestingModeSingle,
 								},
 								Optional: true,
 							},
@@ -719,7 +719,7 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 									Attributes: map[string]*provider.Attribute{
 										"value": {Type: json.RawMessage(`"string"`), Required: true},
 									},
-									NestingMode: "list",
+									NestingMode: provider.NestingModeList,
 								},
 								Optional: true,
 							},
@@ -729,7 +729,7 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 										"key":   {Type: json.RawMessage(`"string"`), Required: true},
 										"value": {Type: json.RawMessage(`"string"`), Optional: true},
 									},
-									NestingMode: "set",
+									NestingMode: provider.NestingModeSet,
 								},
 								Optional: true,
 							},
@@ -738,14 +738,14 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 									Attributes: map[string]*provider.Attribute{
 										"setting": {Type: json.RawMessage(`"string"`), Required: true},
 									},
-									NestingMode: "map",
+									NestingMode: provider.NestingModeMap,
 								},
 								Optional: true,
 							},
 							"empty_nested": {
 								NestedType: &provider.NestedType{
 									Attributes:  map[string]*provider.Attribute{},
-									NestingMode: "single",
+									NestingMode: provider.NestingModeSingle,
 								},
 								Optional: true,
 							},

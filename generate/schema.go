@@ -113,13 +113,13 @@ func nestedTypeString(nt *provider.NestedType) string {
 		return "dynamic"
 	}
 	switch nt.NestingMode {
-	case "single":
+	case provider.NestingModeSingle:
 		return "object"
-	case "list":
+	case provider.NestingModeList:
 		return "list(object)"
-	case "set":
+	case provider.NestingModeSet:
 		return "set(object)"
-	case "map":
+	case provider.NestingModeMap:
 		return "map(object)"
 	default:
 		return "object"

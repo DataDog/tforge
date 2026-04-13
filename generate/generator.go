@@ -333,11 +333,11 @@ func (g *Generator) generateNestedBlockField(s *jen.Group, nb nestedBlockEntry, 
 	field := s.Id(fieldName)
 
 	switch nb.Block.NestingMode {
-	case "single", "group":
+	case provider.NestingModeSingle, provider.NestingModeGroup:
 		field.Op("*").Id(typeName)
-	case "list", "set":
+	case provider.NestingModeList, provider.NestingModeSet:
 		field.Index().Op("*").Id(typeName)
-	case "map":
+	case provider.NestingModeMap:
 		field.Map(jen.String()).Op("*").Id(typeName)
 	default:
 		field.Op("*").Id(typeName)
@@ -438,7 +438,7 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 
 		f.Commentf("%s sets the %s nested block.", funcName, fieldName)
 		switch nb.Block.NestingMode {
-		case "single", "group":
+		case provider.NestingModeSingle, provider.NestingModeGroup:
 			f.Func().Id(funcName).Params(
 				jen.Id("v").Op("*").Id(typeName),
 			).Id(optionType).Block(
@@ -446,7 +446,7 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 					jen.Id("o").Dot(fieldName).Op("=").Id("v"),
 				)),
 			)
-		case "list", "set":
+		case provider.NestingModeList, provider.NestingModeSet:
 			f.Func().Id(funcName).Params(
 				jen.Id("v").Op("...").Op("*").Id(typeName),
 			).Id(optionType).Block(
@@ -454,7 +454,7 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 					jen.Id("o").Dot(fieldName).Op("=").Id("v"),
 				)),
 			)
-		case "map":
+		case provider.NestingModeMap:
 			f.Func().Id(funcName).Params(
 				jen.Id("v").Map(jen.String()).Op("*").Id(typeName),
 			).Id(optionType).Block(

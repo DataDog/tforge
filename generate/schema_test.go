@@ -68,7 +68,7 @@ func newTestProviderSchema() *provider.ProviderSchema {
 										Required: true,
 									},
 								},
-								NestingMode: "single",
+								NestingMode: provider.NestingModeSingle,
 							},
 							Optional: true,
 						},
@@ -80,7 +80,7 @@ func newTestProviderSchema() *provider.ProviderSchema {
 										Required: true,
 									},
 								},
-								NestingMode: "list",
+								NestingMode: provider.NestingModeList,
 							},
 							Optional: true,
 						},
@@ -96,7 +96,7 @@ func newTestProviderSchema() *provider.ProviderSchema {
 										Optional: true,
 									},
 								},
-								NestingMode: "set",
+								NestingMode: provider.NestingModeSet,
 							},
 							Optional: true,
 						},
@@ -108,7 +108,7 @@ func newTestProviderSchema() *provider.ProviderSchema {
 										Required: true,
 									},
 								},
-								NestingMode: "map",
+								NestingMode: provider.NestingModeMap,
 							},
 							Optional: true,
 						},
@@ -127,7 +127,7 @@ func newTestProviderSchema() *provider.ProviderSchema {
 						"nested_empty_attrs": {
 							NestedType: &provider.NestedType{
 								Attributes:  map[string]*provider.Attribute{},
-								NestingMode: "single",
+								NestingMode: provider.NestingModeSingle,
 							},
 							Optional: true,
 						},
@@ -143,7 +143,7 @@ func newTestProviderSchema() *provider.ProviderSchema {
 									},
 								},
 							},
-							NestingMode: "list",
+							NestingMode: provider.NestingModeList,
 							MinItems:    1,
 							MaxItems:    5,
 						},
@@ -151,7 +151,7 @@ func newTestProviderSchema() *provider.ProviderSchema {
 							Block: &provider.BlockType{
 								Description: "A single block",
 							},
-							NestingMode: "single",
+							NestingMode: provider.NestingModeSingle,
 						},
 					},
 				},
@@ -201,15 +201,15 @@ func newTestProviderSchema() *provider.ProviderSchema {
 															},
 														},
 													},
-													NestingMode: "single",
+													NestingMode: provider.NestingModeSingle,
 												},
 											},
 										},
-										NestingMode: "list",
+										NestingMode: provider.NestingModeList,
 									},
 								},
 							},
-							NestingMode: "list",
+							NestingMode: provider.NestingModeList,
 						},
 					},
 				},
@@ -452,13 +452,13 @@ func TestSortedNestedBlocksNil(t *testing.T) {
 
 func TestNestedTypeString(t *testing.T) {
 	tests := []struct {
-		mode string
+		mode provider.NestingMode
 		want string
 	}{
-		{"single", "object"},
-		{"list", "list(object)"},
-		{"set", "set(object)"},
-		{"map", "map(object)"},
+		{provider.NestingModeSingle, "object"},
+		{provider.NestingModeList, "list(object)"},
+		{provider.NestingModeSet, "set(object)"},
+		{provider.NestingModeMap, "map(object)"},
 		{"unknown", "object"},
 	}
 	for _, tt := range tests {
