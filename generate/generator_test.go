@@ -806,6 +806,112 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
+func TestDetectProviderPrefix(t *testing.T) {
+	tests := []struct {
+		name       string
+		resources  map[string]*provider.SchemaBlock
+		dataSrcs   map[string]*provider.SchemaBlock
+		wantPrefix string
+	}{
+		{
+			name:       "resources with underscore",
+			resources:  map[string]*provider.SchemaBlock{"datadog_monitor": {}, "datadog_slo": {}},
+			wantPrefix: "Datadog",
+		},
+		{
+			name:       "data sources only",
+			dataSrcs:   map[string]*provider.SchemaBlock{"aws_ami": {}},
+			wantPrefix: "Aws",
+		},
+		{
+			name:       "resources preferred over data sources",
+			resources:  map[string]*provider.SchemaBlock{"datadog_monitor": {}},
+			dataSrcs:   map[string]*provider.SchemaBlock{"aws_ami": {}},
+			wantPrefix: "Datadog",
+		},
+		{
+			name:       "no underscore in resource name",
+			resources:  map[string]*provider.SchemaBlock{"singleword": {}},
+			wantPrefix: "",
+		},
+		{
+			name:       "no resources or data sources",
+			wantPrefix: "",
+		},
+		{
+			name:       "falls through to data sources when resource has no underscore",
+			resources:  map[string]*provider.SchemaBlock{"nounderscore": {}},
+			dataSrcs:   map[string]*provider.SchemaBlock{"aws_ami": {}},
+			wantPrefix: "Aws",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := New(Config{PackageName: "test", OutputDir: t.TempDir()})
+			g.schema = &provider.ProviderSchema{
+				ResourceSchemas:   tt.resources,
+				DataSourceSchemas: tt.dataSrcs,
+			}
+			got := g.detectProviderPrefix()
+			if got != tt.wantPrefix {
+				t.Errorf("detectProviderPrefix() = %q, want %q", got, tt.wantPrefix)
+			}
+		})
+	}
+}
+
+func TestShortName(t *testing.T) {
+	tests := []struct {
+		name       string
+		prefix     string
+		structName string
+		want       string
+	}{
+		{
+			name:       "strips matching prefix",
+			prefix:     "Datadog",
+			structName: "DatadogMonitor",
+			want:       "Monitor",
+		},
+		{
+			name:       "no prefix set",
+			prefix:     "",
+			structName: "DatadogMonitor",
+			want:       "DatadogMonitor",
+		},
+		{
+			name:       "prefix does not match",
+			prefix:     "Aws",
+			structName: "DatadogMonitor",
+			want:       "DatadogMonitor",
+		},
+		{
+			name:       "stripping prefix leaves empty string",
+			prefix:     "Datadog",
+			structName: "Datadog",
+			want:       "Datadog",
+		},
+		{
+			name:       "initialism prefix",
+			prefix:     "AWS",
+			structName: "AWSInstance",
+			want:       "Instance",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := New(Config{PackageName: "test", OutputDir: t.TempDir()})
+			g.providerPrefix = tt.prefix
+			got := g.shortName(tt.structName)
+			if got != tt.want {
+				t.Errorf("shortName(%q) = %q, want %q", tt.structName, got, tt.want)
+			}
+		})
+	}
+}
+
 // TestConstructorRoundTrip generates code, writes a test harness that invokes
 // the generated constructors, and runs it in a subprocess. This verifies that
 // the marshal/unmarshal round-trip inside the constructor preserves field values
