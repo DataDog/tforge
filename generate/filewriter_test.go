@@ -1,6 +1,13 @@
 package generate
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/dave/jennifer/jen"
+)
 
 // newTestGenerator returns a Generator with default initialisms for testing.
 func newTestGenerator() *Generator {
@@ -159,6 +166,81 @@ func TestDefaultInitialisms(t *testing.T) {
 		if g.initialisms[s] {
 			t.Errorf("did not expect %q in default initialisms", s)
 		}
+	}
+}
+
+func TestWriteFile_HappyPath(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "out_gen.go")
+
+	f := jen.NewFile("testpkg")
+	f.Func().Id("Hello").Params().String().Block(
+		jen.Return(jen.Lit("hello")),
+	)
+
+	if err := WriteFile(f, path); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("reading output: %v", err)
+	}
+	if !strings.Contains(string(data), "func Hello()") {
+		t.Error("output does not contain expected function")
+	}
+}
+
+func TestWriteFile_MkdirAllFailure(t *testing.T) {
+	// Create a file where a directory is expected, so MkdirAll fails.
+	dir := t.TempDir()
+	blocker := filepath.Join(dir, "blocker")
+	if err := os.WriteFile(blocker, []byte("x"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Try to write under the file (which is not a directory).
+	path := filepath.Join(blocker, "subdir", "out_gen.go")
+
+	f := jen.NewFile("testpkg")
+	err := WriteFile(f, path)
+	if err == nil {
+		t.Fatal("expected error for MkdirAll failure, got nil")
+	}
+	if !strings.Contains(err.Error(), "creating directory") {
+		t.Errorf("expected 'creating directory' in error, got: %v", err)
+	}
+}
+
+func TestWriteFile_WriteFailure(t *testing.T) {
+	// Create a read-only directory so os.WriteFile fails.
+	dir := t.TempDir()
+	readonlyDir := filepath.Join(dir, "readonly")
+	if err := os.MkdirAll(readonlyDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	// Make directory read-only after creation.
+	if err := os.Chmod(readonlyDir, 0555); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		// Restore permissions so t.TempDir cleanup can remove it.
+		os.Chmod(readonlyDir, 0755) //nolint:errcheck
+	})
+
+	path := filepath.Join(readonlyDir, "out_gen.go")
+
+	f := jen.NewFile("testpkg")
+	f.Func().Id("Hello").Params().String().Block(
+		jen.Return(jen.Lit("hello")),
+	)
+
+	err := WriteFile(f, path)
+	if err == nil {
+		t.Fatal("expected error for write failure, got nil")
+	}
+	if !strings.Contains(err.Error(), "writing file") {
+		t.Errorf("expected 'writing file' in error, got: %v", err)
 	}
 }
 
