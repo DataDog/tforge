@@ -247,6 +247,24 @@ func buildResources(resources []config.Resource) map[string]map[string]any {
 	return result
 }
 
+// applyCommonMeta writes the meta-arguments shared by resources, data sources,
+// and modules (provider, depends_on, count, for_each) into cfg.
+// This is the single source of truth for the common serialization pattern.
+func applyCommonMeta(cfg map[string]any, provider string, dependsOn []string, count, forEach any) {
+	if provider != "" {
+		cfg["provider"] = provider
+	}
+	if len(dependsOn) > 0 {
+		cfg["depends_on"] = dependsOn
+	}
+	if count != nil {
+		cfg["count"] = count
+	}
+	if forEach != nil {
+		cfg["for_each"] = forEach
+	}
+}
+
 // buildResourceConfig builds a single resource configuration.
 func buildResourceConfig(r config.Resource) map[string]any {
 	cfg := make(map[string]any)
@@ -257,21 +275,7 @@ func buildResourceConfig(r config.Resource) map[string]any {
 	}
 
 	// Add meta-arguments
-	if r.Provider != "" {
-		cfg["provider"] = r.Provider
-	}
-
-	if len(r.DependsOn) > 0 {
-		cfg["depends_on"] = r.DependsOn
-	}
-
-	if r.Count != nil {
-		cfg["count"] = r.Count
-	}
-
-	if r.ForEach != nil {
-		cfg["for_each"] = r.ForEach
-	}
+	applyCommonMeta(cfg, r.Provider, r.DependsOn, r.Count, r.ForEach)
 
 	if r.Lifecycle != nil {
 		cfg["lifecycle"] = r.Lifecycle
@@ -309,21 +313,7 @@ func buildDataSources(dataSources []config.DataSource) map[string]map[string]any
 		}
 
 		// Add meta-arguments
-		if d.Provider != "" {
-			cfg["provider"] = d.Provider
-		}
-
-		if len(d.DependsOn) > 0 {
-			cfg["depends_on"] = d.DependsOn
-		}
-
-		if d.Count != nil {
-			cfg["count"] = d.Count
-		}
-
-		if d.ForEach != nil {
-			cfg["for_each"] = d.ForEach
-		}
+		applyCommonMeta(cfg, d.Provider, d.DependsOn, d.Count, d.ForEach)
 
 		result[d.Type][d.Name] = cfg
 	}
@@ -354,17 +344,8 @@ func buildModules(modules []config.Module) map[string]map[string]any {
 			cfg["providers"] = m.Providers
 		}
 
-		if len(m.DependsOn) > 0 {
-			cfg["depends_on"] = m.DependsOn
-		}
-
-		if m.Count != nil {
-			cfg["count"] = m.Count
-		}
-
-		if m.ForEach != nil {
-			cfg["for_each"] = m.ForEach
-		}
+		// Module does not have a single "provider" field; pass empty string.
+		applyCommonMeta(cfg, "", m.DependsOn, m.Count, m.ForEach)
 
 		result[m.Name] = cfg
 	}

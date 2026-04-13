@@ -1421,3 +1421,50 @@ func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 		t.Errorf("expected bastion_user bastion, got %v", conn["bastion_user"])
 	}
 }
+
+func TestApplyCommonMeta(t *testing.T) {
+	t.Run("all fields set", func(t *testing.T) {
+		cfg := map[string]any{"existing": "value"}
+		applyCommonMeta(cfg, "aws.west", []string{"aws_vpc.main"}, 3, map[string]string{"a": "1"})
+
+		if cfg["provider"] != "aws.west" {
+			t.Errorf("provider = %v, want aws.west", cfg["provider"])
+		}
+		deps := cfg["depends_on"].([]string)
+		if len(deps) != 1 || deps[0] != "aws_vpc.main" {
+			t.Errorf("depends_on = %v, want [aws_vpc.main]", deps)
+		}
+		if cfg["count"] != 3 {
+			t.Errorf("count = %v, want 3", cfg["count"])
+		}
+		fe := cfg["for_each"].(map[string]string)
+		if fe["a"] != "1" {
+			t.Errorf("for_each = %v, want map[a:1]", fe)
+		}
+		// existing key preserved
+		if cfg["existing"] != "value" {
+			t.Errorf("existing = %v, want value", cfg["existing"])
+		}
+	})
+
+	t.Run("no fields set", func(t *testing.T) {
+		cfg := map[string]any{"existing": "value"}
+		applyCommonMeta(cfg, "", nil, nil, nil)
+
+		if _, ok := cfg["provider"]; ok {
+			t.Error("provider should not be set")
+		}
+		if _, ok := cfg["depends_on"]; ok {
+			t.Error("depends_on should not be set")
+		}
+		if _, ok := cfg["count"]; ok {
+			t.Error("count should not be set")
+		}
+		if _, ok := cfg["for_each"]; ok {
+			t.Error("for_each should not be set")
+		}
+		if cfg["existing"] != "value" {
+			t.Errorf("existing = %v, want value", cfg["existing"])
+		}
+	})
+}
