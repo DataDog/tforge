@@ -295,6 +295,24 @@ func (g *Generator) generateBlockFields(s *jen.Group, block *provider.BlockType,
 	}
 }
 
+// applyGoType applies a Go type string to a jen statement. This is the single
+// source of truth for mapping Go type names to jennifer type calls, used by both
+// struct field generation and option function parameter generation.
+func applyGoType(stmt *jen.Statement, goType string) *jen.Statement {
+	switch goType {
+	case "string":
+		return stmt.String()
+	case "float64":
+		return stmt.Float64()
+	case "bool":
+		return stmt.Bool()
+	case "any":
+		return stmt.Any()
+	default:
+		return stmt.Id(goType)
+	}
+}
+
 // generateAttributeField generates a struct field for an attribute.
 func (g *Generator) generateAttributeField(s *jen.Group, attr attributeEntry) {
 	fieldName := g.toGoName(attr.Name)
@@ -302,21 +320,7 @@ func (g *Generator) generateAttributeField(s *jen.Group, attr attributeEntry) {
 	jsonTag := g.jsonTag(attr.Name, attr.Attr.Optional || attr.Attr.Computed)
 
 	field := s.Id(fieldName)
-
-	// Add type
-	switch goType {
-	case "string":
-		field.String()
-	case "float64":
-		field.Float64()
-	case "bool":
-		field.Bool()
-	case "any":
-		field.Any()
-	default:
-		// Handle slices and maps
-		field.Id(goType)
-	}
+	applyGoType(field, goType)
 
 	// Add JSON tag
 	field.Tag(map[string]string{"json": jsonTag})
@@ -410,19 +414,7 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 
 		f.Commentf("%s sets the %s field.", funcName, fieldName)
 		f.Func().Id(funcName).ParamsFunc(func(p *jen.Group) {
-			param := p.Id("v")
-			switch goType {
-			case "string":
-				param.String()
-			case "float64":
-				param.Float64()
-			case "bool":
-				param.Bool()
-			case "any":
-				param.Any()
-			default:
-				param.Id(goType)
-			}
+			applyGoType(p.Id("v"), goType)
 		}).Id(optionType).Block(
 			jen.Return(jen.Func().Params(jen.Id("o").Op("*").Id(structName)).Block(
 				jen.Id("o").Dot(fieldName).Op("=").Id("v"),
