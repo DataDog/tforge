@@ -11,13 +11,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
 	"os"
-
-	"context"
 
 	"tforge/generate"
 	"tforge/provider"
@@ -142,7 +141,11 @@ Examples:
 		if err != nil {
 			return fmt.Errorf("fetching schema: %w", err)
 		}
-		schema.Source, _ = provider.ParseSource(*providerSource)
+		source, err := provider.ParseSource(*providerSource)
+		if err != nil {
+			return fmt.Errorf("parsing provider source %q: %w", *providerSource, err)
+		}
+		schema.Source = source
 		schema.Version = *providerVersion
 	}
 
