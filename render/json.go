@@ -9,12 +9,12 @@
 //	// ... add providers, resources, etc.
 //
 //	// Write to file
-//	if err := render.ToFile(stack, "main.tf.json"); err != nil {
+//	if err := render.ToFile(stack, "main.tf.json", "1.0.0"); err != nil {
 //	    log.Fatal(err)
 //	}
 //
 //	// Or get JSON bytes
-//	data, err := render.ToJSON(stack)
+//	data, err := render.ToJSON(stack, "1.0.0")
 package render
 
 import (
@@ -32,13 +32,22 @@ const (
 	filePerm = os.FileMode(0644)
 )
 
+// DefaultVersion is the fallback version stamped into generated JSON when
+// no explicit version is supplied.
+const DefaultVersion = "dev"
+
 // ToJSON renders a stack to JSON bytes.
-func ToJSON(stack *config.Stack) ([]byte, error) {
+// The version string is embedded in the metadata comment block.
+func ToJSON(stack *config.Stack, version string) ([]byte, error) {
 	if stack == nil {
 		return nil, fmt.Errorf("nil stack")
 	}
 
-	tf := buildTerraformJSON(stack)
+	if version == "" {
+		version = DefaultVersion
+	}
+
+	tf := buildTerraformJSON(stack, version)
 
 	// Use deterministic JSON output
 	var buf bytes.Buffer
@@ -54,8 +63,9 @@ func ToJSON(stack *config.Stack) ([]byte, error) {
 }
 
 // ToFile renders a stack to a JSON file.
-func ToFile(stack *config.Stack, path string) error {
-	data, err := ToJSON(stack)
+// The version string is embedded in the metadata comment block.
+func ToFile(stack *config.Stack, path, version string) error {
+	data, err := ToJSON(stack, version)
 	if err != nil {
 		return err
 	}
@@ -74,9 +84,6 @@ func ToFile(stack *config.Stack, path string) error {
 
 	return nil
 }
-
-// Version is the tforge version, set at build time or defaulting to "dev".
-var Version = "dev"
 
 // terraformJSON represents the root structure of a .tf.json file.
 type terraformJSON struct {
@@ -124,12 +131,12 @@ type outputJSON struct {
 }
 
 // buildTerraformJSON converts a Stack to the terraform JSON structure.
-func buildTerraformJSON(stack *config.Stack) *terraformJSON {
+func buildTerraformJSON(stack *config.Stack, version string) *terraformJSON {
 	tf := &terraformJSON{
 		Comment: map[string]any{
 			"metadata": map[string]any{
 				"tool":      "tforge",
-				"version":   Version,
+				"version":   version,
 				"stackName": stack.Name,
 			},
 		},

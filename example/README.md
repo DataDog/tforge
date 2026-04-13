@@ -66,7 +66,7 @@ func main() {
     })
 
     // Render to .tf.json
-    render.ToFile(stack, "main.tf.json")
+    render.ToFile(stack, "main.tf.json", "")
 }
 ```
 

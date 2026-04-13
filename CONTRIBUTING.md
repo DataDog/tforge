@@ -19,7 +19,7 @@ tforge follows [Semantic Versioning](https://semver.org/) (SemVer):
 - **Minor** (`v0.1.0` -> `v0.2.0`): New features, new provider support, new CLI commands. Backward-compatible.
 - **Patch** (`v0.1.0` -> `v0.1.1`): Bug fixes, documentation updates, test improvements. Backward-compatible.
 
-The version is defined in `cmd/tforge/main.go` as the `version` constant and embedded in rendered `.tf.json` output via `render.Version`.
+The version is defined in `cmd/tforge/main.go` as the `version` constant and passed explicitly to `render.ToJSON` / `render.ToFile` as a parameter.
 
 While tforge is pre-1.0, minor versions may include breaking changes. The API will stabilize at v1.0.0.
 

@@ -11,7 +11,7 @@ import (
 func TestExample_GeneratesValidJSON(t *testing.T) {
 	stack := buildExampleStack()
 
-	data, err := render.ToJSON(stack)
+	data, err := render.ToJSON(stack, "")
 	if err != nil {
 		t.Fatalf("ToJSON: %v", err)
 	}

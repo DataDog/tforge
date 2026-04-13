@@ -106,7 +106,7 @@ func main() {
 		"ManagedBy": "tforge",
 	})
 
-	data, err := render.ToJSON(stack)
+	data, err := render.ToJSON(stack, "")
 	if err != nil {
 		log.Fatal(err)
 	}

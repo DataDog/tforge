@@ -155,7 +155,7 @@ func NewMyStack() *config.Stack {
 
 func main() {
     stack := NewMyStack()
-    if err := render.ToFile(stack, "main.tf.json"); err != nil {
+    if err := render.ToFile(stack, "main.tf.json", ""); err != nil {
         log.Fatal(err)
     }
 }
@@ -458,7 +458,7 @@ func NewMyStack() *config.Stack {
 
 func main() {
     stack := NewMyStack()
-    if err := render.ToFile(stack, "main.tf.json"); err != nil {
+    if err := render.ToFile(stack, "main.tf.json", ""); err != nil {
         log.Fatal(err)
     }
 }

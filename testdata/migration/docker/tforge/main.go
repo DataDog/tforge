@@ -41,7 +41,7 @@ func NewExampleCdktfGoDockerStack() *config.Stack {
 func main() {
 	stack := NewExampleCdktfGoDockerStack()
 
-	must(render.ToFile(stack, "main.tf.json"))
+	must(render.ToFile(stack, "main.tf.json", ""))
 }
 
 func must(err error) {

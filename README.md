@@ -112,7 +112,7 @@ func main() {
         },
     })
 
-    if err := render.ToFile(stack, "main.tf.json"); err != nil {
+    if err := render.ToFile(stack, "main.tf.json", ""); err != nil {
         log.Fatal(err)
     }
 }

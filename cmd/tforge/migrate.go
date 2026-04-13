@@ -290,7 +290,7 @@ func printManualSteps(w io.Writer, providers []parsedProvider, modules []json.Ra
 	}
 
 	fmt.Fprintln(w, "  4. Replace CDKTF patterns:")
-	fmt.Fprintln(w, "     - cdktf.NewApp / app.Synth()  →  render.ToFile(stack, \"main.tf.json\")")
+	fmt.Fprintln(w, "     - cdktf.NewApp / app.Synth()  →  render.ToFile(stack, \"main.tf.json\", \"\")")
 	fmt.Fprintln(w, "     - cdktf.NewTerraformStack()   →  config.NewStack(\"name\")")
 	fmt.Fprintln(w, "     - provider.NewXxx(stack, ...)  →  stack.AddProvider(config.Provider{...})")
 	fmt.Fprintln(w, "     - resource.NewXxx(stack, ...)  →  pkg.NewXxx(stack, \"name\", pkg.XxxConfig{...})")
