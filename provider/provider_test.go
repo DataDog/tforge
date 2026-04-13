@@ -539,6 +539,45 @@ func TestFindCLI_ForcedInvalid(t *testing.T) {
 // Context cancellation tests
 // ---------------------------------------------------------------------------
 
+func TestFetchSchema_InitFailure(t *testing.T) {
+	skipIfNoCLI(t)
+
+	// Use a provider that does not exist in any registry so that init fails.
+	_, err := FetchSchema(context.Background(), "nonexistent-namespace/nonexistent-provider-xyz", "0.0.1")
+	if err == nil {
+		t.Fatal("expected error for nonexistent provider, got nil")
+	}
+	// The error must mention "init failed" and include the CLI output.
+	if !strings.Contains(err.Error(), "init failed") {
+		t.Errorf("error = %q, want it to contain 'init failed'", err.Error())
+	}
+}
+
+func TestFetchSchema_NoCLI(t *testing.T) {
+	// Force a binary that doesn't exist via TFORGE_CLI to trigger the
+	// ErrCLINotFound-like path without affecting the real PATH.
+	t.Setenv("TFORGE_CLI", "nonexistent_binary_xyz_tforge")
+
+	_, err := FetchSchema(context.Background(), "hashicorp/null", "3.2.1")
+	if err == nil {
+		t.Fatal("expected error when CLI is not found, got nil")
+	}
+	if !strings.Contains(err.Error(), "not found") {
+		t.Errorf("error = %q, want it to mention 'not found'", err.Error())
+	}
+}
+
+func TestFetchSchema_InvalidSource(t *testing.T) {
+	// Invalid source should fail at parse stage before any CLI work.
+	_, err := FetchSchema(context.Background(), "no-slash", "1.0.0")
+	if err == nil {
+		t.Fatal("expected error for invalid source, got nil")
+	}
+	if !strings.Contains(err.Error(), "invalid provider source") {
+		t.Errorf("error = %q, want it to mention 'invalid provider source'", err.Error())
+	}
+}
+
 func TestFetchSchema_CancelledContext(t *testing.T) {
 	skipIfNoCLI(t)
 
