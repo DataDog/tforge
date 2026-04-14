@@ -29,6 +29,36 @@ const (
 	filePerm = os.FileMode(0644)
 )
 
+// command represents a CLI subcommand with a typed run function.
+type command struct {
+	// run executes the subcommand, returning an error on failure.
+	run func(args []string, stdout, stderr io.Writer) error
+}
+
+// commands maps subcommand names (including aliases) to their implementations.
+var commands = map[string]command{
+	"generate": {run: func(args []string, stdout, stderr io.Writer) error { return runGenerate(args, stderr) }},
+	"gen":      {run: func(args []string, stdout, stderr io.Writer) error { return runGenerate(args, stderr) }},
+	"schema":   {run: func(args []string, stdout, stderr io.Writer) error { return runSchema(args, stdout, stderr) }},
+	"migrate":  {run: func(args []string, stdout, stderr io.Writer) error { return runMigrate(args, stdout, stderr) }},
+	"version": {run: func(args []string, stdout, _ io.Writer) error {
+		fmt.Fprintf(stdout, "tforge version %s\n", version)
+		return nil
+	}},
+	"help": {run: func(args []string, stdout, _ io.Writer) error {
+		printUsage(stdout)
+		return nil
+	}},
+}
+
+func init() {
+	// Register flag-style aliases that map to existing commands.
+	commands["-v"] = commands["version"]
+	commands["--version"] = commands["version"]
+	commands["-h"] = commands["help"]
+	commands["--help"] = commands["help"]
+}
+
 func main() {
 	os.Exit(run(os.Args, os.Stdout, os.Stderr))
 }
@@ -40,29 +70,15 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return 1
 	}
 
-	switch args[1] {
-	case "generate", "gen":
-		if err := runGenerate(args[2:], stderr); err != nil {
-			fmt.Fprintln(stderr, err)
-			return 1
-		}
-	case "schema":
-		if err := runSchema(args[2:], stdout, stderr); err != nil {
-			fmt.Fprintln(stderr, err)
-			return 1
-		}
-	case "migrate":
-		if err := runMigrate(args[2:], stdout, stderr); err != nil {
-			fmt.Fprintln(stderr, err)
-			return 1
-		}
-	case "version", "-v", "--version":
-		fmt.Fprintf(stdout, "tforge version %s\n", version)
-	case "help", "-h", "--help":
-		printUsage(stdout)
-	default:
+	cmd, ok := commands[args[1]]
+	if !ok {
 		fmt.Fprintf(stderr, "Unknown command: %s\n", args[1])
 		printUsage(stderr)
+		return 1
+	}
+
+	if err := cmd.run(args[2:], stdout, stderr); err != nil {
+		fmt.Fprintln(stderr, err)
 		return 1
 	}
 	return 0
