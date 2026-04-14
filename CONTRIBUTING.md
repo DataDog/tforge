@@ -72,6 +72,7 @@ tforge -v   # should print "tforge version 0.2.0"
 - Add tests for new functionality
 - Do not commit generated files (`*_gen.go`, `*.tf.json`)
 - Check error returns (errcheck linter will catch these)
+- Delete feature branches after merging (GitHub auto-delete is enabled; for manual cleanup run `git fetch --prune`)
 
 ## Code style
 
