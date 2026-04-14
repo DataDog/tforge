@@ -1,5 +1,9 @@
 .PHONY: fmt lint test coverage coverage-check build install clean setup update-snapshots pre-commit snapshot-tests validate-golden clear-golden-cache migration-test
 
+# Minimum test coverage percentage enforced by `make coverage-check`.
+# This is the single source of truth — docs reference this variable.
+COVERAGE_THRESHOLD = 80
+
 # Terraform/OpenTofu versions to validate golden files against (requires Docker)
 TERRAFORM_VERSIONS = 1.5 1.9 latest
 TOFU_VERSIONS = 1.8 latest
@@ -30,11 +34,11 @@ coverage:
 	go test -race -coverprofile=coverage.out -covermode=atomic $(PKGS)
 	go tool cover -func=coverage.out
 
-# Run tests with coverage and check 80% threshold
+# Run tests with coverage and check threshold (see COVERAGE_THRESHOLD variable)
 coverage-check: coverage
 	@coverage=$$(go tool cover -func=coverage.out | grep total: | awk '{print $$3}' | sed 's/%//'); \
 	echo "Total coverage: $${coverage}%"; \
-	threshold=80; \
+	threshold=$(COVERAGE_THRESHOLD); \
 	if [ "$$(echo "$$coverage < $$threshold" | bc -l)" -eq 1 ]; then \
 		echo "Coverage $${coverage}% is below threshold $${threshold}%"; \
 		exit 1; \

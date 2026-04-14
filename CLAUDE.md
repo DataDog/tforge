@@ -73,13 +73,13 @@ make fmt                # check formatting
 - Snapshot tests with golden files (`testdata/golden/*/main.tf.golden.json`)
 - Update snapshots: `make update-snapshots`
 - Example validation: `go test ./example/ -v` (requires `go generate` first)
-- CI enforces 80% coverage threshold (excludes `cmd/` and `example/`)
+- CI enforces a coverage threshold (see `COVERAGE_THRESHOLD` in `Makefile`; excludes `cmd/` and `example/`)
 
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`):
 - **Lint**: gofmt check + golangci-lint
-- **Test**: race detector + coverage with 80% threshold
+- **Test**: race detector + coverage with threshold (see `COVERAGE_THRESHOLD` in `Makefile`)
 - **Snapshot Tests**: golden file comparison
 - **Migration Tests**: CDKTF migration correctness
 
