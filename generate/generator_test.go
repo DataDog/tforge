@@ -170,63 +170,79 @@ func TestJsonTagBehavior(t *testing.T) {
 }
 
 func TestGoTypeForAttribute(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "tforge-gen-gotype-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tmpDir)
-
+	// Direct unit tests for the attributeType -> goTypeName pipeline.
+	// Each test builds a minimal Attribute and verifies the exact Go type string.
 	tests := []struct {
 		name     string
-		typeJSON string
-		want     string
+		attr     *provider.Attribute
+		wantType string
+		wantGo   string
 	}{
-		{"string", `"string"`, "string"},
-		{"number", `"number"`, "float64"},
-		{"bool", `"bool"`, "bool"},
-		{"dynamic", `"dynamic"`, "any"},
+		{
+			name:     "string",
+			attr:     &provider.Attribute{Type: json.RawMessage(`"string"`)},
+			wantType: "string",
+			wantGo:   "string",
+		},
+		{
+			name:     "number",
+			attr:     &provider.Attribute{Type: json.RawMessage(`"number"`)},
+			wantType: "number",
+			wantGo:   "float64",
+		},
+		{
+			name:     "bool",
+			attr:     &provider.Attribute{Type: json.RawMessage(`"bool"`)},
+			wantType: "bool",
+			wantGo:   "bool",
+		},
+		{
+			name:     "dynamic",
+			attr:     &provider.Attribute{Type: json.RawMessage(`"dynamic"`)},
+			wantType: "dynamic",
+			wantGo:   "any",
+		},
+		{
+			name:     "list of string",
+			attr:     &provider.Attribute{Type: json.RawMessage(`["list","string"]`)},
+			wantType: "list(string)",
+			wantGo:   "[]string",
+		},
+		{
+			name:     "map of number",
+			attr:     &provider.Attribute{Type: json.RawMessage(`["map","number"]`)},
+			wantType: "map(number)",
+			wantGo:   "map[string]float64",
+		},
+		{
+			name:     "set of bool",
+			attr:     &provider.Attribute{Type: json.RawMessage(`["set","bool"]`)},
+			wantType: "set(bool)",
+			wantGo:   "[]bool",
+		},
+		{
+			name:     "nested list of list",
+			attr:     &provider.Attribute{Type: json.RawMessage(`["list",["list","string"]]`)},
+			wantType: "list(list(string))",
+			wantGo:   "[][]string",
+		},
+		{
+			name:     "nil attribute",
+			attr:     nil,
+			wantType: "dynamic",
+			wantGo:   "any",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Build a minimal provider.Attribute to wrap in schema.Attribute
-			// and pass through goTypeForAttribute
-			ps := &provider.ProviderSchema{
-				ConfigSchema: &provider.SchemaBlock{
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"test_attr": {Type: json.RawMessage(tt.typeJSON), Required: true},
-						},
-					},
-				},
+			gotType := attributeType(tt.attr)
+			if gotType != tt.wantType {
+				t.Errorf("attributeType() = %q, want %q", gotType, tt.wantType)
 			}
-
-			// Generate and check the output contains the expected Go type
-			outDir := filepath.Join(tmpDir, tt.name)
-			g2 := New(Config{
-				PackageName: "testpkg",
-				OutputDir:   outDir,
-			})
-			if err := g2.Generate(ps); err != nil {
-				t.Fatalf("Generate failed: %v", err)
-			}
-
-			data, err := os.ReadFile(filepath.Join(outDir, "provider_gen.go"))
-			if err != nil {
-				t.Fatalf("reading generated file: %v", err)
-			}
-
-			content := string(data)
-			// The field should contain the Go type
-			if tt.want == "any" {
-				// jen renders "any" as "interface{}" in older Go or "any" in newer
-				if !strings.Contains(content, "interface{}") && !strings.Contains(content, " any ") {
-					t.Errorf("generated code does not contain type %q or interface{}", tt.want)
-				}
-			} else {
-				if !strings.Contains(content, tt.want) {
-					t.Errorf("generated code does not contain type %q", tt.want)
-				}
+			gotGo := goTypeName(gotType)
+			if gotGo != tt.wantGo {
+				t.Errorf("goTypeName(%q) = %q, want %q", gotType, gotGo, tt.wantGo)
 			}
 		})
 	}
