@@ -308,9 +308,13 @@ func TestTerraformValidate(t *testing.T) {
 	groups := groupByProviders(t, goldenFiles)
 	t.Logf("Found %d golden files in %d provider group(s)", len(goldenFiles), len(groups))
 
-	// Parse versions from env or use defaults.
-	tfVersions := parseVersions(os.Getenv("TERRAFORM_VERSIONS"), "1.5 1.9 latest")
-	otVersions := parseVersions(os.Getenv("TOFU_VERSIONS"), "1.8 latest")
+	// Parse versions from env. The Makefile is the single source of truth for
+	// default versions; run via "make validate-golden" to get them automatically.
+	tfVersions := parseVersions(os.Getenv("TERRAFORM_VERSIONS"), "")
+	otVersions := parseVersions(os.Getenv("TOFU_VERSIONS"), "")
+	if len(tfVersions) == 0 && len(otVersions) == 0 {
+		t.Skip("TERRAFORM_VERSIONS and TOFU_VERSIONS not set; run via 'make validate-golden'")
+	}
 
 	tools := []toolInfo{
 		{"tf", "hashicorp/terraform", "terraform"},
