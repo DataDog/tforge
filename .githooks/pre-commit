@@ -1,6 +1,7 @@
 #!/bin/sh
 # Pre-commit hook: run pre-commit to catch CI failures locally
-# Install: git config core.hooksPath .githooks
+# Install: make setup
+# (or manually: ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit)
 
 set -e
 
