@@ -10,9 +10,12 @@ PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)'))
 # Lint needs relative paths, not module-prefixed
 LINT_PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)') | sed "s|^$$(go list -m)/|./|")
 
+# Source directories to check formatting (excludes .claude/, .git/, generated files)
+FMT_DIRS = ./cmd ./config ./generate ./provider ./render
+
 # Format check (same as CI)
 fmt:
-	@test -z "$$(gofmt -l .)" || (echo "Files need formatting:" && gofmt -l . && exit 1)
+	@test -z "$$(gofmt -l $(FMT_DIRS))" || (echo "Files need formatting:" && gofmt -l $(FMT_DIRS) && exit 1)
 
 # Lint (requires golangci-lint installed locally)
 lint: fmt
