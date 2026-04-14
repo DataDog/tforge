@@ -23,13 +23,6 @@ func main() {
 	if err := stack.AddResource(config.Resource{
 		Type: "aws_instance",
 		Name: "app",
-		Config: map[string]any{
-			"ami":           "ami-0c55b159cbfafe1f0",
-			"instance_type": "t3.medium",
-			"tags": map[string]string{
-				"Name": "app-server",
-			},
-		},
 		Lifecycle: &config.Lifecycle{
 			CreateBeforeDestroy: true,
 			PreventDestroy:      false,
@@ -66,6 +59,15 @@ func main() {
 				OnFailure: config.OnFailureContinue,
 			},
 		},
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"ami":           "ami-0c55b159cbfafe1f0",
+				"instance_type": "t3.medium",
+				"tags": map[string]string{
+					"Name": "app-server",
+				},
+			},
+		},
 	}); err != nil {
 		log.Fatal(err)
 	}
@@ -73,15 +75,6 @@ func main() {
 	if err := stack.AddResource(config.Resource{
 		Type: "aws_db_instance",
 		Name: "primary",
-		Config: map[string]any{
-			"engine":            "postgres",
-			"engine_version":    "15.4",
-			"instance_class":    "db.t3.medium",
-			"allocated_storage": 50,
-			"db_name":           "myapp",
-			"username":          "admin",
-			"password":          "${var.db_password}",
-		},
 		Lifecycle: &config.Lifecycle{
 			PreventDestroy: true,
 			IgnoreChanges:  []string{"password"},
@@ -90,7 +83,18 @@ func main() {
 			Create: "60m",
 			Delete: "45m",
 		},
-		DependsOn: []string{"aws_instance.app"},
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"engine":            "postgres",
+				"engine_version":    "15.4",
+				"instance_class":    "db.t3.medium",
+				"allocated_storage": 50,
+				"db_name":           "myapp",
+				"username":          "admin",
+				"password":          "${var.db_password}",
+			},
+			DependsOn: []string{"aws_instance.app"},
+		},
 	}); err != nil {
 		log.Fatal(err)
 	}

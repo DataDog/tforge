@@ -2,6 +2,21 @@ package config
 
 import "fmt"
 
+// MetaArguments contains Terraform meta-arguments shared across Resource, DataSource, and Module.
+type MetaArguments struct {
+	// Config contains the block configuration (resource attributes, data source filters, module inputs).
+	Config map[string]any
+
+	// DependsOn lists explicit dependencies.
+	DependsOn []string
+
+	// Count specifies the number of instances (mutually exclusive with ForEach).
+	Count any
+
+	// ForEach specifies iteration (mutually exclusive with Count).
+	ForEach any
+}
+
 // Resource represents a Terraform managed resource.
 type Resource struct {
 	// Type is the resource type (e.g., "aws_instance").
@@ -14,17 +29,7 @@ type Resource struct {
 	// Format: "provider.alias" (e.g., "aws.west")
 	Provider string
 
-	// Config contains the resource configuration.
-	Config map[string]any
-
-	// DependsOn lists explicit dependencies.
-	DependsOn []string
-
-	// Count specifies the number of instances (mutually exclusive with ForEach).
-	Count any
-
-	// ForEach specifies iteration (mutually exclusive with Count).
-	ForEach any
+	MetaArguments
 
 	// Lifecycle contains lifecycle customizations.
 	Lifecycle *Lifecycle
@@ -60,17 +65,7 @@ type DataSource struct {
 	// Provider specifies a non-default provider configuration.
 	Provider string
 
-	// Config contains the data source configuration.
-	Config map[string]any
-
-	// DependsOn lists explicit dependencies.
-	DependsOn []string
-
-	// Count specifies the number of instances.
-	Count any
-
-	// ForEach specifies iteration.
-	ForEach any
+	MetaArguments
 }
 
 // Address returns the data source address (data.type.name).

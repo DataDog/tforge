@@ -24,8 +24,10 @@ func NewMyStack() *config.Stack {
 		Name:    "null",
 		Source:  "vancluever/module/null",
 		Version: "2.0.2",
-		Config: map[string]any{
-			"trigger": "one",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"trigger": "one",
+			},
 		},
 	}))
 
@@ -33,9 +35,11 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_resource_group",
 		Name: "test_rg",
-		Config: map[string]any{
-			"name":     "test-rg",
-			"location": "westeurope",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"name":     "test-rg",
+				"location": "westeurope",
+			},
 		},
 	}))
 
@@ -43,11 +47,13 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_virtual_network",
 		Name: "test_vm_nw",
-		Config: map[string]any{
-			"name":                "test-vm-nw",
-			"address_space":       []string{"10.0.0.0/16"},
-			"location":            rg.Ref("location"),
-			"resource_group_name": rg.Ref("name"),
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"name":                "test-vm-nw",
+				"address_space":       []string{"10.0.0.0/16"},
+				"location":            rg.Ref("location"),
+				"resource_group_name": rg.Ref("name"),
+			},
 		},
 	}))
 
@@ -55,11 +61,13 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_subnet",
 		Name: "test_vm_nw_sn",
-		Config: map[string]any{
-			"name":                 "test-vm-nw-sn",
-			"resource_group_name":  rg.Ref("name"),
-			"virtual_network_name": vmNw.Ref("name"),
-			"address_prefixes":     []string{"10.0.2.0/24"},
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"name":                 "test-vm-nw-sn",
+				"resource_group_name":  rg.Ref("name"),
+				"virtual_network_name": vmNw.Ref("name"),
+				"address_prefixes":     []string{"10.0.2.0/24"},
+			},
 		},
 	}))
 
@@ -67,15 +75,17 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_network_interface",
 		Name: "test_vm_nic",
-		Config: map[string]any{
-			"name":                "test-vm-nic",
-			"location":            rg.Ref("location"),
-			"resource_group_name": rg.Ref("name"),
-			"ip_configuration": []map[string]any{{
-				"name":                          "internal",
-				"subnet_id":                     vmNwSn.Ref("id"),
-				"private_ip_address_allocation": "Dynamic",
-			}},
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"name":                "test-vm-nic",
+				"location":            rg.Ref("location"),
+				"resource_group_name": rg.Ref("name"),
+				"ip_configuration": []map[string]any{{
+					"name":                          "internal",
+					"subnet_id":                     vmNwSn.Ref("id"),
+					"private_ip_address_allocation": "Dynamic",
+				}},
+			},
 		},
 	}))
 
@@ -84,26 +94,28 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_linux_virtual_machine",
 		Name: "test_vm",
-		Config: map[string]any{
-			"name":                  "test-vm",
-			"location":              rg.Ref("location"),
-			"resource_group_name":   rg.Ref("name"),
-			"size":                  "Standard_F2",
-			"admin_username":        "adminuser",
-			"network_interface_ids": []string{vmNic.Ref("id")},
-			"admin_ssh_key": []map[string]any{{
-				"username":   "glados",
-				"public_key": `${file("~/.ssh/id_rsa.pub")}`,
-			}},
-			"os_disk": map[string]any{
-				"caching":              "ReadWrite",
-				"storage_account_type": "Standard_LRS",
-			},
-			"source_image_reference": map[string]any{
-				"publisher": "Canonical",
-				"offer":     "UbuntuServer",
-				"sku":       "16.04-LTS",
-				"version":   "latest",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"name":                  "test-vm",
+				"location":              rg.Ref("location"),
+				"resource_group_name":   rg.Ref("name"),
+				"size":                  "Standard_F2",
+				"admin_username":        "adminuser",
+				"network_interface_ids": []string{vmNic.Ref("id")},
+				"admin_ssh_key": []map[string]any{{
+					"username":   "glados",
+					"public_key": `${file("~/.ssh/id_rsa.pub")}`,
+				}},
+				"os_disk": map[string]any{
+					"caching":              "ReadWrite",
+					"storage_account_type": "Standard_LRS",
+				},
+				"source_image_reference": map[string]any{
+					"publisher": "Canonical",
+					"offer":     "UbuntuServer",
+					"sku":       "16.04-LTS",
+					"version":   "latest",
+				},
 			},
 		},
 	}))

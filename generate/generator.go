@@ -522,9 +522,11 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 		),
 		jen.Return(jen.Id("stack").Dot(addMethod).Call(
 			jen.Qual("tforge/config", configType).Values(jen.Dict{
-				jen.Id("Type"):   jen.Lit(tfTypeName),
-				jen.Id("Name"):   jen.Id("name"),
-				jen.Id("Config"): jen.Id("m"),
+				jen.Id("Type"): jen.Lit(tfTypeName),
+				jen.Id("Name"): jen.Id("name"),
+				jen.Id("MetaArguments"): jen.Qual("tforge/config", "MetaArguments").Values(jen.Dict{
+					jen.Id("Config"): jen.Id("m"),
+				}),
 			}),
 		)),
 	)

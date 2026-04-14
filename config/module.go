@@ -13,22 +13,12 @@ type Module struct {
 	// Version is the module version constraint (e.g., "~> 19.0"). Only for registry modules.
 	Version string
 
-	// Config contains the module input variables.
-	Config map[string]any
-
 	// Providers maps provider configuration aliases for the module.
 	// Keys are the provider names expected by the module, values are the provider
 	// configurations to use (e.g., {"aws": "aws.west"}).
 	Providers map[string]string
 
-	// DependsOn lists explicit dependencies.
-	DependsOn []string
-
-	// Count specifies the number of instances (mutually exclusive with ForEach).
-	Count any
-
-	// ForEach specifies iteration (mutually exclusive with Count).
-	ForEach any
+	MetaArguments
 }
 
 // Address returns the module address (module.name).

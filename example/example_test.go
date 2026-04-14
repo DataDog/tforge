@@ -52,19 +52,21 @@ func buildExampleStack() *config.Stack {
 	stack.AddResource(config.Resource{
 		Type: "datadog_monitor",
 		Name: "cpu_alert",
-		Config: map[string]any{
-			"name":    "High CPU Usage Alert",
-			"type":    "metric alert",
-			"message": "CPU usage is above threshold. @slack-alerts",
-			"query":   "avg(last_5m):avg:system.cpu.user{*} by {host} > 80",
-			"tags":    []string{"env:production", "managed-by:tforge"},
-			"monitor_thresholds": []map[string]string{
-				{"critical": "80", "warning": "60"},
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"name":    "High CPU Usage Alert",
+				"type":    "metric alert",
+				"message": "CPU usage is above threshold. @slack-alerts",
+				"query":   "avg(last_5m):avg:system.cpu.user{*} by {host} > 80",
+				"tags":    []string{"env:production", "managed-by:tforge"},
+				"monitor_thresholds": []map[string]string{
+					{"critical": "80", "warning": "60"},
+				},
+				"notify_no_data":      true,
+				"no_data_timeframe":   10,
+				"renotify_interval":   60,
+				"require_full_window": true,
 			},
-			"notify_no_data":      true,
-			"no_data_timeframe":   10,
-			"renotify_interval":   60,
-			"require_full_window": true,
 		},
 	})
 

@@ -28,22 +28,26 @@ func main() {
 
 	// Data source with count
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_availability_zones",
-		Name:   "counted",
-		Config: map[string]any{"state": "available"},
-		Count:  3,
+		Type: "aws_availability_zones",
+		Name: "counted",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{"state": "available"},
+			Count:  3,
+		},
 	}); err != nil {
 		log.Fatal(err)
 	}
 
 	// Data source with for_each
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_ami",
-		Name:   "per_region",
-		Config: map[string]any{"most_recent": true},
-		ForEach: map[string]any{
-			"us-east-1": "ami-east",
-			"us-west-2": "ami-west",
+		Type: "aws_ami",
+		Name: "per_region",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{"most_recent": true},
+			ForEach: map[string]any{
+				"us-east-1": "ami-east",
+				"us-west-2": "ami-west",
+			},
 		},
 	}); err != nil {
 		log.Fatal(err)
@@ -51,10 +55,12 @@ func main() {
 
 	// Data source with depends_on
 	if err := stack.AddDataSource(config.DataSource{
-		Type:      "aws_caller_identity",
-		Name:      "current",
-		Config:    map[string]any{},
-		DependsOn: []string{"data.aws_availability_zones.counted"},
+		Type: "aws_caller_identity",
+		Name: "current",
+		MetaArguments: config.MetaArguments{
+			Config:    map[string]any{},
+			DependsOn: []string{"data.aws_availability_zones.counted"},
+		},
 	}); err != nil {
 		log.Fatal(err)
 	}
@@ -63,23 +69,27 @@ func main() {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:     "aws_vpc",
 		Name:     "west_vpc",
-		Config:   map[string]any{"default": true},
 		Provider: "aws.west",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{"default": true},
+		},
 	}); err != nil {
 		log.Fatal(err)
 	}
 
 	// Data source with all four meta-arguments
 	if err := stack.AddDataSource(config.DataSource{
-		Type: "aws_subnet",
-		Name: "all_meta",
-		Config: map[string]any{
-			"vpc_id": "${data.aws_vpc.west_vpc.id}",
+		Type:     "aws_subnet",
+		Name:     "all_meta",
+		Provider: "aws.west",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"vpc_id": "${data.aws_vpc.west_vpc.id}",
+			},
+			DependsOn: []string{"data.aws_vpc.west_vpc"},
+			Count:     2,
+			ForEach:   nil, // count takes precedence; for_each is nil
 		},
-		Provider:  "aws.west",
-		DependsOn: []string{"data.aws_vpc.west_vpc"},
-		Count:     2,
-		ForEach:   nil, // count takes precedence; for_each is nil
 	}); err != nil {
 		log.Fatal(err)
 	}

@@ -35,8 +35,10 @@ func main() {
 	if err := stack.AddResource(config.Resource{
 		Type: "random_pet",
 		Name: "name",
-		Config: map[string]any{
-			"length": 2,
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"length": 2,
+			},
 		},
 	}); err != nil {
 		log.Fatal(err)
@@ -46,14 +48,16 @@ func main() {
 		Type:     "aws_instance",
 		Name:     "east",
 		Provider: "aws",
-		Config: map[string]any{
-			"ami":           "ami-east-123",
-			"instance_type": "t3.micro",
-			"tags": map[string]string{
-				"Name": "${random_pet.name.id}-east",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"ami":           "ami-east-123",
+				"instance_type": "t3.micro",
+				"tags": map[string]string{
+					"Name": "${random_pet.name.id}-east",
+				},
 			},
+			DependsOn: []string{"random_pet.name"},
 		},
-		DependsOn: []string{"random_pet.name"},
 	}); err != nil {
 		log.Fatal(err)
 	}
@@ -62,12 +66,14 @@ func main() {
 		Type:     "aws_instance",
 		Name:     "west",
 		Provider: "aws.west",
-		Count:    3,
-		Config: map[string]any{
-			"ami":           "ami-west-456",
-			"instance_type": "t3.micro",
-			"tags": map[string]string{
-				"Name": "${random_pet.name.id}-west-${count.index}",
+		MetaArguments: config.MetaArguments{
+			Count: 3,
+			Config: map[string]any{
+				"ami":           "ami-west-456",
+				"instance_type": "t3.micro",
+				"tags": map[string]string{
+					"Name": "${random_pet.name.id}-west-${count.index}",
+				},
 			},
 		},
 	}); err != nil {
@@ -77,15 +83,17 @@ func main() {
 	if err := stack.AddResource(config.Resource{
 		Type: "aws_s3_bucket",
 		Name: "logs",
-		ForEach: map[string]string{
-			"access-logs": "access-logs",
-			"app-logs":    "app-logs",
-			"audit-logs":  "audit-logs",
-		},
-		Config: map[string]any{
-			"bucket": "${each.key}-${random_pet.name.id}",
-			"tags": map[string]string{
-				"Purpose": "${each.key}",
+		MetaArguments: config.MetaArguments{
+			ForEach: map[string]string{
+				"access-logs": "access-logs",
+				"app-logs":    "app-logs",
+				"audit-logs":  "audit-logs",
+			},
+			Config: map[string]any{
+				"bucket": "${each.key}-${random_pet.name.id}",
+				"tags": map[string]string{
+					"Purpose": "${each.key}",
+				},
 			},
 		},
 	}); err != nil {
@@ -96,8 +104,10 @@ func main() {
 		Type:     "aws_availability_zones",
 		Name:     "available",
 		Provider: "aws.west",
-		Config: map[string]any{
-			"state": "available",
+		MetaArguments: config.MetaArguments{
+			Config: map[string]any{
+				"state": "available",
+			},
 		},
 	}); err != nil {
 		log.Fatal(err)
