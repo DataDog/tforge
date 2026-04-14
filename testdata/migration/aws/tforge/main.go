@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-cdk/examples/go/aws/aws"
 
-	"tforge/config"
-	"tforge/render"
+	"github.com/DataDog/tforge/config"
+	"github.com/DataDog/tforge/render"
 )
 
 func NewExampleCdktfGoAwsStack() *config.Stack {

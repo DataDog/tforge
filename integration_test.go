@@ -126,7 +126,7 @@ func testMigrationExample(t *testing.T, root, migrationDir, name, cli string) {
 	if err != nil {
 		t.Fatalf("reading tforge/go.mod: %v", err)
 	}
-	goMod := string(goModSrc) + "\nreplace tforge => " + root + "\n"
+	goMod := string(goModSrc) + "\nreplace github.com/DataDog/tforge => " + root + "\n"
 	if err := os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("writing go.mod: %v", err)
 	}

@@ -2,7 +2,7 @@
 
 **Define Terraform infrastructure in pure Go: no JSII, no Node.js, no HashiCorp libraries.**
 
-[![CI](https://github.com/St0rmingBr4in/tforge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/St0rmingBr4in/tforge/actions/workflows/ci.yml)
+[![CI](https://github.com/DataDog/tforge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DataDog/tforge/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/go-1.23+-00ADD8?logo=go)](https://go.dev/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.md)
 
@@ -46,13 +46,13 @@ tforge takes a different approach:
 ### 1. Install
 
 ```bash
-go install tforge/cmd/tforge@latest
+go install github.com/DataDog/tforge/cmd/tforge@latest
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/St0rmingBr4in/tforge.git && cd tforge
+git clone https://github.com/DataDog/tforge.git && cd tforge
 make build
 ```
 

@@ -18,8 +18,8 @@ import (
 	"io"
 	"os"
 
-	"tforge/generate"
-	"tforge/provider"
+	"github.com/DataDog/tforge/generate"
+	"github.com/DataDog/tforge/provider"
 )
 
 const version = "0.2.0"

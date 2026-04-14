@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"tforge/config"
+	"github.com/DataDog/tforge/config"
 )
 
 // mustMap extracts a map[string]any value from a parent map by key.

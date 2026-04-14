@@ -6,8 +6,8 @@ package main
 import (
 	"log"
 
-	"tforge/config"
-	"tforge/render"
+	"github.com/DataDog/tforge/config"
+	"github.com/DataDog/tforge/render"
 )
 
 func NewMyStack() *config.Stack {

@@ -1,5 +1,5 @@
 module github.com/hashicorp/terraform-cdk/examples/go/docker
 
-go 1.23
+go 1.25
 
-require tforge v0.0.0
+require github.com/DataDog/tforge v0.0.0

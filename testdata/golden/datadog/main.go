@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"tforge/config"
-	"tforge/render"
-	"tforge/testdata/golden/datadog/datadog"
+	"github.com/DataDog/tforge/config"
+	"github.com/DataDog/tforge/render"
+	"github.com/DataDog/tforge/testdata/golden/datadog/datadog"
 )
 
 func main() {

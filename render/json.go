@@ -24,7 +24,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"tforge/config"
+	"github.com/DataDog/tforge/config"
 )
 
 const (

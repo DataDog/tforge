@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"tforge/provider"
+	"github.com/DataDog/tforge/provider"
 )
 
 // compileGeneratedCode creates a temporary Go module in the given directory
@@ -18,9 +18,9 @@ import (
 func compileGeneratedCode(t *testing.T, dir, pkgName string) {
 	t.Helper()
 
-	// Write a go.mod that can resolve tforge/config (used by generated constructors)
+	// Write a go.mod that can resolve github.com/DataDog/tforge/config (used by generated constructors)
 	tforgeRoot, _ := filepath.Abs(filepath.Join("..", "."))
-	goMod := fmt.Sprintf("module testcompile\n\ngo 1.23\n\nrequire tforge v0.0.0\nreplace tforge => %s\n", tforgeRoot)
+	goMod := fmt.Sprintf("module testcompile\n\ngo 1.25\n\nrequire github.com/DataDog/tforge v0.0.0\nreplace github.com/DataDog/tforge => %s\n", tforgeRoot)
 	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("writing go.mod: %v", err)
 	}
@@ -980,7 +980,7 @@ func TestConstructorRoundTrip(t *testing.T) {
 
 	// Write go.mod at tmpDir level
 	tforgeRoot, _ := filepath.Abs(filepath.Join("..", "."))
-	goMod := fmt.Sprintf("module roundtrip_test\n\ngo 1.23\n\nrequire tforge v0.0.0\nreplace tforge => %s\n", tforgeRoot)
+	goMod := fmt.Sprintf("module roundtrip_test\n\ngo 1.25\n\nrequire github.com/DataDog/tforge v0.0.0\nreplace github.com/DataDog/tforge => %s\n", tforgeRoot)
 	if err := os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644); err != nil {
 		t.Fatalf("writing go.mod: %v", err)
 	}
@@ -992,7 +992,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"tforge/config"
+	"github.com/DataDog/tforge/config"
 )
 
 func TestResourceConstructorRoundTrip(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"tforge/provider"
+	"github.com/DataDog/tforge/provider"
 )
 
 // newTestProviderSchema builds a fixture ProviderSchema for tests.

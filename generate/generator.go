@@ -28,7 +28,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 
-	"tforge/provider"
+	"github.com/DataDog/tforge/provider"
 )
 
 // Config holds configuration for the code generator.
@@ -584,10 +584,10 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 
 	// Step 4: Add the resource/data source to the stack.
 	addToStack := jen.Return(jen.Id("stack").Dot(addMethod).Call(
-		jen.Qual("tforge/config", configType).Values(jen.Dict{
+		jen.Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
 			jen.Id("Type"): jen.Lit(tfTypeName),
 			jen.Id("Name"): jen.Id("name"),
-			jen.Id("MetaArguments"): jen.Qual("tforge/config", "MetaArguments").Values(jen.Dict{
+			jen.Id("MetaArguments"): jen.Qual("github.com/DataDog/tforge/config", "MetaArguments").Values(jen.Dict{
 				jen.Id("Config"): jen.Id("m"),
 			}),
 		}),
@@ -602,7 +602,7 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 
 	f.Commentf("%s creates a %s %s and adds it to the stack.", funcName, tfTypeName, configType)
 	f.Func().Id(funcName).Params(
-		jen.Id("stack").Op("*").Qual("tforge/config", "Stack"),
+		jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
 		jen.Id("name").String(),
 		jen.Id("opts").Op("...").Id(optionType),
 	).Error().Block(body...)
@@ -619,6 +619,13 @@ func (g *Generator) jsonTag(name string, optional bool) string {
 
 // writeFile writes a jennifer file to disk.
 func (g *Generator) writeFile(f *jen.File, filename string) error {
-	path := filepath.Join(g.config.OutputDir, filename)
+	outDir, err := filepath.Abs(g.config.OutputDir)
+	if err != nil {
+		return fmt.Errorf("resolving output directory: %w", err)
+	}
+	path := filepath.Join(outDir, filename)
+	if !strings.HasPrefix(path, outDir+string(filepath.Separator)) {
+		return fmt.Errorf("path %q escapes output directory %q", filename, g.config.OutputDir)
+	}
 	return WriteFile(f, path)
 }

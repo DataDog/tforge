@@ -13,9 +13,9 @@ import (
 	"fmt"
 	"log"
 
-	"tforge/config"
-	"tforge/render"
-	"tforge/testdata/golden/name_collision/aws"
+	"github.com/DataDog/tforge/config"
+	"github.com/DataDog/tforge/render"
+	"github.com/DataDog/tforge/testdata/golden/name_collision/aws"
 )
 
 func main() {

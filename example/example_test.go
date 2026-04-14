@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"tforge/config"
-	"tforge/render"
+	"github.com/DataDog/tforge/config"
+	"github.com/DataDog/tforge/render"
 )
 
 func TestExample_GeneratesValidJSON(t *testing.T) {

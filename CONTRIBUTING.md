@@ -3,7 +3,7 @@
 ## Development setup
 
 ```bash
-git clone https://github.com/St0rmingBr4in/tforge.git && cd tforge
+git clone https://github.com/DataDog/tforge.git && cd tforge
 make setup    # installs pre-commit hook
 make test     # run tests
 make lint     # run linter

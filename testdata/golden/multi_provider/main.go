@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"tforge/config"
-	"tforge/render"
+	"github.com/DataDog/tforge/config"
+	"github.com/DataDog/tforge/render"
 )
 
 func main() {

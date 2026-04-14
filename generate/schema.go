@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"tforge/provider"
+	"github.com/DataDog/tforge/provider"
 )
 
 // schemaEntry pairs a resource or data source name with its schema for sorted iteration.
