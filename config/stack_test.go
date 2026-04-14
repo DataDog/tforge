@@ -13,26 +13,30 @@ func TestNewStack(t *testing.T) {
 	if s.Backend != nil {
 		t.Fatal("Backend should be nil")
 	}
-	if s.RequiredProviders == nil {
-		t.Fatal("RequiredProviders should be non-nil")
+	// Slices and maps start nil; verify they are usable via the Add*/Set* methods.
+	if len(s.RequiredProviders) != 0 {
+		t.Fatal("RequiredProviders should be empty")
 	}
-	if s.Providers == nil {
-		t.Fatal("Providers should be non-nil")
+	if len(s.Providers) != 0 {
+		t.Fatal("Providers should be empty")
 	}
-	if s.Resources == nil {
-		t.Fatal("Resources should be non-nil")
+	if len(s.Resources) != 0 {
+		t.Fatal("Resources should be empty")
 	}
-	if s.DataSources == nil {
-		t.Fatal("DataSources should be non-nil")
+	if len(s.DataSources) != 0 {
+		t.Fatal("DataSources should be empty")
 	}
-	if s.Variables == nil {
-		t.Fatal("Variables should be non-nil")
+	if len(s.Modules) != 0 {
+		t.Fatal("Modules should be empty")
 	}
-	if s.Outputs == nil {
-		t.Fatal("Outputs should be non-nil")
+	if len(s.Variables) != 0 {
+		t.Fatal("Variables should be empty")
 	}
-	if s.Locals == nil {
-		t.Fatal("Locals should be non-nil")
+	if len(s.Outputs) != 0 {
+		t.Fatal("Outputs should be empty")
+	}
+	if len(s.Locals) != 0 {
+		t.Fatal("Locals should be empty")
 	}
 }
 
@@ -327,8 +331,15 @@ func TestModuleRef(t *testing.T) {
 
 func TestNewStackIncludesModules(t *testing.T) {
 	s := NewStack("test")
-	if s.Modules == nil {
-		t.Fatal("Modules should be non-nil")
+	if len(s.Modules) != 0 {
+		t.Fatal("Modules should be empty")
+	}
+	// Verify modules can be added (lazy initialization works)
+	if err := s.AddModule(Module{Name: "test", Source: "./mod"}); err != nil {
+		t.Fatalf("AddModule on fresh stack: %v", err)
+	}
+	if len(s.Modules) != 1 {
+		t.Fatalf("len(Modules) = %d, want 1", len(s.Modules))
 	}
 }
 

@@ -49,18 +49,9 @@ type Stack struct {
 }
 
 // NewStack creates a new empty stack with the given name.
+// Slices and maps are left nil and initialized lazily by the Add*/Set* methods.
 func NewStack(name string) *Stack {
-	return &Stack{
-		Name:              name,
-		RequiredProviders: make(map[string]ProviderRequirement),
-		Providers:         make([]Provider, 0),
-		Resources:         make([]Resource, 0),
-		DataSources:       make([]DataSource, 0),
-		Modules:           make([]Module, 0),
-		Variables:         make([]Variable, 0),
-		Outputs:           make([]Output, 0),
-		Locals:            make(map[string]any),
-	}
+	return &Stack{Name: name}
 }
 
 // SetBackend configures the Terraform backend.
@@ -74,6 +65,9 @@ func (s *Stack) AddProvider(p Provider) {
 
 	// Auto-add to required providers if version specified
 	if p.Version != "" && p.Source != "" {
+		if s.RequiredProviders == nil {
+			s.RequiredProviders = make(map[string]ProviderRequirement)
+		}
 		s.RequiredProviders[p.Name] = ProviderRequirement{
 			Source:  p.Source,
 			Version: p.Version,
@@ -184,6 +178,9 @@ func (s *Stack) AddOutput(o Output) error {
 
 // SetLocal sets a local value.
 func (s *Stack) SetLocal(name string, value any) {
+	if s.Locals == nil {
+		s.Locals = make(map[string]any)
+	}
 	s.Locals[name] = value
 }
 
