@@ -77,10 +77,50 @@ func TestToJSON_EmptyStack(t *testing.T) {
 	if !json.Valid(data) {
 		t.Fatal("output is not valid JSON")
 	}
-	// Should produce minimal JSON (empty object)
+	// An empty stack should produce only the "//" comment metadata block
+	// and no terraform, provider, resource, data, module, variable, output, or locals keys.
 	var obj map[string]any
 	if err := json.Unmarshal(data, &obj); err != nil {
 		t.Fatalf("failed to unmarshal: %v", err)
+	}
+
+	// The only key should be "//"
+	if len(obj) != 1 {
+		t.Errorf("expected 1 top-level key, got %d: %v", len(obj), keys(obj))
+	}
+	comment, ok := obj["//"]
+	if !ok {
+		t.Fatal("expected '//' key in output")
+	}
+
+	// Verify metadata structure
+	commentMap, ok := comment.(map[string]any)
+	if !ok {
+		t.Fatalf("'//' value: expected map[string]any, got %T", comment)
+	}
+	metadata, ok := commentMap["metadata"]
+	if !ok {
+		t.Fatal("expected 'metadata' key inside '//'")
+	}
+	metaMap, ok := metadata.(map[string]any)
+	if !ok {
+		t.Fatalf("'metadata' value: expected map[string]any, got %T", metadata)
+	}
+	if metaMap["tool"] != "tforge" {
+		t.Errorf("metadata.tool = %v, want %q", metaMap["tool"], "tforge")
+	}
+	if metaMap["version"] != DefaultVersion {
+		t.Errorf("metadata.version = %v, want %q", metaMap["version"], DefaultVersion)
+	}
+	if metaMap["stackName"] != "empty" {
+		t.Errorf("metadata.stackName = %v, want %q", metaMap["stackName"], "empty")
+	}
+
+	// Ensure no infrastructure keys are present
+	for _, key := range []string{"terraform", "provider", "resource", "data", "module", "variable", "output", "locals"} {
+		if _, exists := obj[key]; exists {
+			t.Errorf("unexpected key %q in empty stack output", key)
+		}
 	}
 }
 
