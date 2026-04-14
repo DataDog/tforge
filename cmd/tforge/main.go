@@ -129,33 +129,30 @@ Examples:
 		return fmt.Errorf("either -schema or both -provider and -version are required")
 	}
 
-	var schema *provider.Schema
+	var ps *provider.ProviderSchema
+	var source provider.Source
 	var err error
 
 	if *schemaFile != "" {
 		fmt.Fprintf(stderr, "Loading schema from %s...\n", *schemaFile)
-		schema, err = provider.LoadSchemaFromFile(*schemaFile)
+		ps, err = provider.LoadSchemaFromFile(*schemaFile)
 		if err != nil {
 			return fmt.Errorf("loading schema: %w", err)
 		}
 	} else {
 		fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
-		schema, err = provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
-		if err != nil {
-			return fmt.Errorf("fetching schema: %w", err)
+		schema, fetchErr := provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
+		if fetchErr != nil {
+			return fmt.Errorf("fetching schema: %w", fetchErr)
 		}
-		source, err := provider.ParseSource(*providerSource)
-		if err != nil {
-			return fmt.Errorf("parsing provider source %q: %w", *providerSource, err)
-		}
-		schema.Source = source
-		schema.Version = *providerVersion
+		ps = schema.Provider
+		source = schema.Source
 	}
 
 	pkg := *packageName
 	if pkg == "" {
-		if schema.Source.Name != "" {
-			pkg = schema.Source.Name
+		if source.Name != "" {
+			pkg = source.Name
 		} else {
 			pkg = generate.DefaultPackageName
 		}
@@ -168,13 +165,13 @@ Examples:
 		PackageName: pkg,
 	})
 
-	if err := gen.Generate(schema); err != nil {
+	if err := gen.Generate(ps); err != nil {
 		return fmt.Errorf("generating code: %w", err)
 	}
 
 	fmt.Fprintf(stderr, "Generated %d resources and %d data sources\n",
-		len(schema.Provider.ResourceSchemas),
-		len(schema.Provider.DataSourceSchemas))
+		len(ps.ResourceSchemas),
+		len(ps.DataSourceSchemas))
 	return nil
 }
 

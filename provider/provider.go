@@ -305,7 +305,7 @@ func parseSchemaOutput(data []byte, src Source) (*ProviderSchema, error) {
 }
 
 // LoadSchemaFromFile loads a provider schema from a JSON file.
-func LoadSchemaFromFile(path string) (*Schema, error) {
+func LoadSchemaFromFile(path string) (*ProviderSchema, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("reading schema file: %w", err)
@@ -332,10 +332,10 @@ func filterEnv(env []string, keys ...string) []string {
 }
 
 // LoadSchemaFromJSON parses a provider schema from JSON bytes.
-func LoadSchemaFromJSON(data []byte) (*Schema, error) {
+func LoadSchemaFromJSON(data []byte) (*ProviderSchema, error) {
 	var ps ProviderSchema
 	if err := json.Unmarshal(data, &ps); err != nil {
 		return nil, fmt.Errorf("parsing schema JSON: %w", err)
 	}
-	return &Schema{Provider: &ps}, nil
+	return &ps, nil
 }

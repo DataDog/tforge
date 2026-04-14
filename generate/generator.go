@@ -90,12 +90,12 @@ func New(cfg Config) *Generator {
 }
 
 // Generate generates Go SDK code from a provider schema.
-func (g *Generator) Generate(ps *provider.Schema) error {
-	if ps == nil || ps.Provider == nil {
+func (g *Generator) Generate(ps *provider.ProviderSchema) error {
+	if ps == nil {
 		return fmt.Errorf("nil provider schema")
 	}
 
-	g.schema = ps.Provider
+	g.schema = ps
 
 	// Derive the provider prefix from resource/data source names.
 	// All resources in a provider share the same first _-delimited segment

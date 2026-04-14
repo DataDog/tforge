@@ -65,14 +65,6 @@ func TestGenerateNilSchema(t *testing.T) {
 	}
 }
 
-func TestGenerateNilProvider(t *testing.T) {
-	g := New(Config{})
-	err := g.Generate(&provider.Schema{})
-	if err == nil {
-		t.Fatal("expected error for nil provider, got nil")
-	}
-}
-
 func TestGenerateEmptySchema(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-test-*")
 	if err != nil {
@@ -85,11 +77,10 @@ func TestGenerateEmptySchema(t *testing.T) {
 		OutputDir:   tmpDir,
 	})
 
-	ps := &provider.Schema{
-		Provider: &provider.ProviderSchema{
-			ConfigSchema: &provider.SchemaBlock{
-				Block: &provider.BlockType{},
-			},
+	ps := &provider.ProviderSchema{
+
+		ConfigSchema: &provider.SchemaBlock{
+			Block: &provider.BlockType{},
 		},
 	}
 
@@ -118,22 +109,21 @@ func TestGenerateWithResources(t *testing.T) {
 		OutputDir:   tmpDir,
 	})
 
-	ps := &provider.Schema{
-		Provider: &provider.ProviderSchema{
-			ConfigSchema: &provider.SchemaBlock{
-				Block: &provider.BlockType{
-					Attributes: map[string]*provider.Attribute{
-						"api_key": {Type: json.RawMessage(`"string"`), Required: true},
-					},
+	ps := &provider.ProviderSchema{
+
+		ConfigSchema: &provider.SchemaBlock{
+			Block: &provider.BlockType{
+				Attributes: map[string]*provider.Attribute{
+					"api_key": {Type: json.RawMessage(`"string"`), Required: true},
 				},
 			},
-			ResourceSchemas: map[string]*provider.SchemaBlock{
-				"test_thing": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"name": {Type: json.RawMessage(`"string"`), Required: true},
-							"id":   {Type: json.RawMessage(`"string"`), Computed: true},
-						},
+		},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_thing": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"name": {Type: json.RawMessage(`"string"`), Required: true},
+						"id":   {Type: json.RawMessage(`"string"`), Computed: true},
 					},
 				},
 			},
@@ -201,13 +191,11 @@ func TestGoTypeForAttribute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Build a minimal provider.Attribute to wrap in schema.Attribute
 			// and pass through goTypeForAttribute
-			ps := &provider.Schema{
-				Provider: &provider.ProviderSchema{
-					ConfigSchema: &provider.SchemaBlock{
-						Block: &provider.BlockType{
-							Attributes: map[string]*provider.Attribute{
-								"test_attr": {Type: json.RawMessage(tt.typeJSON), Required: true},
-							},
+			ps := &provider.ProviderSchema{
+				ConfigSchema: &provider.SchemaBlock{
+					Block: &provider.BlockType{
+						Attributes: map[string]*provider.Attribute{
+							"test_attr": {Type: json.RawMessage(tt.typeJSON), Required: true},
 						},
 					},
 				},
@@ -256,53 +244,52 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 		OutputDir:   tmpDir,
 	})
 
-	ps := &provider.Schema{
-		Provider: &provider.ProviderSchema{
-			ConfigSchema: &provider.SchemaBlock{
+	ps := &provider.ProviderSchema{
+
+		ConfigSchema: &provider.SchemaBlock{
+			Block: &provider.BlockType{
+				Attributes: map[string]*provider.Attribute{
+					"api_key": {Type: json.RawMessage(`"string"`), Required: true},
+				},
+				BlockTypes: map[string]*provider.NestedBlock{
+					"settings": {
+						NestingMode: provider.NestingModeSingle,
+						Block: &provider.BlockType{
+							Attributes: map[string]*provider.Attribute{
+								"timeout": {Type: json.RawMessage(`"number"`), Optional: true},
+							},
+						},
+					},
+				},
+			},
+		},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_thing": {
 				Block: &provider.BlockType{
 					Attributes: map[string]*provider.Attribute{
-						"api_key": {Type: json.RawMessage(`"string"`), Required: true},
+						"name": {Type: json.RawMessage(`"string"`), Required: true},
+						"id":   {Type: json.RawMessage(`"string"`), Computed: true},
 					},
 					BlockTypes: map[string]*provider.NestedBlock{
-						"settings": {
-							NestingMode: provider.NestingModeSingle,
+						"config": {
+							NestingMode: provider.NestingModeList,
 							Block: &provider.BlockType{
 								Attributes: map[string]*provider.Attribute{
-									"timeout": {Type: json.RawMessage(`"number"`), Optional: true},
+									"key":   {Type: json.RawMessage(`"string"`), Required: true},
+									"value": {Type: json.RawMessage(`"string"`), Optional: true},
 								},
 							},
 						},
 					},
 				},
 			},
-			ResourceSchemas: map[string]*provider.SchemaBlock{
-				"test_thing": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"name": {Type: json.RawMessage(`"string"`), Required: true},
-							"id":   {Type: json.RawMessage(`"string"`), Computed: true},
-						},
-						BlockTypes: map[string]*provider.NestedBlock{
-							"config": {
-								NestingMode: provider.NestingModeList,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"key":   {Type: json.RawMessage(`"string"`), Required: true},
-										"value": {Type: json.RawMessage(`"string"`), Optional: true},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			DataSourceSchemas: map[string]*provider.SchemaBlock{
-				"test_data": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"filter": {Type: json.RawMessage(`"string"`), Optional: true},
-							"id":     {Type: json.RawMessage(`"string"`), Computed: true},
-						},
+		},
+		DataSourceSchemas: map[string]*provider.SchemaBlock{
+			"test_data": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"filter": {Type: json.RawMessage(`"string"`), Optional: true},
+						"id":     {Type: json.RawMessage(`"string"`), Computed: true},
 					},
 				},
 			},
@@ -378,32 +365,31 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 		OutputDir:   tmpDir,
 	})
 
-	ps := &provider.Schema{
-		Provider: &provider.ProviderSchema{
-			ConfigSchema: &provider.SchemaBlock{
-				Block: &provider.BlockType{},
-			},
-			ResourceSchemas: map[string]*provider.SchemaBlock{
-				"test_multi": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"name": {Type: json.RawMessage(`"string"`), Required: true},
-						},
-						BlockTypes: map[string]*provider.NestedBlock{
-							"tags": {
-								NestingMode: provider.NestingModeSet,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"key": {Type: json.RawMessage(`"string"`), Required: true},
-									},
+	ps := &provider.ProviderSchema{
+
+		ConfigSchema: &provider.SchemaBlock{
+			Block: &provider.BlockType{},
+		},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_multi": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"name": {Type: json.RawMessage(`"string"`), Required: true},
+					},
+					BlockTypes: map[string]*provider.NestedBlock{
+						"tags": {
+							NestingMode: provider.NestingModeSet,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"key": {Type: json.RawMessage(`"string"`), Required: true},
 								},
 							},
-							"metadata": {
-								NestingMode: provider.NestingModeMap,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"value": {Type: json.RawMessage(`"string"`), Optional: true},
-									},
+						},
+						"metadata": {
+							NestingMode: provider.NestingModeMap,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"value": {Type: json.RawMessage(`"string"`), Optional: true},
 								},
 							},
 						},
@@ -446,33 +432,32 @@ func TestGenerateWithComments(t *testing.T) {
 		OutputDir:   tmpDir,
 	})
 
-	ps := &provider.Schema{
-		Provider: &provider.ProviderSchema{
-			ConfigSchema: &provider.SchemaBlock{
+	ps := &provider.ProviderSchema{
+
+		ConfigSchema: &provider.SchemaBlock{
+			Block: &provider.BlockType{
+				Description: "Provider configuration for the test provider",
+				Attributes: map[string]*provider.Attribute{
+					"token": {Type: json.RawMessage(`"string"`), Required: true, Description: "Authentication token"},
+				},
+			},
+		},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_item": {
 				Block: &provider.BlockType{
-					Description: "Provider configuration for the test provider",
+					Description: "Manages a test item resource",
 					Attributes: map[string]*provider.Attribute{
-						"token": {Type: json.RawMessage(`"string"`), Required: true, Description: "Authentication token"},
+						"name": {Type: json.RawMessage(`"string"`), Required: true, Description: "The name of the item"},
 					},
 				},
 			},
-			ResourceSchemas: map[string]*provider.SchemaBlock{
-				"test_item": {
-					Block: &provider.BlockType{
-						Description: "Manages a test item resource",
-						Attributes: map[string]*provider.Attribute{
-							"name": {Type: json.RawMessage(`"string"`), Required: true, Description: "The name of the item"},
-						},
-					},
-				},
-			},
-			DataSourceSchemas: map[string]*provider.SchemaBlock{
-				"test_lookup": {
-					Block: &provider.BlockType{
-						Description: "Reads a test lookup data source",
-						Attributes: map[string]*provider.Attribute{
-							"query": {Type: json.RawMessage(`"string"`), Optional: true, Description: "Search query string"},
-						},
+		},
+		DataSourceSchemas: map[string]*provider.SchemaBlock{
+			"test_lookup": {
+				Block: &provider.BlockType{
+					Description: "Reads a test lookup data source",
+					Attributes: map[string]*provider.Attribute{
+						"query": {Type: json.RawMessage(`"string"`), Optional: true, Description: "Search query string"},
 					},
 				},
 			},
@@ -536,97 +521,96 @@ func TestGenerateCompilationComplex(t *testing.T) {
 		OutputDir:   tmpDir,
 	})
 
-	ps := &provider.Schema{
-		Provider: &provider.ProviderSchema{
-			ConfigSchema: &provider.SchemaBlock{
+	ps := &provider.ProviderSchema{
+
+		ConfigSchema: &provider.SchemaBlock{
+			Block: &provider.BlockType{
+				Attributes: map[string]*provider.Attribute{
+					"api_key":  {Type: json.RawMessage(`"string"`), Required: true},
+					"base_url": {Type: json.RawMessage(`"string"`), Optional: true},
+					"timeout":  {Type: json.RawMessage(`"number"`), Optional: true},
+					"debug":    {Type: json.RawMessage(`"bool"`), Optional: true},
+				},
+				BlockTypes: map[string]*provider.NestedBlock{
+					"auth": {
+						NestingMode: provider.NestingModeSingle,
+						Block: &provider.BlockType{
+							Attributes: map[string]*provider.Attribute{
+								"token": {Type: json.RawMessage(`"string"`), Required: true},
+							},
+						},
+					},
+				},
+			},
+		},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_server": {
 				Block: &provider.BlockType{
 					Attributes: map[string]*provider.Attribute{
-						"api_key":  {Type: json.RawMessage(`"string"`), Required: true},
-						"base_url": {Type: json.RawMessage(`"string"`), Optional: true},
-						"timeout":  {Type: json.RawMessage(`"number"`), Optional: true},
-						"debug":    {Type: json.RawMessage(`"bool"`), Optional: true},
+						"name":    {Type: json.RawMessage(`"string"`), Required: true},
+						"id":      {Type: json.RawMessage(`"string"`), Computed: true},
+						"tags":    {Type: json.RawMessage(`["list","string"]`), Optional: true},
+						"labels":  {Type: json.RawMessage(`["map","string"]`), Optional: true},
+						"ports":   {Type: json.RawMessage(`["set","number"]`), Optional: true},
+						"dynamic": {Type: json.RawMessage(`"dynamic"`), Optional: true},
 					},
 					BlockTypes: map[string]*provider.NestedBlock{
-						"auth": {
+						"disk": {
+							NestingMode: provider.NestingModeList,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"size": {Type: json.RawMessage(`"number"`), Required: true},
+									"type": {Type: json.RawMessage(`"string"`), Optional: true},
+								},
+							},
+						},
+						"network": {
+							NestingMode: provider.NestingModeSet,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"cidr": {Type: json.RawMessage(`"string"`), Required: true},
+								},
+							},
+						},
+						"metadata": {
+							NestingMode: provider.NestingModeMap,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"value": {Type: json.RawMessage(`"string"`), Optional: true},
+								},
+							},
+						},
+						"primary_nic": {
 							NestingMode: provider.NestingModeSingle,
 							Block: &provider.BlockType{
 								Attributes: map[string]*provider.Attribute{
-									"token": {Type: json.RawMessage(`"string"`), Required: true},
+									"mac": {Type: json.RawMessage(`"string"`), Computed: true},
 								},
 							},
 						},
 					},
 				},
 			},
-			ResourceSchemas: map[string]*provider.SchemaBlock{
-				"test_server": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"name":    {Type: json.RawMessage(`"string"`), Required: true},
-							"id":      {Type: json.RawMessage(`"string"`), Computed: true},
-							"tags":    {Type: json.RawMessage(`["list","string"]`), Optional: true},
-							"labels":  {Type: json.RawMessage(`["map","string"]`), Optional: true},
-							"ports":   {Type: json.RawMessage(`["set","number"]`), Optional: true},
-							"dynamic": {Type: json.RawMessage(`"dynamic"`), Optional: true},
-						},
-						BlockTypes: map[string]*provider.NestedBlock{
-							"disk": {
-								NestingMode: provider.NestingModeList,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"size": {Type: json.RawMessage(`"number"`), Required: true},
-										"type": {Type: json.RawMessage(`"string"`), Optional: true},
-									},
-								},
-							},
-							"network": {
-								NestingMode: provider.NestingModeSet,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"cidr": {Type: json.RawMessage(`"string"`), Required: true},
-									},
-								},
-							},
-							"metadata": {
-								NestingMode: provider.NestingModeMap,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"value": {Type: json.RawMessage(`"string"`), Optional: true},
-									},
-								},
-							},
-							"primary_nic": {
-								NestingMode: provider.NestingModeSingle,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"mac": {Type: json.RawMessage(`"string"`), Computed: true},
-									},
-								},
-							},
-						},
+			"test_database": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"engine":  {Type: json.RawMessage(`"string"`), Required: true},
+						"version": {Type: json.RawMessage(`"string"`), Optional: true},
 					},
-				},
-				"test_database": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"engine":  {Type: json.RawMessage(`"string"`), Required: true},
-							"version": {Type: json.RawMessage(`"string"`), Optional: true},
-						},
-						BlockTypes: map[string]*provider.NestedBlock{
-							"replica": {
-								NestingMode: provider.NestingModeList,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"region": {Type: json.RawMessage(`"string"`), Required: true},
-									},
-									BlockTypes: map[string]*provider.NestedBlock{
-										"endpoint": {
-											NestingMode: provider.NestingModeSingle,
-											Block: &provider.BlockType{
-												Attributes: map[string]*provider.Attribute{
-													"host": {Type: json.RawMessage(`"string"`), Computed: true},
-													"port": {Type: json.RawMessage(`"number"`), Computed: true},
-												},
+					BlockTypes: map[string]*provider.NestedBlock{
+						"replica": {
+							NestingMode: provider.NestingModeList,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"region": {Type: json.RawMessage(`"string"`), Required: true},
+								},
+								BlockTypes: map[string]*provider.NestedBlock{
+									"endpoint": {
+										NestingMode: provider.NestingModeSingle,
+										Block: &provider.BlockType{
+											Attributes: map[string]*provider.Attribute{
+												"host": {Type: json.RawMessage(`"string"`), Computed: true},
+												"port": {Type: json.RawMessage(`"number"`), Computed: true},
 											},
 										},
 									},
@@ -636,22 +620,22 @@ func TestGenerateCompilationComplex(t *testing.T) {
 					},
 				},
 			},
-			DataSourceSchemas: map[string]*provider.SchemaBlock{
-				"test_image": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"name":   {Type: json.RawMessage(`"string"`), Optional: true},
-							"id":     {Type: json.RawMessage(`"string"`), Computed: true},
-							"owners": {Type: json.RawMessage(`["list","string"]`), Optional: true},
-						},
-						BlockTypes: map[string]*provider.NestedBlock{
-							"filter": {
-								NestingMode: provider.NestingModeSet,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"name":   {Type: json.RawMessage(`"string"`), Required: true},
-										"values": {Type: json.RawMessage(`["list","string"]`), Required: true},
-									},
+		},
+		DataSourceSchemas: map[string]*provider.SchemaBlock{
+			"test_image": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"name":   {Type: json.RawMessage(`"string"`), Optional: true},
+						"id":     {Type: json.RawMessage(`"string"`), Computed: true},
+						"owners": {Type: json.RawMessage(`["list","string"]`), Optional: true},
+					},
+					BlockTypes: map[string]*provider.NestedBlock{
+						"filter": {
+							NestingMode: provider.NestingModeSet,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"name":   {Type: json.RawMessage(`"string"`), Required: true},
+									"values": {Type: json.RawMessage(`["list","string"]`), Required: true},
 								},
 							},
 						},
@@ -694,61 +678,60 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 	})
 
 	// Use a schema with all NestedType nesting modes.
-	ps := &provider.Schema{
-		Provider: &provider.ProviderSchema{
-			ConfigSchema: &provider.SchemaBlock{
-				Block: &provider.BlockType{},
-			},
-			ResourceSchemas: map[string]*provider.SchemaBlock{
-				"test_nested_types": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"name": {Type: json.RawMessage(`"string"`), Required: true},
-							"single_nested": {
-								NestedType: &provider.NestedType{
-									Attributes: map[string]*provider.Attribute{
-										"inner_name":  {Type: json.RawMessage(`"string"`), Required: true},
-										"inner_count": {Type: json.RawMessage(`"number"`), Optional: true},
-									},
-									NestingMode: provider.NestingModeSingle,
+	ps := &provider.ProviderSchema{
+
+		ConfigSchema: &provider.SchemaBlock{
+			Block: &provider.BlockType{},
+		},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_nested_types": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"name": {Type: json.RawMessage(`"string"`), Required: true},
+						"single_nested": {
+							NestedType: &provider.NestedType{
+								Attributes: map[string]*provider.Attribute{
+									"inner_name":  {Type: json.RawMessage(`"string"`), Required: true},
+									"inner_count": {Type: json.RawMessage(`"number"`), Optional: true},
 								},
-								Optional: true,
+								NestingMode: provider.NestingModeSingle,
 							},
-							"list_nested": {
-								NestedType: &provider.NestedType{
-									Attributes: map[string]*provider.Attribute{
-										"value": {Type: json.RawMessage(`"string"`), Required: true},
-									},
-									NestingMode: provider.NestingModeList,
+							Optional: true,
+						},
+						"list_nested": {
+							NestedType: &provider.NestedType{
+								Attributes: map[string]*provider.Attribute{
+									"value": {Type: json.RawMessage(`"string"`), Required: true},
 								},
-								Optional: true,
+								NestingMode: provider.NestingModeList,
 							},
-							"set_nested": {
-								NestedType: &provider.NestedType{
-									Attributes: map[string]*provider.Attribute{
-										"key":   {Type: json.RawMessage(`"string"`), Required: true},
-										"value": {Type: json.RawMessage(`"string"`), Optional: true},
-									},
-									NestingMode: provider.NestingModeSet,
+							Optional: true,
+						},
+						"set_nested": {
+							NestedType: &provider.NestedType{
+								Attributes: map[string]*provider.Attribute{
+									"key":   {Type: json.RawMessage(`"string"`), Required: true},
+									"value": {Type: json.RawMessage(`"string"`), Optional: true},
 								},
-								Optional: true,
+								NestingMode: provider.NestingModeSet,
 							},
-							"map_nested": {
-								NestedType: &provider.NestedType{
-									Attributes: map[string]*provider.Attribute{
-										"setting": {Type: json.RawMessage(`"string"`), Required: true},
-									},
-									NestingMode: provider.NestingModeMap,
+							Optional: true,
+						},
+						"map_nested": {
+							NestedType: &provider.NestedType{
+								Attributes: map[string]*provider.Attribute{
+									"setting": {Type: json.RawMessage(`"string"`), Required: true},
 								},
-								Optional: true,
+								NestingMode: provider.NestingModeMap,
 							},
-							"empty_nested": {
-								NestedType: &provider.NestedType{
-									Attributes:  map[string]*provider.Attribute{},
-									NestingMode: provider.NestingModeSingle,
-								},
-								Optional: true,
+							Optional: true,
+						},
+						"empty_nested": {
+							NestedType: &provider.NestedType{
+								Attributes:  map[string]*provider.Attribute{},
+								NestingMode: provider.NestingModeSingle,
 							},
+							Optional: true,
 						},
 					},
 				},
@@ -935,41 +918,40 @@ func TestConstructorRoundTrip(t *testing.T) {
 		OutputDir:   genDir,
 	})
 
-	ps := &provider.Schema{
-		Provider: &provider.ProviderSchema{
-			ConfigSchema: &provider.SchemaBlock{
-				Block: &provider.BlockType{},
-			},
-			ResourceSchemas: map[string]*provider.SchemaBlock{
-				"test_widget": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"name":    {Type: json.RawMessage(`"string"`), Required: true},
-							"enabled": {Type: json.RawMessage(`"bool"`), Optional: true},
-							"count":   {Type: json.RawMessage(`"number"`), Optional: true},
-							"tags":    {Type: json.RawMessage(`["list","string"]`), Optional: true},
-						},
-						BlockTypes: map[string]*provider.NestedBlock{
-							"setting": {
-								NestingMode: provider.NestingModeList,
-								Block: &provider.BlockType{
-									Attributes: map[string]*provider.Attribute{
-										"key":   {Type: json.RawMessage(`"string"`), Required: true},
-										"value": {Type: json.RawMessage(`"string"`), Optional: true},
-									},
+	ps := &provider.ProviderSchema{
+
+		ConfigSchema: &provider.SchemaBlock{
+			Block: &provider.BlockType{},
+		},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_widget": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"name":    {Type: json.RawMessage(`"string"`), Required: true},
+						"enabled": {Type: json.RawMessage(`"bool"`), Optional: true},
+						"count":   {Type: json.RawMessage(`"number"`), Optional: true},
+						"tags":    {Type: json.RawMessage(`["list","string"]`), Optional: true},
+					},
+					BlockTypes: map[string]*provider.NestedBlock{
+						"setting": {
+							NestingMode: provider.NestingModeList,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"key":   {Type: json.RawMessage(`"string"`), Required: true},
+									"value": {Type: json.RawMessage(`"string"`), Optional: true},
 								},
 							},
 						},
 					},
 				},
 			},
-			DataSourceSchemas: map[string]*provider.SchemaBlock{
-				"test_lookup": {
-					Block: &provider.BlockType{
-						Attributes: map[string]*provider.Attribute{
-							"filter": {Type: json.RawMessage(`"string"`), Optional: true},
-							"id":     {Type: json.RawMessage(`"string"`), Computed: true},
-						},
+		},
+		DataSourceSchemas: map[string]*provider.SchemaBlock{
+			"test_lookup": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"filter": {Type: json.RawMessage(`"string"`), Optional: true},
+						"id":     {Type: json.RawMessage(`"string"`), Computed: true},
 					},
 				},
 			},
@@ -1183,9 +1165,7 @@ func TestGenerateNestedTypeFullFixture(t *testing.T) {
 		OutputDir:   tmpDir,
 	})
 
-	ps := &provider.Schema{
-		Provider: newTestProviderSchema(),
-	}
+	ps := newTestProviderSchema()
 
 	if err := g.Generate(ps); err != nil {
 		t.Fatalf("Generate failed: %v", err)

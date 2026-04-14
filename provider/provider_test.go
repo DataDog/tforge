@@ -72,13 +72,10 @@ func TestLoadSchemaFromJSONValid(t *testing.T) {
 	if schema == nil {
 		t.Fatal("LoadSchemaFromJSON returned nil schema")
 	}
-	if schema.Provider == nil {
-		t.Fatal("schema.Provider is nil")
-	}
-	if schema.Provider.ResourceSchemas == nil {
+	if schema.ResourceSchemas == nil {
 		t.Fatal("ResourceSchemas is nil")
 	}
-	rs, ok := schema.Provider.ResourceSchemas["test_thing"]
+	rs, ok := schema.ResourceSchemas["test_thing"]
 	if !ok {
 		t.Fatal("test_thing resource not found")
 	}
@@ -139,10 +136,10 @@ func TestSaveAndLoadSchemaRoundtrip(t *testing.T) {
 		t.Fatalf("LoadSchemaFromFile: %v", err)
 	}
 
-	if loaded.Provider == nil {
-		t.Fatal("loaded Provider is nil")
+	if loaded == nil {
+		t.Fatal("loaded schema is nil")
 	}
-	rs, ok := loaded.Provider.ResourceSchemas["test_resource"]
+	rs, ok := loaded.ResourceSchemas["test_resource"]
 	if !ok {
 		t.Fatal("test_resource not found after roundtrip")
 	}
@@ -415,13 +412,13 @@ func TestLoadSchemaFromJSON_WithAllSections(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if schema.Provider.ConfigSchema == nil {
+	if schema.ConfigSchema == nil {
 		t.Error("ConfigSchema is nil")
 	}
-	if _, ok := schema.Provider.ResourceSchemas["r1"]; !ok {
+	if _, ok := schema.ResourceSchemas["r1"]; !ok {
 		t.Error("r1 resource not found")
 	}
-	if _, ok := schema.Provider.DataSourceSchemas["d1"]; !ok {
+	if _, ok := schema.DataSourceSchemas["d1"]; !ok {
 		t.Error("d1 data source not found")
 	}
 }
@@ -431,8 +428,8 @@ func TestLoadSchemaFromJSON_EmptyObject(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if schema.Provider == nil {
-		t.Fatal("Provider is nil")
+	if schema == nil {
+		t.Fatal("schema is nil")
 	}
 }
 
