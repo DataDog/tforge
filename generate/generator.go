@@ -196,7 +196,7 @@ func (g *Generator) generateProvider() error {
 
 // generateResources generates resource files.
 func (g *Generator) generateResources() error {
-	resources := sortedResources(g.schema.ResourceSchemas)
+	resources := sortedSchemas(g.schema.ResourceSchemas)
 	if len(resources) == 0 {
 		return nil
 	}
@@ -240,7 +240,7 @@ func (g *Generator) generateResources() error {
 
 // generateDataSources generates data source files.
 func (g *Generator) generateDataSources() error {
-	dataSources := sortedDataSources(g.schema.DataSourceSchemas)
+	dataSources := sortedSchemas(g.schema.DataSourceSchemas)
 	if len(dataSources) == 0 {
 		return nil
 	}

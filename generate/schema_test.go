@@ -363,9 +363,9 @@ func TestAttributeTypeNested(t *testing.T) {
 	}
 }
 
-func TestSortedResources(t *testing.T) {
+func TestSortedSchemas_Resources(t *testing.T) {
 	ps := newTestProviderSchema()
-	resources := sortedResources(ps.ResourceSchemas)
+	resources := sortedSchemas(ps.ResourceSchemas)
 	if len(resources) != 3 {
 		t.Fatalf("expected 3 resources, got %d", len(resources))
 	}
@@ -380,15 +380,15 @@ func TestSortedResources(t *testing.T) {
 	}
 }
 
-func TestSortedResourcesNil(t *testing.T) {
-	if sortedResources(nil) != nil {
+func TestSortedSchemas_Nil(t *testing.T) {
+	if sortedSchemas(nil) != nil {
 		t.Error("expected nil for nil map")
 	}
 }
 
-func TestSortedDataSources(t *testing.T) {
+func TestSortedSchemas_DataSources(t *testing.T) {
 	ps := newTestProviderSchema()
-	dataSources := sortedDataSources(ps.DataSourceSchemas)
+	dataSources := sortedSchemas(ps.DataSourceSchemas)
 	if len(dataSources) != 2 {
 		t.Fatalf("expected 2 data sources, got %d", len(dataSources))
 	}
@@ -397,12 +397,6 @@ func TestSortedDataSources(t *testing.T) {
 	}
 	if dataSources[1].Name != "example_things" {
 		t.Errorf("expected second data source %q, got %q", "example_things", dataSources[1].Name)
-	}
-}
-
-func TestSortedDataSourcesNil(t *testing.T) {
-	if sortedDataSources(nil) != nil {
-		t.Error("expected nil for nil map")
 	}
 }
 

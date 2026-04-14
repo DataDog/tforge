@@ -9,14 +9,8 @@ import (
 	"tforge/provider"
 )
 
-// resourceEntry pairs a resource name with its schema for sorted iteration.
-type resourceEntry struct {
-	Name   string
-	Schema *provider.SchemaBlock
-}
-
-// dataSourceEntry pairs a data source name with its schema for sorted iteration.
-type dataSourceEntry struct {
+// schemaEntry pairs a resource or data source name with its schema for sorted iteration.
+type schemaEntry struct {
 	Name   string
 	Schema *provider.SchemaBlock
 }
@@ -33,29 +27,15 @@ type nestedBlockEntry struct {
 	Block *provider.NestedBlock
 }
 
-// sortedResources returns all resource schemas sorted by name.
-func sortedResources(schemas map[string]*provider.SchemaBlock) []resourceEntry {
+// sortedSchemas returns all schemas sorted by name.
+// Used for both resource and data source schemas.
+func sortedSchemas(schemas map[string]*provider.SchemaBlock) []schemaEntry {
 	if len(schemas) == 0 {
 		return nil
 	}
-	entries := make([]resourceEntry, 0, len(schemas))
+	entries := make([]schemaEntry, 0, len(schemas))
 	for name, s := range schemas {
-		entries = append(entries, resourceEntry{Name: name, Schema: s})
-	}
-	sort.Slice(entries, func(i, j int) bool {
-		return entries[i].Name < entries[j].Name
-	})
-	return entries
-}
-
-// sortedDataSources returns all data source schemas sorted by name.
-func sortedDataSources(schemas map[string]*provider.SchemaBlock) []dataSourceEntry {
-	if len(schemas) == 0 {
-		return nil
-	}
-	entries := make([]dataSourceEntry, 0, len(schemas))
-	for name, s := range schemas {
-		entries = append(entries, dataSourceEntry{Name: name, Schema: s})
+		entries = append(entries, schemaEntry{Name: name, Schema: s})
 	}
 	sort.Slice(entries, func(i, j int) bool {
 		return entries[i].Name < entries[j].Name
