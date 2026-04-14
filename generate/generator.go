@@ -391,7 +391,6 @@ func (g *Generator) generateNestedTypes(f *jen.File, block *provider.BlockType, 
 func (g *Generator) generateOptionType(f *jen.File, structName string) {
 	short := g.shortName(structName)
 	optionType := short + "Option"
-	f.Commentf("%s is a functional option for configuring a %s.", optionType, structName)
 	f.Type().Id(optionType).Func().Params(jen.Op("*").Id(structName))
 	f.Line()
 }
@@ -412,7 +411,6 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 		funcName := structName + "_Set" + fieldName
 		goType := goTypeName(attributeType(attr.Attr))
 
-		f.Commentf("%s sets the %s field.", funcName, fieldName)
 		f.Func().Id(funcName).ParamsFunc(func(p *jen.Group) {
 			applyGoType(p.Id("v"), goType)
 		}).Id(optionType).Block(
@@ -428,7 +426,6 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 		typeName := structName + g.toGoName(nb.Name)
 		funcName := structName + "_Set" + fieldName
 
-		f.Commentf("%s sets the %s nested block.", funcName, fieldName)
 		switch nb.Block.NestingMode {
 		case provider.NestingModeSingle, provider.NestingModeGroup:
 			f.Func().Id(funcName).Params(
@@ -475,7 +472,6 @@ func (g *Generator) generateConfigBridge(f *jen.File, structName string) {
 	optionType := short + "Option"
 	funcName := "From" + short
 
-	f.Commentf("%s applies all fields from a %s struct value.", funcName, structName)
 	f.Func().Id(funcName).Params(
 		jen.Id("cfg").Id(structName),
 	).Id(optionType).Block(
