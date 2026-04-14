@@ -450,6 +450,31 @@ func TestSortedNestedBlocksNil(t *testing.T) {
 	}
 }
 
+func TestExtractInnerType(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"list of string", "list(string)", "string"},
+		{"map of list of string", "map(list(string))", "list(string)"},
+		{"no parens", "string", "any"},
+		{"empty string", "", "any"},
+		{"empty parens", "list()", ""},
+		{"missing close paren", "list(string", "any"},
+		{"missing open paren", "list)string(", "any"},
+		{"close before open", ")string(", "any"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := extractInnerType(tt.input)
+			if got != tt.want {
+				t.Errorf("extractInnerType(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNestedTypeString(t *testing.T) {
 	tests := []struct {
 		mode provider.NestingMode
