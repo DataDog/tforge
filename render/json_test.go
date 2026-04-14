@@ -1522,55 +1522,143 @@ func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 	}
 }
 
-func TestApplyCommonMeta(t *testing.T) {
+func TestResourceConfigJSON_MarshalJSON(t *testing.T) {
 	t.Run("all fields set", func(t *testing.T) {
-		cfg := map[string]any{"existing": "value"}
-		applyCommonMeta(cfg, "aws.west", []string{"aws_vpc.main"}, 3, map[string]string{"a": "1"})
-
-		if cfg["provider"] != "aws.west" {
-			t.Errorf("provider = %v, want aws.west", cfg["provider"])
+		rc := resourceConfigJSON{
+			Config:    map[string]any{"existing": "value"},
+			Provider:  "aws.west",
+			DependsOn: []string{"aws_vpc.main"},
+			Count:     3,
+			ForEach:   map[string]string{"a": "1"},
 		}
-		deps, ok := cfg["depends_on"].([]string)
+
+		data, err := json.Marshal(rc)
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
+		}
+		var m map[string]any
+		if err := json.Unmarshal(data, &m); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+
+		if m["provider"] != "aws.west" {
+			t.Errorf("provider = %v, want aws.west", m["provider"])
+		}
+		deps, ok := m["depends_on"].([]any)
 		if !ok {
-			t.Fatalf("depends_on: expected []string, got %T", cfg["depends_on"])
+			t.Fatalf("depends_on: expected []any, got %T", m["depends_on"])
 		}
 		if len(deps) != 1 || deps[0] != "aws_vpc.main" {
 			t.Errorf("depends_on = %v, want [aws_vpc.main]", deps)
 		}
-		if cfg["count"] != 3 {
-			t.Errorf("count = %v, want 3", cfg["count"])
+		if m["count"] != float64(3) {
+			t.Errorf("count = %v, want 3", m["count"])
 		}
-		fe, ok := cfg["for_each"].(map[string]string)
+		fe, ok := m["for_each"].(map[string]any)
 		if !ok {
-			t.Fatalf("for_each: expected map[string]string, got %T", cfg["for_each"])
+			t.Fatalf("for_each: expected map[string]any, got %T", m["for_each"])
 		}
 		if fe["a"] != "1" {
 			t.Errorf("for_each = %v, want map[a:1]", fe)
 		}
-		// existing key preserved
-		if cfg["existing"] != "value" {
-			t.Errorf("existing = %v, want value", cfg["existing"])
+		if m["existing"] != "value" {
+			t.Errorf("existing = %v, want value", m["existing"])
 		}
 	})
 
-	t.Run("no fields set", func(t *testing.T) {
-		cfg := map[string]any{"existing": "value"}
-		applyCommonMeta(cfg, "", nil, nil, nil)
+	t.Run("no meta fields set", func(t *testing.T) {
+		rc := resourceConfigJSON{
+			Config: map[string]any{"existing": "value"},
+		}
 
-		if _, ok := cfg["provider"]; ok {
-			t.Error("provider should not be set")
+		data, err := json.Marshal(rc)
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
 		}
-		if _, ok := cfg["depends_on"]; ok {
-			t.Error("depends_on should not be set")
+		var m map[string]any
+		if err := json.Unmarshal(data, &m); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
 		}
-		if _, ok := cfg["count"]; ok {
-			t.Error("count should not be set")
+
+		for _, key := range []string{"provider", "depends_on", "count", "for_each", "lifecycle", "timeouts", "connection", "provisioner"} {
+			if _, ok := m[key]; ok {
+				t.Errorf("%s should not be present", key)
+			}
 		}
-		if _, ok := cfg["for_each"]; ok {
-			t.Error("for_each should not be set")
+		if m["existing"] != "value" {
+			t.Errorf("existing = %v, want value", m["existing"])
 		}
-		if cfg["existing"] != "value" {
-			t.Errorf("existing = %v, want value", cfg["existing"])
+	})
+}
+
+func TestProvisionerJSON_MarshalJSON(t *testing.T) {
+	p := provisionerJSON{
+		Type:      "local-exec",
+		Config:    map[string]any{"command": "echo hello"},
+		When:      "create",
+		OnFailure: "continue",
+	}
+
+	data, err := json.Marshal(p)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+
+	inner, ok := m["local-exec"].(map[string]any)
+	if !ok {
+		t.Fatalf("expected local-exec key, got keys: %v", keys(m))
+	}
+	if inner["command"] != "echo hello" {
+		t.Errorf("command = %v, want echo hello", inner["command"])
+	}
+	if inner["when"] != "create" {
+		t.Errorf("when = %v, want create", inner["when"])
+	}
+	if inner["on_failure"] != "continue" {
+		t.Errorf("on_failure = %v, want continue", inner["on_failure"])
+	}
+}
+
+func TestProviderConfigJSON_MarshalJSON(t *testing.T) {
+	t.Run("with alias", func(t *testing.T) {
+		p := providerConfigJSON{
+			Config: map[string]any{"region": "us-east-1"},
+			Alias:  "east",
+		}
+		data, err := json.Marshal(p)
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
+		}
+		var m map[string]any
+		if err := json.Unmarshal(data, &m); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if m["region"] != "us-east-1" {
+			t.Errorf("region = %v, want us-east-1", m["region"])
+		}
+		if m["alias"] != "east" {
+			t.Errorf("alias = %v, want east", m["alias"])
+		}
+	})
+
+	t.Run("without alias", func(t *testing.T) {
+		p := providerConfigJSON{
+			Config: map[string]any{"region": "us-west-2"},
+		}
+		data, err := json.Marshal(p)
+		if err != nil {
+			t.Fatalf("Marshal: %v", err)
+		}
+		var m map[string]any
+		if err := json.Unmarshal(data, &m); err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+		if _, ok := m["alias"]; ok {
+			t.Error("alias should not be present")
 		}
 	})
 }

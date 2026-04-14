@@ -32,6 +32,25 @@ const (
 	filePerm = os.FileMode(0644)
 )
 
+// marshalNoEscape marshals v to JSON without HTML-escaping special characters
+// like <, >, and &. This matches the behavior of the top-level encoder which
+// uses SetEscapeHTML(false), ensuring that values containing these characters
+// (e.g., Terraform query expressions with ">") are preserved as-is.
+func marshalNoEscape(v any) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	if err := enc.Encode(v); err != nil {
+		return nil, err
+	}
+	// Encode appends a trailing newline; strip it for MarshalJSON compatibility.
+	b := buf.Bytes()
+	if len(b) > 0 && b[len(b)-1] == '\n' {
+		b = b[:len(b)-1]
+	}
+	return b, nil
+}
+
 // DefaultVersion is the fallback version stamped into generated JSON when
 // no explicit version is supplied.
 const DefaultVersion = "dev"
@@ -92,7 +111,7 @@ type terraformJSON struct {
 	Provider  map[string][]any          `json:"provider,omitempty"`
 	Resource  map[string]map[string]any `json:"resource,omitempty"`
 	Data      map[string]map[string]any `json:"data,omitempty"`
-	Module    map[string]map[string]any `json:"module,omitempty"`
+	Module    map[string]any            `json:"module,omitempty"`
 	Variable  map[string]variableJSON   `json:"variable,omitempty"`
 	Output    map[string]outputJSON     `json:"output,omitempty"`
 	Locals    map[string]any            `json:"locals,omitempty"`
@@ -220,18 +239,10 @@ func buildProviders(providers []config.Provider) map[string][]any {
 	result := make(map[string][]any)
 
 	for _, p := range providers {
-		cfg := make(map[string]any)
-
-		// Copy provider config
-		for k, v := range p.Config {
-			cfg[k] = v
+		cfg := providerConfigJSON{
+			Config: p.Config,
+			Alias:  p.Alias,
 		}
-
-		// Add alias if set
-		if p.Alias != "" {
-			cfg["alias"] = p.Alias
-		}
-
 		result[p.Name] = append(result[p.Name], cfg)
 	}
 
@@ -247,60 +258,203 @@ func buildResources(resources []config.Resource) map[string]map[string]any {
 			result[r.Type] = make(map[string]any)
 		}
 
-		cfg := buildResourceConfig(r)
-		result[r.Type][r.Name] = cfg
+		result[r.Type][r.Name] = buildResourceConfig(r)
 	}
 
 	return result
 }
 
-// applyCommonMeta writes the meta-arguments shared by resources, data sources,
-// and modules (provider, depends_on, count, for_each) into cfg.
-// This is the single source of truth for the common serialization pattern.
-func applyCommonMeta(cfg map[string]any, provider string, dependsOn []string, count, forEach any) {
-	if provider != "" {
-		cfg["provider"] = provider
+// resourceConfigJSON represents a single resource block in JSON output.
+// The Config map is flattened alongside the typed meta-argument fields
+// via a custom MarshalJSON, giving compile-time safety for the meta keys
+// while preserving the arbitrary user-supplied configuration.
+type resourceConfigJSON struct {
+	Config       map[string]any    `json:"-"` // flattened into top level
+	Provider     string            `json:"provider,omitempty"`
+	DependsOn    []string          `json:"depends_on,omitempty"`
+	Count        any               `json:"count,omitempty"`
+	ForEach      any               `json:"for_each,omitempty"`
+	Lifecycle    *config.Lifecycle `json:"lifecycle,omitempty"`
+	Timeouts     *config.Timeouts  `json:"timeouts,omitempty"`
+	Connection   *connectionJSON   `json:"connection,omitempty"`
+	Provisioners []provisionerJSON `json:"provisioner,omitempty"`
+}
+
+// MarshalJSON flattens Config alongside the typed meta-argument fields.
+func (r resourceConfigJSON) MarshalJSON() ([]byte, error) {
+	m := make(map[string]any, len(r.Config)+8)
+	for k, v := range r.Config {
+		m[k] = v
 	}
-	if len(dependsOn) > 0 {
-		cfg["depends_on"] = dependsOn
+	if r.Provider != "" {
+		m["provider"] = r.Provider
 	}
-	if count != nil {
-		cfg["count"] = count
+	if len(r.DependsOn) > 0 {
+		m["depends_on"] = r.DependsOn
 	}
-	if forEach != nil {
-		cfg["for_each"] = forEach
+	if r.Count != nil {
+		m["count"] = r.Count
 	}
+	if r.ForEach != nil {
+		m["for_each"] = r.ForEach
+	}
+	if r.Lifecycle != nil {
+		m["lifecycle"] = r.Lifecycle
+	}
+	if r.Timeouts != nil {
+		m["timeouts"] = r.Timeouts
+	}
+	if r.Connection != nil {
+		m["connection"] = r.Connection
+	}
+	if len(r.Provisioners) > 0 {
+		m["provisioner"] = r.Provisioners
+	}
+	return marshalNoEscape(m)
+}
+
+// provisionerJSON represents a single provisioner block in JSON output.
+// Config is flattened alongside the typed meta-keys (when, on_failure,
+// connection) to prevent string-key typos.
+type provisionerJSON struct {
+	Type       string          `json:"-"` // used as the outer map key
+	Config     map[string]any  `json:"-"` // flattened
+	When       string          `json:"when,omitempty"`
+	OnFailure  string          `json:"on_failure,omitempty"`
+	Connection *connectionJSON `json:"connection,omitempty"`
+}
+
+// MarshalJSON produces {"type": {config + meta}} matching Terraform format.
+func (p provisionerJSON) MarshalJSON() ([]byte, error) {
+	inner := make(map[string]any, len(p.Config)+3)
+	for k, v := range p.Config {
+		inner[k] = v
+	}
+	if p.When != "" {
+		inner["when"] = p.When
+	}
+	if p.OnFailure != "" {
+		inner["on_failure"] = p.OnFailure
+	}
+	if p.Connection != nil {
+		inner["connection"] = p.Connection
+	}
+	return marshalNoEscape(map[string]any{p.Type: inner})
+}
+
+// dataSourceConfigJSON represents a single data source block in JSON output.
+// Same pattern as resourceConfigJSON but without lifecycle/timeouts/provisioners.
+type dataSourceConfigJSON struct {
+	Config    map[string]any `json:"-"` // flattened into top level
+	Provider  string         `json:"provider,omitempty"`
+	DependsOn []string       `json:"depends_on,omitempty"`
+	Count     any            `json:"count,omitempty"`
+	ForEach   any            `json:"for_each,omitempty"`
+}
+
+// MarshalJSON flattens Config alongside the typed meta-argument fields.
+func (d dataSourceConfigJSON) MarshalJSON() ([]byte, error) {
+	m := make(map[string]any, len(d.Config)+4)
+	for k, v := range d.Config {
+		m[k] = v
+	}
+	if d.Provider != "" {
+		m["provider"] = d.Provider
+	}
+	if len(d.DependsOn) > 0 {
+		m["depends_on"] = d.DependsOn
+	}
+	if d.Count != nil {
+		m["count"] = d.Count
+	}
+	if d.ForEach != nil {
+		m["for_each"] = d.ForEach
+	}
+	return marshalNoEscape(m)
+}
+
+// moduleConfigJSON represents a single module block in JSON output.
+type moduleConfigJSON struct {
+	Source    string            `json:"-"` // always set, but serialized in MarshalJSON
+	Version   string            `json:"-"`
+	Config    map[string]any    `json:"-"` // flattened into top level
+	Providers map[string]string `json:"providers,omitempty"`
+	DependsOn []string          `json:"depends_on,omitempty"`
+	Count     any               `json:"count,omitempty"`
+	ForEach   any               `json:"for_each,omitempty"`
+}
+
+// MarshalJSON flattens Config alongside the typed meta-argument fields.
+func (mc moduleConfigJSON) MarshalJSON() ([]byte, error) {
+	m := make(map[string]any, len(mc.Config)+6)
+	m["source"] = mc.Source
+	if mc.Version != "" {
+		m["version"] = mc.Version
+	}
+	for k, v := range mc.Config {
+		m[k] = v
+	}
+	if len(mc.Providers) > 0 {
+		m["providers"] = mc.Providers
+	}
+	if len(mc.DependsOn) > 0 {
+		m["depends_on"] = mc.DependsOn
+	}
+	if mc.Count != nil {
+		m["count"] = mc.Count
+	}
+	if mc.ForEach != nil {
+		m["for_each"] = mc.ForEach
+	}
+	return marshalNoEscape(m)
+}
+
+// providerConfigJSON represents a single provider configuration block.
+// Config is flattened alongside the typed alias field.
+type providerConfigJSON struct {
+	Config map[string]any `json:"-"` // flattened
+	Alias  string         `json:"alias,omitempty"`
+}
+
+// MarshalJSON flattens Config alongside the alias field.
+func (p providerConfigJSON) MarshalJSON() ([]byte, error) {
+	m := make(map[string]any, len(p.Config)+1)
+	for k, v := range p.Config {
+		m[k] = v
+	}
+	if p.Alias != "" {
+		m["alias"] = p.Alias
+	}
+	return marshalNoEscape(m)
 }
 
 // buildResourceConfig builds a single resource configuration.
-func buildResourceConfig(r config.Resource) map[string]any {
-	cfg := make(map[string]any)
-
-	// Copy resource config
-	for k, v := range r.Config {
-		cfg[k] = v
-	}
-
-	// Add meta-arguments
-	applyCommonMeta(cfg, r.Provider, r.DependsOn, r.Count, r.ForEach)
-
-	if r.Lifecycle != nil {
-		cfg["lifecycle"] = r.Lifecycle
-	}
-
-	if r.Timeouts != nil {
-		cfg["timeouts"] = r.Timeouts
-	}
-
+func buildResourceConfig(r config.Resource) resourceConfigJSON {
+	var conn *connectionJSON
 	if r.Connection != nil {
-		cfg["connection"] = buildConnection(r.Connection)
+		c := buildConnection(r.Connection)
+		conn = &c
 	}
 
-	if len(r.Provisioners) > 0 {
-		cfg["provisioner"] = buildProvisioners(r.Provisioners)
+	provs := make([]provisionerJSON, len(r.Provisioners))
+	for i, p := range r.Provisioners {
+		provs[i] = buildProvisioner(p)
+	}
+	if len(provs) == 0 {
+		provs = nil
 	}
 
-	return cfg
+	return resourceConfigJSON{
+		Config:       r.Config,
+		Provider:     r.Provider,
+		DependsOn:    r.DependsOn,
+		Count:        r.Count,
+		ForEach:      r.ForEach,
+		Lifecycle:    r.Lifecycle,
+		Timeouts:     r.Timeouts,
+		Connection:   conn,
+		Provisioners: provs,
+	}
 }
 
 // buildDataSources builds the data source configurations.
@@ -312,49 +466,32 @@ func buildDataSources(dataSources []config.DataSource) map[string]map[string]any
 			result[d.Type] = make(map[string]any)
 		}
 
-		cfg := make(map[string]any)
-
-		// Copy data source config
-		for k, v := range d.Config {
-			cfg[k] = v
+		result[d.Type][d.Name] = dataSourceConfigJSON{
+			Config:    d.Config,
+			Provider:  d.Provider,
+			DependsOn: d.DependsOn,
+			Count:     d.Count,
+			ForEach:   d.ForEach,
 		}
-
-		// Add meta-arguments
-		applyCommonMeta(cfg, d.Provider, d.DependsOn, d.Count, d.ForEach)
-
-		result[d.Type][d.Name] = cfg
 	}
 
 	return result
 }
 
 // buildModules builds the module configurations.
-func buildModules(modules []config.Module) map[string]map[string]any {
-	result := make(map[string]map[string]any)
+func buildModules(modules []config.Module) map[string]any {
+	result := make(map[string]any, len(modules))
 
 	for _, m := range modules {
-		cfg := make(map[string]any)
-
-		cfg["source"] = m.Source
-
-		if m.Version != "" {
-			cfg["version"] = m.Version
+		result[m.Name] = moduleConfigJSON{
+			Source:    m.Source,
+			Version:   m.Version,
+			Config:    m.Config,
+			Providers: m.Providers,
+			DependsOn: m.DependsOn,
+			Count:     m.Count,
+			ForEach:   m.ForEach,
 		}
-
-		// Copy module input variables
-		for k, v := range m.Config {
-			cfg[k] = v
-		}
-
-		// Add meta-arguments
-		if len(m.Providers) > 0 {
-			cfg["providers"] = m.Providers
-		}
-
-		// Module does not have a single "provider" field; pass empty string.
-		applyCommonMeta(cfg, "", m.DependsOn, m.Count, m.ForEach)
-
-		result[m.Name] = cfg
 	}
 
 	return result
@@ -405,35 +542,21 @@ func buildOutputs(outputs []config.Output) map[string]outputJSON {
 	return result
 }
 
-// buildProvisioners builds the provisioner blocks.
-func buildProvisioners(provisioners []config.Provisioner) []map[string]any {
-	result := make([]map[string]any, len(provisioners))
-
-	for i, p := range provisioners {
-		prov := make(map[string]any)
-
-		cfg := make(map[string]any)
-		for k, v := range p.Config {
-			cfg[k] = v
-		}
-
-		if p.When != "" {
-			cfg["when"] = string(p.When)
-		}
-
-		if p.OnFailure != "" {
-			cfg["on_failure"] = string(p.OnFailure)
-		}
-
-		if p.Connection != nil {
-			cfg["connection"] = buildConnection(p.Connection)
-		}
-
-		prov[p.Type] = cfg
-		result[i] = prov
+// buildProvisioner builds a single provisioner block.
+func buildProvisioner(p config.Provisioner) provisionerJSON {
+	var conn *connectionJSON
+	if p.Connection != nil {
+		c := buildConnection(p.Connection)
+		conn = &c
 	}
 
-	return result
+	return provisionerJSON{
+		Type:       p.Type,
+		Config:     p.Config,
+		When:       string(p.When),
+		OnFailure:  string(p.OnFailure),
+		Connection: conn,
+	}
 }
 
 // connectionJSON represents a provisioner connection block.
@@ -481,7 +604,7 @@ func (c connectionJSON) MarshalJSON() ([]byte, error) {
 		}
 	}
 
-	return json.Marshal(m)
+	return marshalNoEscape(m)
 }
 
 // buildConnection builds a connection block.
