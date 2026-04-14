@@ -85,8 +85,4 @@ GitHub Actions (`.github/workflows/ci.yml`):
 
 ## Review Guidelines
 
-- Keep PRs small and focused
-- Check error returns (errcheck linter will catch these)
-- Do not commit generated files (`*_gen.go`, `*.tf.json`)
-- Add tests for new functionality
-- Run `make lint` before submitting
+See the [Pull requests](CONTRIBUTING.md#pull-requests) section in CONTRIBUTING.md (single source of truth).
