@@ -1,0 +1,41 @@
+version: "2"
+linters:
+  enable:
+    - bodyclose
+    - errcheck
+    - errorlint
+    - misspell
+    - noctx
+  settings:
+    errorlint:
+      errorf: true
+      asserts: true
+      comparison: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - all
+        path: _gen\.go$
+    paths:
+      - example
+      - testdata
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    generated: lax
+    paths:
+      - example
+      - testdata
+      - third_party$
+      - builtin$
+      - examples$

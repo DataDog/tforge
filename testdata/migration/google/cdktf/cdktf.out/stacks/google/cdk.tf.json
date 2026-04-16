@@ -1,0 +1,167 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "google",
+      "version": "0.20.9"
+    },
+    "outputs": {
+    }
+  },
+  "module": {
+    "auth": {
+      "//": {
+        "metadata": {
+          "path": "google/auth",
+          "uniqueId": "auth"
+        }
+      },
+      "cluster_name": "${google_container_cluster.cluster.name}",
+      "location": "${google_container_cluster.cluster.location}",
+      "project_id": "${google_container_cluster.cluster.project}",
+      "source": "terraform-google-modules/kubernetes-engine/google//modules/auth",
+      "version": "14.3.0"
+    }
+  },
+  "provider": {
+    "google": [
+      {
+        "project": "dschmidt-cdk-test",
+        "zone": "us-west1"
+      }
+    ],
+    "helm": [
+      {
+        "kubernetes": {
+          "cluster_ca_certificate": "${module.auth.cluster_ca_certificate}",
+          "host": "${module.auth.host}",
+          "token": "${module.auth.token}"
+        }
+      }
+    ],
+    "kubernetes": [
+      {
+        "cluster_ca_certificate": "${module.auth.cluster_ca_certificate}",
+        "host": "${module.auth.host}",
+        "token": "${module.auth.token}"
+      }
+    ],
+    "local": [
+      {
+      }
+    ]
+  },
+  "resource": {
+    "google_container_cluster": {
+      "cluster": {
+        "//": {
+          "metadata": {
+            "path": "google/cluster",
+            "uniqueId": "cluster"
+          }
+        },
+        "initial_node_count": 1,
+        "name": "cluster",
+        "remove_default_node_pool": true
+      }
+    },
+    "google_container_node_pool": {
+      "main-pool": {
+        "//": {
+          "metadata": {
+            "path": "google/main-pool",
+            "uniqueId": "main-pool"
+          }
+        },
+        "cluster": "${google_container_cluster.cluster.name}",
+        "name": "main",
+        "node_config": {
+          "machine_type": "e2-medium",
+          "oauth_scopes": [
+            "https://www.googleapis.com/auth/cloud-platform"
+          ],
+          "preemptible": true,
+          "service_account": "${google_service_account.sa.email}"
+        }
+      }
+    },
+    "google_service_account": {
+      "sa": {
+        "//": {
+          "metadata": {
+            "path": "google/sa",
+            "uniqueId": "sa"
+          }
+        },
+        "account_id": "cluster-admin",
+        "display_name": "Cluster Admin"
+      }
+    },
+    "helm_release": {
+      "cert-manager": {
+        "//": {
+          "metadata": {
+            "path": "google/cert-manager",
+            "uniqueId": "cert-manager"
+          }
+        },
+        "chart": "cert-manager",
+        "create_namespace": true,
+        "name": "cert-manager",
+        "namespace": "cert-manager",
+        "repository": "https://charts.jetstack.io",
+        "version": "v1.3.1"
+      }
+    },
+    "kubernetes_namespace": {
+      "namespace": {
+        "//": {
+          "metadata": {
+            "path": "google/namespace",
+            "uniqueId": "namespace"
+          }
+        },
+        "metadata": {
+          "name": "development"
+        }
+      }
+    },
+    "local_file": {
+      "kubeconfig": {
+        "//": {
+          "metadata": {
+            "path": "google/kubeconfig",
+            "uniqueId": "kubeconfig"
+          }
+        },
+        "content": "${module.auth.kubeconfig_raw}",
+        "filename": "kubeconfig.yaml"
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "local": {
+        "path": "/private/tmp/cdktf-google/terraform.google.tfstate"
+      }
+    },
+    "required_providers": {
+      "google": {
+        "source": "hashicorp/google",
+        "version": "3.69.0"
+      },
+      "helm": {
+        "source": "hashicorp/helm",
+        "version": "2.1.2"
+      },
+      "kubernetes": {
+        "source": "hashicorp/kubernetes",
+        "version": "2.2.0"
+      },
+      "local": {
+        "source": "hashicorp/local",
+        "version": "2.1.0"
+      }
+    }
+  }
+}

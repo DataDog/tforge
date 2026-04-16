@@ -1,0 +1,103 @@
+{
+  "//": {
+    "metadata": {
+      "stackName": "lifecycle-provisioners-golden",
+      "tool": "tforge",
+      "version": "dev"
+    }
+  },
+  "terraform": {
+    "required_providers": {
+      "aws": {
+        "source": "hashicorp/aws",
+        "version": "~> 5.0"
+      }
+    }
+  },
+  "provider": {
+    "aws": [
+      {
+        "region": "us-east-1"
+      }
+    ]
+  },
+  "resource": {
+    "aws_db_instance": {
+      "primary": {
+        "allocated_storage": 50,
+        "db_name": "myapp",
+        "depends_on": [
+          "aws_instance.app"
+        ],
+        "engine": "postgres",
+        "engine_version": "15.4",
+        "instance_class": "db.t3.medium",
+        "lifecycle": {
+          "prevent_destroy": true,
+          "ignore_changes": [
+            "password"
+          ]
+        },
+        "password": "${var.db_password}",
+        "timeouts": {
+          "create": "60m",
+          "delete": "45m"
+        },
+        "username": "admin"
+      }
+    },
+    "aws_instance": {
+      "app": {
+        "ami": "ami-0c55b159cbfafe1f0",
+        "instance_type": "t3.medium",
+        "lifecycle": {
+          "create_before_destroy": true,
+          "ignore_changes": [
+            "tags",
+            "ami"
+          ],
+          "replace_triggered_by": [
+            "null_resource.deploy_trigger"
+          ]
+        },
+        "provisioner": [
+          {
+            "local-exec": {
+              "command": "echo 'Instance created: ${self.id}'"
+            }
+          },
+          {
+            "remote-exec": {
+              "inline": [
+                "sudo apt-get update",
+                "sudo apt-get install -y nginx"
+              ]
+            }
+          },
+          {
+            "local-exec": {
+              "command": "echo 'Destroying instance: ${self.id}'",
+              "on_failure": "continue",
+              "when": "destroy"
+            }
+          }
+        ],
+        "tags": {
+          "Name": "app-server"
+        },
+        "timeouts": {
+          "create": "30m",
+          "update": "20m",
+          "delete": "15m"
+        }
+      }
+    }
+  },
+  "variable": {
+    "db_password": {
+      "type": "string",
+      "sensitive": true
+    }
+  }
+}
+

@@ -1,0 +1,62 @@
+{
+  "//": {
+    "metadata": {
+      "backend": "local",
+      "stackName": "ExampleCdktfGoDockerStack",
+      "version": "0.20.9"
+    },
+    "outputs": {
+    }
+  },
+  "provider": {
+    "docker": [
+      {
+      }
+    ]
+  },
+  "resource": {
+    "docker_container": {
+      "nginxContainer": {
+        "//": {
+          "metadata": {
+            "path": "ExampleCdktfGoDockerStack/nginxContainer",
+            "uniqueId": "nginxContainer"
+          }
+        },
+        "image": "${docker_image.nginxImage.image_id}",
+        "name": "tutorial",
+        "ports": [
+          {
+            "external": 8000,
+            "internal": 80
+          }
+        ]
+      }
+    },
+    "docker_image": {
+      "nginxImage": {
+        "//": {
+          "metadata": {
+            "path": "ExampleCdktfGoDockerStack/nginxImage",
+            "uniqueId": "nginxImage"
+          }
+        },
+        "keep_locally": false,
+        "name": "nginx:latest"
+      }
+    }
+  },
+  "terraform": {
+    "backend": {
+      "local": {
+        "path": "/Users/julien.doche/Documents/git-repos/terraform-cdk/examples/go/docker/terraform.ExampleCdktfGoDockerStack.tfstate"
+      }
+    },
+    "required_providers": {
+      "docker": {
+        "source": "kreuzwerker/docker",
+        "version": "4.0.0"
+      }
+    }
+  }
+}
