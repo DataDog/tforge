@@ -1,6 +1,6 @@
 module github.com/hashicorp/terraform-cdk/examples/go/docker
 
-go 1.25.7
+go 1.25.9
 
 require (
 	github.com/aws/constructs-go/constructs/v10 v10.3.0
