@@ -345,7 +345,14 @@ func needsPointer(attr *provider.Attribute, goType string) bool {
 // applyGoType applies a Go type string to a jen statement. This is the single
 // source of truth for mapping Go type names to jennifer type calls, used by both
 // struct field generation and option function parameter generation.
+//
+// Pointer types (e.g. "*float64") are derived from needsPointer — this function
+// handles them generically via the "*" prefix so adding a new pointer-eligible
+// type only requires updating needsPointer.
 func applyGoType(stmt *jen.Statement, goType string) *jen.Statement {
+	if strings.HasPrefix(goType, "*") {
+		return applyGoType(stmt.Op("*"), goType[1:])
+	}
 	switch goType {
 	case "string":
 		return stmt.String()
@@ -353,10 +360,6 @@ func applyGoType(stmt *jen.Statement, goType string) *jen.Statement {
 		return stmt.Float64()
 	case "bool":
 		return stmt.Bool()
-	case "*float64":
-		return stmt.Op("*").Float64()
-	case "*bool":
-		return stmt.Op("*").Bool()
 	case "any":
 		return stmt.Any()
 	default:
@@ -471,33 +474,28 @@ func (g *Generator) generateOptionType(f *jen.File, structName string) {
 // emitOptionFunc generates a single Set* option function.
 // paramCode is the jen expression for the function parameter — the only thing
 // that varies between attribute setters and different nested block nesting modes.
+// When takeAddr is true, the closure stores &v instead of v (for pointer fields
+// where the parameter accepts the plain type but the struct field is a pointer).
 //
-// Output (all variants share this shape):
+// Output (takeAddr=false):
 //
 //	func Monitor_SetName(v string) MonitorOption {
 //	    return func(o *Monitor) { o.Name = v }
 //	}
-func (g *Generator) emitOptionFunc(f *jen.File, funcName, optionType, structName, fieldName string, paramCode *jen.Statement) {
-	f.Func().Id(funcName).Params(paramCode).Id(optionType).Block(
-		jen.Return(jen.Func().Params(jen.Id("o").Op("*").Id(structName)).Block(
-			jen.Id("o").Dot(fieldName).Op("=").Id("v"),
-		)),
-	)
-	f.Line()
-}
-
-// emitOptionFuncPtr generates a Set* option function for pointer fields.
-// The parameter accepts the plain value type; the closure takes its address.
 //
-// Output:
+// Output (takeAddr=true):
 //
 //	func Monitor_SetRenotifyInterval(v float64) MonitorOption {
 //	    return func(o *Monitor) { o.RenotifyInterval = &v }
 //	}
-func (g *Generator) emitOptionFuncPtr(f *jen.File, funcName, optionType, structName, fieldName string, paramCode *jen.Statement) {
+func (g *Generator) emitOptionFunc(f *jen.File, funcName, optionType, structName, fieldName string, paramCode *jen.Statement, takeAddr bool) {
+	rhs := jen.Id("v")
+	if takeAddr {
+		rhs = jen.Op("&").Id("v")
+	}
 	f.Func().Id(funcName).Params(paramCode).Id(optionType).Block(
 		jen.Return(jen.Func().Params(jen.Id("o").Op("*").Id(structName)).Block(
-			jen.Id("o").Dot(fieldName).Op("=").Op("&").Id("v"),
+			jen.Id("o").Dot(fieldName).Op("=").Add(rhs),
 		)),
 	)
 	f.Line()
@@ -534,12 +532,7 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 
 		// Option function parameter is always the plain type (never pointer).
 		param := applyGoType(jen.Id("v"), goType)
-
-		if isPtr {
-			g.emitOptionFuncPtr(f, funcName, optionType, structName, fieldName, param)
-		} else {
-			g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param)
-		}
+		g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param, isPtr)
 	}
 
 	// Nested block setters: parameter shape depends on nesting mode.
@@ -559,7 +552,7 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 		default:
 			param = jen.Id("v").Op("*").Id(typeName)
 		}
-		g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param)
+		g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param, false)
 	}
 }
 

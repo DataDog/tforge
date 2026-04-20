@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dave/jennifer/jen"
+
 	"github.com/DataDog/tforge/provider"
 )
 
@@ -272,6 +274,30 @@ func TestGoTypeForAttribute(t *testing.T) {
 			gotGo := goTypeName(gotType)
 			if gotGo != tt.wantGo {
 				t.Errorf("goTypeName(%q) = %q, want %q", gotType, gotGo, tt.wantGo)
+			}
+		})
+	}
+}
+
+func TestApplyGoTypePointer(t *testing.T) {
+	// Verify that applyGoType handles pointer types correctly by rendering
+	// the jen statement to a string and checking the output.
+	tests := []struct {
+		goType string
+		want   string
+	}{
+		{"*float64", "*float64"},
+		{"*bool", "*bool"},
+		{"float64", "float64"},
+		{"bool", "bool"},
+		{"string", "string"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.goType, func(t *testing.T) {
+			stmt := applyGoType(jen.Null(), tt.goType)
+			got := fmt.Sprintf("%#v", stmt)
+			if got != tt.want {
+				t.Errorf("applyGoType(%q) rendered %q, want %q", tt.goType, got, tt.want)
 			}
 		})
 	}
@@ -1063,6 +1089,23 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Error("config[enabled] should be present when explicitly set to false")
 	} else if r2.Config["enabled"] != false {
 		t.Errorf("config[enabled] = %v, want false", r2.Config["enabled"])
+	}
+
+	// Case 2b: Optional float64 set to 0 must appear in config (not omitted).
+	// Same zero-value ambiguity as bool: Terraform "count = 0" differs from unset.
+	stack2b := config.NewStack("rt2b")
+	err = NewWidget(stack2b, "zerocount",
+		Widget_SetName("x"),
+		Widget_SetCount(0),
+	)
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	r2b := stack2b.Resources[0]
+	if _, exists := r2b.Config["count"]; !exists {
+		t.Error("config[count] should be present when explicitly set to 0")
+	} else if r2b.Config["count"] != float64(0) {
+		t.Errorf("config[count] = %v, want 0", r2b.Config["count"])
 	}
 
 	// Case 3: Optional bool set to true must appear
