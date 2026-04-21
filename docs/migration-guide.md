@@ -448,9 +448,10 @@ func NewMyStack() *config.Stack {
     docker.NewContainer(stack, "nginxContainer",
         docker.Container_SetImage(nginxImage.Ref("image_id")),
         docker.Container_SetName("tutorial"),
-        docker.Container_SetPorts(&docker.ContainerPorts{
-            Internal: 80, External: 8000,
-        }),
+        docker.Container_SetPorts(docker.NewContainerPorts(
+            docker.ContainerPorts_SetInternal(80),
+            docker.ContainerPorts_SetExternal(8000),
+        )),
     )
 
     return stack
