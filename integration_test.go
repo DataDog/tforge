@@ -231,16 +231,14 @@ func TestSnapshots(t *testing.T) {
 				}
 			}
 
-			// Compare generated Go code against *.go.golden snapshots,
-			// then run each golden directory to compare JSON output.
-			// JSON output depends on the generated code, so both
-			// checks live under the same subtest.
+			// Compare generated Go code against *.go.golden snapshots.
 			t.Run("generated_code", func(t *testing.T) {
-				compareGeneratedCodeGoldens(t, root, goldenBase)
+				compareGeneratedCodeGoldens(t, goldenBase)
+			})
 
-				t.Run("json_output", func(t *testing.T) {
-					compareJSONOutputGoldens(t, root, goldenBase)
-				})
+			// Run each golden directory and compare JSON output.
+			t.Run("json_output", func(t *testing.T) {
+				compareJSONOutputGoldens(t, root, goldenBase)
 			})
 		})
 	}
@@ -309,7 +307,7 @@ var goldenExcludes = map[string]bool{
 // (unless explicitly excluded), and directories without generate.go are flagged
 // as having no generated code. This ensures new golden directories cannot
 // silently skip the generated code comparison.
-func compareGeneratedCodeGoldens(t *testing.T, root, goldenBase string) {
+func compareGeneratedCodeGoldens(t *testing.T, goldenBase string) {
 	t.Helper()
 
 	// Build a map of provider directories (containing generate.go) keyed by
