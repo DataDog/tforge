@@ -14,6 +14,10 @@ import (
 	"testing"
 )
 
+// pluginCacheDir is the host directory used to cache Terraform/OpenTofu
+// provider plugins across Docker validation runs.
+const pluginCacheDir = "/tmp/tforge-cache"
+
 // ---------------------------------------------------------------------------
 // TestMigration — end-to-end migration tests (replaces migration-test.sh)
 // ---------------------------------------------------------------------------
@@ -568,8 +572,7 @@ func cacheVolName(toolKey, groupHash string) string {
 func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []toolInfo) {
 	t.Helper()
 
-	pluginCacheDir := "/tmp/tforge-cache"
-	if err := os.MkdirAll(pluginCacheDir, 0755); err != nil {
+		if err := os.MkdirAll(pluginCacheDir, 0755); err != nil {
 		t.Fatalf("creating plugin cache dir: %v", err)
 	}
 
@@ -649,8 +652,7 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 func validateVersion(t *testing.T, image, cmd, toolKey string, groups map[string]*providerGroup, goldenFiles []string) {
 	t.Helper()
 
-	pluginCacheDir := "/tmp/tforge-cache"
-
+	
 	// Map each file to its group hash.
 	fileGroup := map[string]string{}
 	for _, g := range groups {
