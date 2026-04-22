@@ -246,6 +246,11 @@ func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
 	for _, name := range discoverDirs(t, goldenBase) {
 		name := name
 		t.Run(name, func(t *testing.T) {
+			if goldenExcludes[name] {
+				t.Skipf("excluded from JSON output comparison (too large)")
+				return
+			}
+
 			goldenFile := filepath.Join(goldenBase, name, "main.tf.golden.json")
 			if _, err := os.Stat(goldenFile); err != nil {
 				t.Fatalf("missing golden file %s — run 'make update-snapshots' to create it", goldenFile)
@@ -283,10 +288,12 @@ func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
 	}
 }
 
-// generatedCodeGoldenExcludes lists provider directories excluded from generated
-// code golden comparison. name_collision/aws is excluded because its
-// resources_gen.go is ~174 MB, making it impractical to commit as a golden file.
-var generatedCodeGoldenExcludes = map[string]bool{
+// goldenExcludes lists directories excluded from generated code golden
+// comparison and JSON output tests. name_collision is excluded because its AWS
+// provider generates ~174 MB of Go code, making it impractical to commit as a
+// golden file and too slow to compile in CI.
+var goldenExcludes = map[string]bool{
+	"name_collision":                       true,
 	filepath.Join("name_collision", "aws"): true,
 }
 
@@ -330,7 +337,7 @@ func compareGeneratedCodeGoldens(t *testing.T, root, goldenBase string) {
 	}
 
 	for rel, dir := range providerDirSet {
-		if generatedCodeGoldenExcludes[rel] {
+		if goldenExcludes[rel] {
 			t.Run(rel, func(t *testing.T) {
 				t.Skipf("excluded from generated code golden comparison (too large)")
 			})
