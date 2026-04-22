@@ -1,0 +1,5 @@
+---
+schema-version: v1
+kind: mergequeue
+gitlab_check_enable: false
+allow_empty_statuses: true

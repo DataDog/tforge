@@ -10,8 +10,39 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dave/jennifer/jen"
+
 	"github.com/DataDog/tforge/provider"
 )
+
+func TestNeedsPointer(t *testing.T) {
+	tests := []struct {
+		name   string
+		attr   *provider.Attribute
+		goType string
+		want   bool
+	}{
+		{"optional float64", &provider.Attribute{Optional: true}, "float64", true},
+		{"optional bool", &provider.Attribute{Optional: true}, "bool", true},
+		{"optional string", &provider.Attribute{Optional: true}, "string", false},
+		{"optional slice", &provider.Attribute{Optional: true}, "[]string", false},
+		{"required float64", &provider.Attribute{Required: true}, "float64", false},
+		{"required bool", &provider.Attribute{Required: true}, "bool", false},
+		{"computed-only float64", &provider.Attribute{Computed: true}, "float64", false},
+		{"computed-only bool", &provider.Attribute{Computed: true}, "bool", false},
+		{"optional+computed float64", &provider.Attribute{Optional: true, Computed: true}, "float64", true},
+		{"optional+computed bool", &provider.Attribute{Optional: true, Computed: true}, "bool", true},
+		{"nil attr", nil, "float64", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := needsPointer(tt.attr, tt.goType)
+			if got != tt.want {
+				t.Errorf("needsPointer(%q) = %v, want %v", tt.name, got, tt.want)
+			}
+		})
+	}
+}
 
 // compileGeneratedCode creates a temporary Go module in the given directory
 // and runs "go build ./..." to verify the generated code compiles.
@@ -243,6 +274,30 @@ func TestGoTypeForAttribute(t *testing.T) {
 			gotGo := goTypeName(gotType)
 			if gotGo != tt.wantGo {
 				t.Errorf("goTypeName(%q) = %q, want %q", gotType, gotGo, tt.wantGo)
+			}
+		})
+	}
+}
+
+func TestApplyGoTypePointer(t *testing.T) {
+	// Verify that applyGoType handles pointer types correctly by rendering
+	// the jen statement to a string and checking the output.
+	tests := []struct {
+		goType string
+		want   string
+	}{
+		{"*float64", "*float64"},
+		{"*bool", "*bool"},
+		{"float64", "float64"},
+		{"bool", "bool"},
+		{"string", "string"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.goType, func(t *testing.T) {
+			stmt := applyGoType(jen.Null(), tt.goType)
+			got := fmt.Sprintf("%#v", stmt)
+			if got != tt.want {
+				t.Errorf("applyGoType(%q) rendered %q, want %q", tt.goType, got, tt.want)
 			}
 		})
 	}
@@ -1017,7 +1072,10 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Errorf("config[name] = %v, want hello", r.Config["name"])
 	}
 
-	// Case 2: Optional bool set to false must appear in config (not omitted)
+	// Case 2: Optional bool set to false must appear in config (not omitted).
+	// With pointer types, SetEnabled(false) produces &false which is NOT omitted
+	// by json omitempty — this is the correct Terraform behavior where
+	// "enabled = false" is different from not setting "enabled" at all.
 	stack2 := config.NewStack("rt2")
 	err = NewWidget(stack2, "booltest",
 		Widget_SetName("x"),
@@ -1027,13 +1085,27 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Fatalf("NewWidget: %v", err)
 	}
 	r2 := stack2.Resources[0]
-	// "enabled" has omitempty, so false IS expected to be omitted (Go zero value).
-	// This is the correct Terraform behavior: omitting false == default.
-	if _, exists := r2.Config["enabled"]; exists {
-		// If present, value must be false (bool)
-		if r2.Config["enabled"] != false {
-			t.Errorf("config[enabled] = %v, want false", r2.Config["enabled"])
-		}
+	if _, exists := r2.Config["enabled"]; !exists {
+		t.Error("config[enabled] should be present when explicitly set to false")
+	} else if r2.Config["enabled"] != false {
+		t.Errorf("config[enabled] = %v, want false", r2.Config["enabled"])
+	}
+
+	// Case 2b: Optional float64 set to 0 must appear in config (not omitted).
+	// Same zero-value ambiguity as bool: Terraform "count = 0" differs from unset.
+	stack2b := config.NewStack("rt2b")
+	err = NewWidget(stack2b, "zerocount",
+		Widget_SetName("x"),
+		Widget_SetCount(0),
+	)
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	r2b := stack2b.Resources[0]
+	if _, exists := r2b.Config["count"]; !exists {
+		t.Error("config[count] should be present when explicitly set to 0")
+	} else if r2b.Config["count"] != float64(0) {
+		t.Errorf("config[count] = %v, want 0", r2b.Config["count"])
 	}
 
 	// Case 3: Optional bool set to true must appear
@@ -1088,7 +1160,7 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Fatalf("NewWidget: %v", err)
 	}
 	r5 := stack5.Resources[0]
-	for _, key := range []string{"tags", "count", "setting"} {
+	for _, key := range []string{"tags", "count", "enabled", "setting"} {
 		if _, exists := r5.Config[key]; exists {
 			t.Errorf("config[%s] should be absent for unset optional, got %v", key, r5.Config[key])
 		}
@@ -1131,7 +1203,7 @@ func TestFromBridgeRoundTrip(t *testing.T) {
 
 	cfg := Widget{
 		Name:    "direct",
-		Enabled: true,
+		Enabled: Ptr(true),
 		Tags:    []string{"a", "b"},
 	}
 	err := NewWidget(stack, "bridged", FromWidget(cfg))

@@ -132,6 +132,11 @@ func (g *Generator) Generate(ps *provider.ProviderSchema) error {
 		return fmt.Errorf("generating data sources: %w", err)
 	}
 
+	// Generate helper functions (Ptr, etc.)
+	if err := g.generateHelpers(); err != nil {
+		return fmt.Errorf("generating helpers: %w", err)
+	}
+
 	return nil
 }
 
@@ -319,10 +324,35 @@ func (g *Generator) generateBlockFields(s *jen.Group, block *provider.BlockType,
 	}
 }
 
+// needsPointer reports whether an attribute should use a pointer type to
+// distinguish zero values from unset. This applies to optional float64 and bool
+// fields, where Go's zero value (0, false) would be silently omitted by
+// json:",omitempty" even though Terraform treats them as meaningful.
+func needsPointer(attr *provider.Attribute, goType string) bool {
+	if attr == nil || attr.Required {
+		return false
+	}
+	// Computed-only fields are read-only; never set by the user.
+	if attr.Computed && !attr.Optional {
+		return false
+	}
+	// Only float64 and bool have the zero-value ambiguity problem.
+	// Strings: empty string omission is correct for Terraform.
+	// Slices/maps: nil omission is correct.
+	return goType == "float64" || goType == "bool"
+}
+
 // applyGoType applies a Go type string to a jen statement. This is the single
 // source of truth for mapping Go type names to jennifer type calls, used by both
 // struct field generation and option function parameter generation.
+//
+// Pointer types (e.g. "*float64") are derived from needsPointer — this function
+// handles them generically via the "*" prefix so adding a new pointer-eligible
+// type only requires updating needsPointer.
 func applyGoType(stmt *jen.Statement, goType string) *jen.Statement {
+	if strings.HasPrefix(goType, "*") {
+		return applyGoType(stmt.Op("*"), goType[1:])
+	}
 	switch goType {
 	case "string":
 		return stmt.String()
@@ -340,9 +370,16 @@ func applyGoType(stmt *jen.Statement, goType string) *jen.Statement {
 // generateAttributeField generates a struct field for an attribute.
 //
 // Output: Name string `json:"name"` (required) or Tags []string `json:"tags,omitempty"` (optional)
+//
+// Optional float64 and bool fields use pointer types (*float64, *bool) so that
+// nil (unset) is distinguishable from the zero value (0, false) during JSON
+// marshaling with omitempty.
 func (g *Generator) generateAttributeField(s *jen.Group, attr attributeEntry) {
 	fieldName := g.toGoName(attr.Name)
 	goType := goTypeName(attributeType(attr.Attr))
+	if needsPointer(attr.Attr, goType) {
+		goType = "*" + goType
+	}
 	jsonTag := g.jsonTag(attr.Name, attr.Attr.Optional || attr.Attr.Computed)
 
 	field := s.Id(fieldName)
@@ -437,16 +474,28 @@ func (g *Generator) generateOptionType(f *jen.File, structName string) {
 // emitOptionFunc generates a single Set* option function.
 // paramCode is the jen expression for the function parameter — the only thing
 // that varies between attribute setters and different nested block nesting modes.
+// When takeAddr is true, the closure stores &v instead of v (for pointer fields
+// where the parameter accepts the plain type but the struct field is a pointer).
 //
-// Output (all variants share this shape):
+// Output (takeAddr=false):
 //
 //	func Monitor_SetName(v string) MonitorOption {
 //	    return func(o *Monitor) { o.Name = v }
 //	}
-func (g *Generator) emitOptionFunc(f *jen.File, funcName, optionType, structName, fieldName string, paramCode *jen.Statement) {
+//
+// Output (takeAddr=true):
+//
+//	func Monitor_SetRenotifyInterval(v float64) MonitorOption {
+//	    return func(o *Monitor) { o.RenotifyInterval = &v }
+//	}
+func (g *Generator) emitOptionFunc(f *jen.File, funcName, optionType, structName, fieldName string, paramCode *jen.Statement, takeAddr bool) {
+	rhs := jen.Id("v")
+	if takeAddr {
+		rhs = jen.Op("&").Id("v")
+	}
 	f.Func().Id(funcName).Params(paramCode).Id(optionType).Block(
 		jen.Return(jen.Func().Params(jen.Id("o").Op("*").Id(structName)).Block(
-			jen.Id("o").Dot(fieldName).Op("=").Id("v"),
+			jen.Id("o").Dot(fieldName).Op("=").Add(rhs),
 		)),
 	)
 	f.Line()
@@ -473,13 +522,17 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 	optionType := short + "Option"
 
 	// Attribute setters: parameter type comes from the Terraform schema type mapping.
+	// For pointer fields (*float64, *bool), the option function accepts the plain
+	// value type and takes its address inside the closure, keeping the user API clean.
 	for _, attr := range sortedAttributes(block) {
 		fieldName := g.toGoName(attr.Name)
 		funcName := structName + "_Set" + fieldName
 		goType := goTypeName(attributeType(attr.Attr))
+		isPtr := needsPointer(attr.Attr, goType)
 
+		// Option function parameter is always the plain type (never pointer).
 		param := applyGoType(jen.Id("v"), goType)
-		g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param)
+		g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param, isPtr)
 	}
 
 	// Nested block setters: parameter shape depends on nesting mode.
@@ -499,7 +552,7 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 		default:
 			param = jen.Id("v").Op("*").Id(typeName)
 		}
-		g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param)
+		g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param, false)
 	}
 }
 
@@ -607,6 +660,27 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 		jen.Id("opts").Op("...").Id(optionType),
 	).Error().Block(body...)
 	f.Line()
+}
+
+// generateHelpers generates utility functions used by generated code.
+// Currently emits a generic Ptr[T] function for struct-literal users who need
+// to set optional pointer fields without a temporary variable.
+func (g *Generator) generateHelpers() error {
+	f := jen.NewFile(g.config.PackageName)
+	f.HeaderComment("Code generated by tforge. DO NOT EDIT.")
+
+	f.Comment("Ptr returns a pointer to the given value.")
+	f.Comment("Use this for optional pointer fields in struct literals:")
+	f.Comment("")
+	f.Comment("    cfg := Monitor{RenotifyInterval: Ptr(float64(60))}")
+	f.Func().Id("Ptr").Types(jen.Id("T").Any()).Params(
+		jen.Id("v").Id("T"),
+	).Op("*").Id("T").Block(
+		jen.Return(jen.Op("&").Id("v")),
+	)
+	f.Line()
+
+	return g.writeFile(f, "helpers_gen.go")
 }
 
 // jsonTag generates a JSON struct tag, adding omitempty for optional fields.
