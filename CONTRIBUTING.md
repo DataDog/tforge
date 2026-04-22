@@ -76,6 +76,6 @@ tforge -v   # should print "tforge version 0.2.0"
 
 ## Code style
 
-- Go 1.23+, standard library preferred
+- Go 1.25+, standard library preferred
 - `gofmt` for formatting, `golangci-lint` for linting
 - Generated code is excluded from linting (`.golangci.yml`)
