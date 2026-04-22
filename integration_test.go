@@ -281,65 +281,106 @@ func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
 	}
 }
 
-// compareGeneratedCodeGoldens walks goldenBase for *_gen.go.golden files and
-// compares each against its corresponding generated *_gen.go file.
+// generatedCodeGoldenExcludes lists provider directories excluded from generated
+// code golden comparison. name_collision/aws is excluded because its
+// resources_gen.go is ~174 MB, making it impractical to commit as a golden file.
+var generatedCodeGoldenExcludes = map[string]bool{
+	filepath.Join("name_collision", "aws"): true,
+}
+
+// compareGeneratedCodeGoldens finds every provider directory (containing a
+// generate.go) under goldenBase, requires that committed *.go.golden files
+// exist for each generated file, and compares them byte-for-byte.
+// Directories listed in generatedCodeGoldenExcludes are skipped.
 func compareGeneratedCodeGoldens(t *testing.T, root, goldenBase string) {
 	t.Helper()
-	err := filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
-			return err
+
+	// Discover all provider directories that contain a generate.go.
+	var providerDirs []string
+	filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
+		if err == nil && !d.IsDir() && d.Name() == "generate.go" {
+			providerDirs = append(providerDirs, filepath.Dir(path))
 		}
-		if !strings.HasSuffix(path, "_gen.go.golden") {
-			return nil
-		}
-
-		goldenFile := path
-		genFile := strings.TrimSuffix(goldenFile, ".golden")
-		rel, _ := filepath.Rel(root, genFile)
-
-		t.Run(rel, func(t *testing.T) {
-			if *update {
-				src, err := os.ReadFile(genFile)
-				if err != nil {
-					t.Fatalf("reading generated file %s: %v", rel, err)
-				}
-				if err := os.WriteFile(goldenFile, src, 0644); err != nil {
-					t.Fatalf("updating golden file: %v", err)
-				}
-				return
-			}
-
-			golden, err := os.ReadFile(goldenFile)
-			if err != nil {
-				t.Fatalf("reading golden file: %v", err)
-			}
-			actual, err := os.ReadFile(genFile)
-			if err != nil {
-				t.Fatalf("reading generated file %s: %v", rel, err)
-			}
-
-			if !bytes.Equal(golden, actual) {
-				goldenLines := strings.Split(string(golden), "\n")
-				actualLines := strings.Split(string(actual), "\n")
-				for i := 0; i < len(goldenLines) && i < len(actualLines); i++ {
-					if goldenLines[i] != actualLines[i] {
-						t.Errorf("generated code mismatch at line %d\n--- golden ---\n%s\n--- actual ---\n%s",
-							i+1, goldenLines[i], actualLines[i])
-						break
-					}
-				}
-				if len(goldenLines) != len(actualLines) {
-					t.Errorf("line count differs: golden=%d actual=%d", len(goldenLines), len(actualLines))
-				}
-				if !t.Failed() {
-					t.Errorf("files differ (binary comparison)")
-				}
-			}
-		})
 		return nil
 	})
-	if err != nil {
-		t.Fatalf("walking golden directories: %v", err)
+
+	if len(providerDirs) == 0 {
+		t.Fatal("no generate.go files found under testdata/golden")
+	}
+
+	for _, dir := range providerDirs {
+		rel, _ := filepath.Rel(goldenBase, dir)
+		if generatedCodeGoldenExcludes[rel] {
+			continue
+		}
+
+		t.Run(rel, func(t *testing.T) {
+			// Find all *_gen.go files produced by go generate.
+			entries, err := os.ReadDir(dir)
+			if err != nil {
+				t.Fatalf("reading directory %s: %v", rel, err)
+			}
+
+			var genFiles []string
+			for _, e := range entries {
+				if !e.IsDir() && strings.HasSuffix(e.Name(), "_gen.go") {
+					genFiles = append(genFiles, e.Name())
+				}
+			}
+			if len(genFiles) == 0 {
+				t.Fatalf("no *_gen.go files found in %s — did go generate run?", rel)
+			}
+
+			for _, name := range genFiles {
+				name := name
+				t.Run(name, func(t *testing.T) {
+					genFile := filepath.Join(dir, name)
+					goldenFile := genFile + ".golden"
+
+					if *update {
+						src, err := os.ReadFile(genFile)
+						if err != nil {
+							t.Fatalf("reading generated file: %v", err)
+						}
+						if err := os.WriteFile(goldenFile, src, 0644); err != nil {
+							t.Fatalf("updating golden file: %v", err)
+						}
+						return
+					}
+
+					if _, err := os.Stat(goldenFile); err != nil {
+						t.Fatalf("missing golden file %s.golden — run 'make update-snapshots' to create it", name)
+					}
+
+					golden, err := os.ReadFile(goldenFile)
+					if err != nil {
+						t.Fatalf("reading golden file: %v", err)
+					}
+					actual, err := os.ReadFile(genFile)
+					if err != nil {
+						t.Fatalf("reading generated file: %v", err)
+					}
+
+					if !bytes.Equal(golden, actual) {
+						goldenLines := strings.Split(string(golden), "\n")
+						actualLines := strings.Split(string(actual), "\n")
+						for i := 0; i < len(goldenLines) && i < len(actualLines); i++ {
+							if goldenLines[i] != actualLines[i] {
+								t.Errorf("generated code mismatch at line %d\n--- golden ---\n%s\n--- actual ---\n%s",
+									i+1, goldenLines[i], actualLines[i])
+								break
+							}
+						}
+						if len(goldenLines) != len(actualLines) {
+							t.Errorf("line count differs: golden=%d actual=%d", len(goldenLines), len(actualLines))
+						}
+						if !t.Failed() {
+							t.Errorf("files differ (binary comparison)")
+						}
+					}
+				})
+			}
+		})
 	}
 }
 
