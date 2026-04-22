@@ -224,79 +224,67 @@ func TestSnapshots(t *testing.T) {
 				t.Fatalf("go generate failed with %s: %v\n%s", cli, err, out)
 			}
 
-			// Test each golden directory.
-			for _, name := range discoverDirs(t, goldenBase) {
-				name := name
-				t.Run(name, func(t *testing.T) {
-					goldenFile := filepath.Join(goldenBase, name, "main.tf.golden.json")
-					if _, err := os.Stat(goldenFile); err != nil {
-						t.Skipf("no golden file: %v", err)
-					}
+			// Compare generated Go code against *.go.golden snapshots.
+			t.Run("generated_code", func(t *testing.T) {
+				compareGeneratedCodeGoldens(t, root, goldenBase)
+			})
 
-					// go run ./<dir> → stdout.
-					cmd := exec.Command("go", "run", "./testdata/golden/"+name)
-					cmd.Dir = root
-					actual, err := cmd.Output()
-					if err != nil {
-						var stderr []byte
-						if ee, ok := err.(*exec.ExitError); ok {
-							stderr = ee.Stderr
-						}
-						t.Fatalf("go run failed: %v\n%s", err, stderr)
-					}
+			// Compare JSON output against *.golden.json snapshots.
+			t.Run("json_output", func(t *testing.T) {
+				compareJSONOutputGoldens(t, root, goldenBase)
+			})
+		})
+	}
+}
 
-					if *update {
-						if err := os.WriteFile(goldenFile, actual, 0644); err != nil {
-							t.Fatalf("updating golden file: %v", err)
-						}
-						return
-					}
+// compareJSONOutputGoldens runs each golden directory's main.go and compares
+// the JSON output against main.tf.golden.json.
+func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
+	t.Helper()
+	for _, name := range discoverDirs(t, goldenBase) {
+		name := name
+		t.Run(name, func(t *testing.T) {
+			goldenFile := filepath.Join(goldenBase, name, "main.tf.golden.json")
+			if _, err := os.Stat(goldenFile); err != nil {
+				t.Skipf("no golden file: %v", err)
+			}
 
-					golden, err := os.ReadFile(goldenFile)
-					if err != nil {
-						t.Fatalf("reading golden file: %v", err)
-					}
+			// go run ./<dir> → stdout.
+			cmd := exec.Command("go", "run", "./testdata/golden/"+name)
+			cmd.Dir = root
+			actual, err := cmd.Output()
+			if err != nil {
+				var stderr []byte
+				if ee, ok := err.(*exec.ExitError); ok {
+					stderr = ee.Stderr
+				}
+				t.Fatalf("go run failed: %v\n%s", err, stderr)
+			}
 
-					if !bytes.Equal(bytes.TrimSpace(actual), bytes.TrimSpace(golden)) {
-						t.Errorf("output mismatch for %s\n--- golden ---\n%s\n--- actual ---\n%s",
-							name, golden, actual)
-					}
-				})
+			if *update {
+				if err := os.WriteFile(goldenFile, actual, 0644); err != nil {
+					t.Fatalf("updating golden file: %v", err)
+				}
+				return
+			}
+
+			golden, err := os.ReadFile(goldenFile)
+			if err != nil {
+				t.Fatalf("reading golden file: %v", err)
+			}
+
+			if !bytes.Equal(bytes.TrimSpace(actual), bytes.TrimSpace(golden)) {
+				t.Errorf("output mismatch for %s\n--- golden ---\n%s\n--- actual ---\n%s",
+					name, golden, actual)
 			}
 		})
 	}
 }
 
-// ---------------------------------------------------------------------------
-// TestGeneratedCodeSnapshots — compare generated *_gen.go against *.go.golden
-// ---------------------------------------------------------------------------
-
-func TestGeneratedCodeSnapshots(t *testing.T) {
-	root := tforgeRoot(t)
-	requireCLI(t, "tforge")
-
-	goldenBase := filepath.Join(root, "testdata", "golden")
-
-	// Discover which provider directories contain .go.golden files and
-	// only run go generate on those, avoiding the expensive name_collision/aws.
-	genDirs := map[string]bool{}
-	filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
-		if err == nil && !d.IsDir() && strings.HasSuffix(path, "_gen.go.golden") {
-			genDirs[filepath.Dir(path)] = true
-		}
-		return nil
-	})
-
-	env := []string{"TFORGE_CLI=terraform"}
-	for dir := range genDirs {
-		rel, _ := filepath.Rel(root, dir)
-		out, err := runCmd(t, root, env, "go", "generate", "./"+rel)
-		if err != nil {
-			t.Fatalf("go generate ./%s failed: %v\n%s", rel, err, out)
-		}
-	}
-
-	// Walk golden directories looking for *.go.golden files.
+// compareGeneratedCodeGoldens walks goldenBase for *_gen.go.golden files and
+// compares each against its corresponding generated *_gen.go file.
+func compareGeneratedCodeGoldens(t *testing.T, root, goldenBase string) {
+	t.Helper()
 	err := filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
@@ -331,7 +319,6 @@ func TestGeneratedCodeSnapshots(t *testing.T) {
 			}
 
 			if !bytes.Equal(golden, actual) {
-				// Show first divergence for debugging.
 				goldenLines := strings.Split(string(golden), "\n")
 				actualLines := strings.Split(string(actual), "\n")
 				for i := 0; i < len(goldenLines) && i < len(actualLines); i++ {

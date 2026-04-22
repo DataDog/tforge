@@ -55,11 +55,11 @@ install:
 # Regenerate golden files (JSON output + generated Go code)
 update-snapshots: install
 	go generate ./testdata/golden/...
-	go test -tags integration -run "TestSnapshots|TestGeneratedCodeSnapshots" -update -count=1 -timeout 10m .
+	go test -tags integration -run TestSnapshots -update -count=1 -timeout 10m .
 
 # Verify golden files match generated output (runs with both CLIs via Go tests)
 snapshot-tests: install
-	go test -tags integration -run "TestSnapshots|TestGeneratedCodeSnapshots" -v -count=1 -timeout 10m .
+	go test -tags integration -run TestSnapshots -v -count=1 -timeout 10m .
 
 # Validate golden files against multiple Terraform and OpenTofu versions (requires Docker)
 validate-golden:
