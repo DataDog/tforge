@@ -298,8 +298,21 @@ func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
 // provider generates ~174 MB of Go code, making it impractical to commit as a
 // golden file and too slow to compile in CI.
 var goldenExcludes = map[string]bool{
-	"name_collision":                       true,
-	filepath.Join("name_collision", "aws"): true,
+	"name_collision": true,
+}
+
+// isGoldenExcluded returns true if the given relative path is excluded or is a
+// child of an excluded directory.
+func isGoldenExcluded(rel string) bool {
+	if goldenExcludes[rel] {
+		return true
+	}
+	for exc := range goldenExcludes {
+		if strings.HasPrefix(rel, exc+string(filepath.Separator)) {
+			return true
+		}
+	}
+	return false
 }
 
 // compareGeneratedCodeGoldens verifies every golden test directory is accounted
@@ -342,7 +355,7 @@ func compareGeneratedCodeGoldens(t *testing.T, goldenBase string) {
 	}
 
 	for rel, dir := range providerDirSet {
-		if goldenExcludes[rel] {
+		if isGoldenExcluded(rel) {
 			t.Run(rel, func(t *testing.T) {
 				t.Skipf("excluded from generated code golden comparison (too large)")
 			})
