@@ -275,17 +275,29 @@ func TestGeneratedCodeSnapshots(t *testing.T) {
 	root := tforgeRoot(t)
 	requireCLI(t, "tforge")
 
-	// Run go generate for golden directories.
-	env := []string{"TFORGE_CLI=terraform"}
-	out, err := runCmd(t, root, env, "go", "generate", "./testdata/golden/...")
-	if err != nil {
-		t.Fatalf("go generate failed: %v\n%s", err, out)
-	}
-
 	goldenBase := filepath.Join(root, "testdata", "golden")
 
+	// Discover which provider directories contain .go.golden files and
+	// only run go generate on those, avoiding the expensive name_collision/aws.
+	genDirs := map[string]bool{}
+	filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
+		if err == nil && !d.IsDir() && strings.HasSuffix(path, "_gen.go.golden") {
+			genDirs[filepath.Dir(path)] = true
+		}
+		return nil
+	})
+
+	env := []string{"TFORGE_CLI=terraform"}
+	for dir := range genDirs {
+		rel, _ := filepath.Rel(root, dir)
+		out, err := runCmd(t, root, env, "go", "generate", "./"+rel)
+		if err != nil {
+			t.Fatalf("go generate ./%s failed: %v\n%s", rel, err, out)
+		}
+	}
+
 	// Walk golden directories looking for *.go.golden files.
-	err = filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
+	err := filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
 		}
