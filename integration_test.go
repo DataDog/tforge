@@ -217,11 +217,18 @@ func TestSnapshots(t *testing.T) {
 			requireCLI(t, cli)
 			requireCLI(t, "tforge")
 
-			// Run go generate with TFORGE_CLI.
+			// Run go generate for each golden directory that isn't excluded.
+			// Generating all directories (./testdata/golden/...) would include
+			// the AWS provider which takes minutes to generate and compile.
 			env := []string{"TFORGE_CLI=" + cli}
-			out, err := runCmd(t, root, env, "go", "generate", "./testdata/golden/...")
-			if err != nil {
-				t.Fatalf("go generate failed with %s: %v\n%s", cli, err, out)
+			for _, name := range discoverDirs(t, goldenBase) {
+				if goldenExcludes[name] {
+					continue
+				}
+				out, err := runCmd(t, root, env, "go", "generate", "./testdata/golden/"+name+"/...")
+				if err != nil {
+					t.Fatalf("go generate %s failed with %s: %v\n%s", name, cli, err, out)
+				}
 			}
 
 			// Compare generated Go code against *.go.golden snapshots,
