@@ -268,6 +268,83 @@ func TestSnapshots(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// TestGeneratedCodeSnapshots — compare generated *_gen.go against *.go.golden
+// ---------------------------------------------------------------------------
+
+func TestGeneratedCodeSnapshots(t *testing.T) {
+	root := tforgeRoot(t)
+	requireCLI(t, "tforge")
+
+	// Run go generate for golden directories.
+	env := []string{"TFORGE_CLI=terraform"}
+	out, err := runCmd(t, root, env, "go", "generate", "./testdata/golden/...")
+	if err != nil {
+		t.Fatalf("go generate failed: %v\n%s", err, out)
+	}
+
+	goldenBase := filepath.Join(root, "testdata", "golden")
+
+	// Walk golden directories looking for *.go.golden files.
+	err = filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		if !strings.HasSuffix(path, "_gen.go.golden") {
+			return nil
+		}
+
+		goldenFile := path
+		genFile := strings.TrimSuffix(goldenFile, ".golden")
+		rel, _ := filepath.Rel(root, genFile)
+
+		t.Run(rel, func(t *testing.T) {
+			if *update {
+				src, err := os.ReadFile(genFile)
+				if err != nil {
+					t.Fatalf("reading generated file %s: %v", rel, err)
+				}
+				if err := os.WriteFile(goldenFile, src, 0644); err != nil {
+					t.Fatalf("updating golden file: %v", err)
+				}
+				return
+			}
+
+			golden, err := os.ReadFile(goldenFile)
+			if err != nil {
+				t.Fatalf("reading golden file: %v", err)
+			}
+			actual, err := os.ReadFile(genFile)
+			if err != nil {
+				t.Fatalf("reading generated file %s: %v", rel, err)
+			}
+
+			if !bytes.Equal(golden, actual) {
+				// Show first divergence for debugging.
+				goldenLines := strings.Split(string(golden), "\n")
+				actualLines := strings.Split(string(actual), "\n")
+				for i := 0; i < len(goldenLines) && i < len(actualLines); i++ {
+					if goldenLines[i] != actualLines[i] {
+						t.Errorf("generated code mismatch at line %d\n--- golden ---\n%s\n--- actual ---\n%s",
+							i+1, goldenLines[i], actualLines[i])
+						break
+					}
+				}
+				if len(goldenLines) != len(actualLines) {
+					t.Errorf("line count differs: golden=%d actual=%d", len(goldenLines), len(actualLines))
+				}
+				if !t.Failed() {
+					t.Errorf("files differ (binary comparison)")
+				}
+			}
+		})
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walking golden directories: %v", err)
+	}
+}
+
+// ---------------------------------------------------------------------------
 // TestTerraformValidate — validate golden files against multiple TF/OpenTofu
 // versions via Docker (replaces validate-golden.sh)
 // ---------------------------------------------------------------------------
