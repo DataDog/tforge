@@ -556,7 +556,9 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 	t.Helper()
 
 	pluginCacheDir := "/tmp/tforge-cache"
-	os.MkdirAll(pluginCacheDir, 0755)
+	if err := os.MkdirAll(pluginCacheDir, 0755); err != nil {
+		t.Fatalf("creating plugin cache dir: %v", err)
+	}
 
 	for _, group := range groups {
 		for _, tool := range tools {
@@ -564,7 +566,9 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 			initImage := tool.image + ":latest"
 
 			// Create volume if needed.
-			exec.Command("docker", "volume", "create", vol).Run()
+			if out, err := exec.Command("docker", "volume", "create", vol).CombinedOutput(); err != nil {
+				t.Fatalf("docker volume create %s failed: %v\n%s", vol, err, out)
+			}
 
 			// Check if cache is valid by reading config.hash from volume.
 			configHash := fmt.Sprintf("%x", sha256.Sum256(group.configJSON))
@@ -578,9 +582,11 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 
 			t.Logf("Initializing %s provider cache for group %s...", tool.cmd, group.hash)
 
-			// Reset volume.
-			exec.Command("docker", "volume", "rm", vol).Run()
-			exec.Command("docker", "volume", "create", vol).Run()
+			// Reset volume: rm is best-effort (may not exist yet), create must succeed.
+			exec.Command("docker", "volume", "rm", vol).Run() //nolint:errcheck // best-effort cleanup
+			if out, err := exec.Command("docker", "volume", "create", vol).CombinedOutput(); err != nil {
+				t.Fatalf("docker volume create %s failed: %v\n%s", vol, err, out)
+			}
 
 			// Write config to temp file for docker cp.
 			tmpConfig, err := os.CreateTemp("", "tforge-config-*.tf.json")
