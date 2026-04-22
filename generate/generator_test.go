@@ -402,7 +402,10 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 		t.Fatalf("reading resources_gen.go: %v", err)
 	}
 	resourceContent := string(resourceData)
-	for _, want := range []string{"Thing", "Config", "ThingConfig"} {
+	for _, want := range []string{
+		"Thing", "Config", "ThingConfig",
+		"ThingConfigOption", "NewThingConfig", "ThingConfig_SetKey",
+	} {
 		if !strings.Contains(resourceContent, want) {
 			t.Errorf("resources_gen.go does not contain %q", want)
 		}
@@ -1122,11 +1125,14 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Errorf("config[enabled] = %v, want true", r3.Config["enabled"])
 	}
 
-	// Case 4: Nested block round-trip
+	// Case 4: Nested block round-trip using nested constructor
 	stack4 := config.NewStack("rt4")
 	err = NewWidget(stack4, "nested",
 		Widget_SetName("z"),
-		Widget_SetSetting(&WidgetSetting{Key: "k1", Value: "v1"}),
+		Widget_SetSetting(NewWidgetSetting(
+			WidgetSetting_SetKey("k1"),
+			WidgetSetting_SetValue("v1"),
+		)),
 	)
 	if err != nil {
 		t.Fatalf("NewWidget: %v", err)

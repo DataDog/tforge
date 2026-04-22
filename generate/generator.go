@@ -454,6 +454,13 @@ func (g *Generator) generateNestedTypes(f *jen.File, block *provider.BlockType, 
 		})
 		f.Line()
 
+		// Generate functional option type, option functions, and constructor
+		g.generateOptionType(f, typeName)
+		if nb.Block.Block != nil {
+			g.generateOptionFunctions(f, typeName, nb.Block.Block)
+		}
+		g.generateNestedConstructor(f, typeName)
+
 		// Recursively generate nested types
 		if nb.Block.Block != nil {
 			g.generateNestedTypes(f, nb.Block.Block, typeName)
@@ -659,6 +666,37 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 		jen.Id("name").String(),
 		jen.Id("opts").Op("...").Id(optionType),
 	).Error().Block(body...)
+	f.Line()
+}
+
+// generateNestedConstructor generates a constructor for a nested block type.
+// Unlike top-level constructors (which add to a Stack), nested constructors
+// simply apply options and return a pointer to the configured struct.
+//
+// Output:
+//
+//	func NewContainerPorts(opts ...ContainerPortsOption) *ContainerPorts {
+//	    var cfg ContainerPorts
+//	    for _, opt := range opts {
+//	        opt(&cfg)
+//	    }
+//	    return &cfg
+//	}
+func (g *Generator) generateNestedConstructor(f *jen.File, structName string) {
+	short := g.shortName(structName)
+	optionType := short + "Option"
+	funcName := "New" + short
+
+	f.Commentf("%s creates a new %s from functional options.", funcName, structName)
+	f.Func().Id(funcName).Params(
+		jen.Id("opts").Op("...").Id(optionType),
+	).Op("*").Id(structName).Block(
+		jen.Var().Id("cfg").Id(structName),
+		jen.For(jen.List(jen.Id("_"), jen.Id("opt")).Op(":=").Range().Id("opts")).Block(
+			jen.Id("opt").Call(jen.Op("&").Id("cfg")),
+		),
+		jen.Return(jen.Op("&").Id("cfg")),
+	)
 	f.Line()
 }
 
