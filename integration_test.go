@@ -224,14 +224,16 @@ func TestSnapshots(t *testing.T) {
 				t.Fatalf("go generate failed with %s: %v\n%s", cli, err, out)
 			}
 
-			// Compare generated Go code against *.go.golden snapshots.
+			// Compare generated Go code against *.go.golden snapshots,
+			// then run each golden directory to compare JSON output.
+			// JSON output depends on the generated code, so both
+			// checks live under the same subtest.
 			t.Run("generated_code", func(t *testing.T) {
 				compareGeneratedCodeGoldens(t, root, goldenBase)
-			})
 
-			// Compare JSON output against *.golden.json snapshots.
-			t.Run("json_output", func(t *testing.T) {
-				compareJSONOutputGoldens(t, root, goldenBase)
+				t.Run("json_output", func(t *testing.T) {
+					compareJSONOutputGoldens(t, root, goldenBase)
+				})
 			})
 		})
 	}
@@ -246,7 +248,7 @@ func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
 		t.Run(name, func(t *testing.T) {
 			goldenFile := filepath.Join(goldenBase, name, "main.tf.golden.json")
 			if _, err := os.Stat(goldenFile); err != nil {
-				t.Skipf("no golden file: %v", err)
+				t.Fatalf("missing golden file %s — run 'make update-snapshots' to create it", goldenFile)
 			}
 
 			// go run ./<dir> → stdout.
