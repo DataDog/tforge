@@ -290,29 +290,50 @@ var generatedCodeGoldenExcludes = map[string]bool{
 	filepath.Join("name_collision", "aws"): true,
 }
 
-// compareGeneratedCodeGoldens finds every provider directory (containing a
-// generate.go) under goldenBase, requires that committed *.go.golden files
-// exist for each generated file, and compares them byte-for-byte.
-// Directories listed in generatedCodeGoldenExcludes are skipped.
+// compareGeneratedCodeGoldens verifies every golden test directory is accounted
+// for: directories with a generate.go must have committed *.go.golden files
+// (unless explicitly excluded), and directories without generate.go are flagged
+// as having no generated code. This ensures new golden directories cannot
+// silently skip the generated code comparison.
 func compareGeneratedCodeGoldens(t *testing.T, root, goldenBase string) {
 	t.Helper()
 
-	// Discover all provider directories that contain a generate.go.
-	var providerDirs []string
+	// Build a map of provider directories (containing generate.go) keyed by
+	// their path relative to goldenBase (e.g. "datadog/datadog").
+	providerDirSet := map[string]string{} // rel -> abs
 	filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
 		if err == nil && !d.IsDir() && d.Name() == "generate.go" {
-			providerDirs = append(providerDirs, filepath.Dir(path))
+			rel, _ := filepath.Rel(goldenBase, filepath.Dir(path))
+			providerDirSet[rel] = filepath.Dir(path)
 		}
 		return nil
 	})
 
-	if len(providerDirs) == 0 {
+	// Verify every top-level golden directory is accounted for.
+	for _, name := range discoverDirs(t, goldenBase) {
+		hasGen := false
+		for rel := range providerDirSet {
+			if strings.HasPrefix(rel, name+string(filepath.Separator)) || rel == name {
+				hasGen = true
+				break
+			}
+		}
+		if !hasGen {
+			t.Run(name, func(t *testing.T) {
+				t.Skipf("no generate.go — no generated code to compare")
+			})
+		}
+	}
+
+	if len(providerDirSet) == 0 {
 		t.Fatal("no generate.go files found under testdata/golden")
 	}
 
-	for _, dir := range providerDirs {
-		rel, _ := filepath.Rel(goldenBase, dir)
+	for rel, dir := range providerDirSet {
 		if generatedCodeGoldenExcludes[rel] {
+			t.Run(rel, func(t *testing.T) {
+				t.Skipf("excluded from generated code golden comparison (too large)")
+			})
 			continue
 		}
 
