@@ -3,9 +3,9 @@ module github.com/hashicorp/terraform-cdk/examples/go/docker
 go 1.25.9
 
 require (
-	github.com/aws/constructs-go/constructs/v10 v10.3.0
-	github.com/aws/jsii-runtime-go v1.102.0
-	github.com/hashicorp/terraform-cdk-go/cdktf v0.0.0
+	github.com/aws/constructs-go/constructs/v10 v10.6.0
+	github.com/aws/jsii-runtime-go v1.128.0
+	github.com/hashicorp/terraform-cdk-go/cdktf v0.21.0
 )
 
 require (
