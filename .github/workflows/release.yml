@@ -5,6 +5,10 @@ on:
     tags:
       - "v*"
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -93,6 +97,7 @@ jobs:
     name: Notify Provider Repos
     needs: publish
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Dispatch to tforge-provider-datadog
         env:
