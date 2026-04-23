@@ -88,3 +88,18 @@ jobs:
           gh release create ${{ github.ref_name }} dist/* \
             --generate-notes \
             --title "tforge ${{ github.ref_name }}"
+
+  notify-provider-repos:
+    name: Notify Provider Repos
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch to tforge-provider-datadog
+        env:
+          GH_TOKEN: ${{ secrets.TFORGE_PROVIDER_DISPATCH_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          gh api repos/DataDog/tforge-provider-datadog/dispatches \
+            -f event_type=tforge-release \
+            -f "client_payload[tforge_version]=$VERSION" \
+            -f "client_payload[tforge_tag]=${{ github.ref_name }}"
