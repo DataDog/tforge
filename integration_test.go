@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -367,21 +368,44 @@ func compareGeneratedCodeGoldens(t *testing.T, goldenBase string) {
 		}
 
 		t.Run(rel, func(t *testing.T) {
-			// Find all *_gen.go files produced by go generate.
+			// Find all *_gen.go files produced by go generate and all
+			// committed *.go.golden files. Compare both sets to detect
+			// regressions where the generator stops emitting a file.
 			entries, err := os.ReadDir(dir)
 			if err != nil {
 				t.Fatalf("reading directory %s: %v", rel, err)
 			}
 
-			var genFiles []string
+			genSet := map[string]bool{}
+			goldenSet := map[string]bool{}
 			for _, e := range entries {
-				if !e.IsDir() && strings.HasSuffix(e.Name(), "_gen.go") {
-					genFiles = append(genFiles, e.Name())
+				if e.IsDir() {
+					continue
+				}
+				if strings.HasSuffix(e.Name(), "_gen.go.golden") {
+					// "foo_gen.go.golden" → "foo_gen.go"
+					goldenSet[strings.TrimSuffix(e.Name(), ".golden")] = true
+				} else if strings.HasSuffix(e.Name(), "_gen.go") {
+					genSet[e.Name()] = true
 				}
 			}
-			if len(genFiles) == 0 {
+
+			// Fail if a committed golden has no corresponding generated file.
+			for g := range goldenSet {
+				if !genSet[g] {
+					t.Errorf("golden file %s.golden exists but %s was not generated — generator may have regressed", g, g)
+				}
+			}
+
+			if len(genSet) == 0 {
 				t.Fatalf("no *_gen.go files found in %s — did go generate run?", rel)
 			}
+
+			genFiles := make([]string, 0, len(genSet))
+			for name := range genSet {
+				genFiles = append(genFiles, name)
+			}
+			sort.Strings(genFiles)
 
 			for _, name := range genFiles {
 				name := name
