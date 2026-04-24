@@ -52,7 +52,7 @@ build:
 install:
 	go install ./cmd/tforge
 
-# Regenerate golden files
+# Regenerate golden files (JSON output + generated Go code)
 update-snapshots: install
 	go generate ./testdata/golden/...
 	go test -tags integration -run TestSnapshots -update -count=1 -timeout 10m .

@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: read
-
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -20,6 +17,8 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -40,6 +39,8 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -61,6 +62,9 @@ jobs:
   snapshots:
     name: Snapshot Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -86,6 +90,8 @@ jobs:
   migration:
     name: Migration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -112,6 +118,8 @@ jobs:
     name: Validate Golden Files
     needs: snapshots
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -123,3 +131,100 @@ jobs:
 
       - name: Validate golden files against Terraform and OpenTofu
         run: make validate-golden
+
+  version-check:
+    name: Version Bump Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Check changed files
+        id: changes
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        with:
+          filters: |
+            go:
+              - '**/*.go'
+              - 'go.mod'
+              - 'go.sum'
+
+      - name: Checkout PR
+        if: steps.changes.outputs.go == 'true'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Get PR version
+        if: steps.changes.outputs.go == 'true'
+        id: pr
+        run: |
+          VERSION=$(sed -n 's/^const version = "\(.*\)"/\1/p' cmd/tforge/main.go)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout base branch
+        if: steps.changes.outputs.go == 'true'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+
+      - name: Get base version
+        if: steps.changes.outputs.go == 'true'
+        id: base
+        run: |
+          VERSION=$(sed -n 's/^const version = "\(.*\)"/\1/p' base/cmd/tforge/main.go)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Compare versions
+        if: steps.changes.outputs.go == 'true'
+        run: |
+          PR="${{ steps.pr.outputs.version }}"
+          BASE="${{ steps.base.outputs.version }}"
+          if [ "$PR" = "$BASE" ]; then
+            echo "::error::Version was not bumped. PR version ($PR) == base version ($BASE). Please bump the version in cmd/tforge/main.go."
+            exit 1
+          fi
+          HIGHER=$(printf '%s\n%s' "$BASE" "$PR" | sort -V | tail -1)
+          if [ "$HIGHER" != "$PR" ]; then
+            echo "::error::PR version ($PR) is not greater than base version ($BASE)."
+            exit 1
+          fi
+          echo "Version bumped: $BASE -> $PR"
+
+  auto-tag:
+    name: Auto Tag Release
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [lint, test, snapshots, migration, validate-golden]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.TFORGE_PROVIDER_DISPATCH_TOKEN }}
+
+      - name: Extract version and check tag
+        id: version
+        run: |
+          VERSION=$(sed -n 's/^const version = "\(.*\)"/\1/p' cmd/tforge/main.go)
+          TAG="v${VERSION}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Tag $TAG already exists, skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Tag $TAG does not exist, will create."
+          fi
+
+      - name: Create and push tag
+        if: steps.version.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a ${{ steps.version.outputs.tag }} -m "tforge ${{ steps.version.outputs.tag }}"
+          git push origin ${{ steps.version.outputs.tag }}

@@ -60,7 +60,7 @@ make fmt                # check formatting
 
 ## Code Style
 
-- Go 1.23+, standard library preferred
+- Go 1.25+, standard library preferred
 - Single external dependency (minimal footprint)
 - `gofmt` for formatting, `golangci-lint` for linting
 - Check error returns (errcheck is enabled)
@@ -71,9 +71,10 @@ make fmt                # check formatting
 - Unit tests alongside source files
 - Integration tests use `//go:build integration` tag (snapshot, migration, golden validation)
 - Snapshot tests with golden files (`testdata/golden/*/main.tf.golden.json`)
+- Generated code snapshots (`testdata/golden/*/*_gen.go.golden`) compare generated Go code against committed golden files (excludes `name_collision/aws` due to size — 174M)
 - Update snapshots: `make update-snapshots`
 - Example validation: `go test ./example/ -v` (requires `go generate` first)
-- CI enforces a coverage threshold (see `COVERAGE_THRESHOLD` in `Makefile`; excludes `cmd/` and `example/`)
+- CI enforces a coverage threshold (see `COVERAGE_THRESHOLD` and `EXCLUDED` in `Makefile`)
 
 ## CI
 

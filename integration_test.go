@@ -10,9 +10,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 )
+
+// pluginCacheDir is the host directory used to cache Terraform/OpenTofu
+// provider plugins across Docker validation runs.
+const pluginCacheDir = "/tmp/tforge-cache"
 
 // ---------------------------------------------------------------------------
 // TestMigration — end-to-end migration tests (replaces migration-test.sh)
@@ -217,49 +222,237 @@ func TestSnapshots(t *testing.T) {
 			requireCLI(t, cli)
 			requireCLI(t, "tforge")
 
-			// Run go generate with TFORGE_CLI.
+			// Run go generate for each golden directory that isn't excluded.
+			// Generating all directories (./testdata/golden/...) would include
+			// the AWS provider which takes minutes to generate and compile.
 			env := []string{"TFORGE_CLI=" + cli}
-			out, err := runCmd(t, root, env, "go", "generate", "./testdata/golden/...")
-			if err != nil {
-				t.Fatalf("go generate failed with %s: %v\n%s", cli, err, out)
+			for _, name := range discoverDirs(t, goldenBase) {
+				if goldenExcludes[name] {
+					continue
+				}
+				out, err := runCmd(t, root, env, "go", "generate", "./testdata/golden/"+name+"/...")
+				if err != nil {
+					t.Fatalf("go generate %s failed with %s: %v\n%s", name, cli, err, out)
+				}
 			}
 
-			// Test each golden directory.
-			for _, name := range discoverDirs(t, goldenBase) {
+			// Compare generated Go code against *.go.golden snapshots.
+			t.Run("generated_code", func(t *testing.T) {
+				compareGeneratedCodeGoldens(t, goldenBase)
+			})
+
+			// Run each golden directory and compare JSON output.
+			t.Run("json_output", func(t *testing.T) {
+				compareJSONOutputGoldens(t, root, goldenBase)
+			})
+		})
+	}
+}
+
+// compareJSONOutputGoldens runs each golden directory's main.go and compares
+// the JSON output against main.tf.golden.json.
+func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
+	t.Helper()
+	for _, name := range discoverDirs(t, goldenBase) {
+		name := name
+		t.Run(name, func(t *testing.T) {
+			if goldenExcludes[name] {
+				t.Skipf("excluded from JSON output comparison (too large)")
+				return
+			}
+
+			goldenFile := filepath.Join(goldenBase, name, "main.tf.golden.json")
+			if _, err := os.Stat(goldenFile); err != nil {
+				t.Fatalf("missing golden file %s — run 'make update-snapshots' to create it", goldenFile)
+			}
+
+			// go run ./<dir> → stdout.
+			cmd := exec.Command("go", "run", "./testdata/golden/"+name)
+			cmd.Dir = root
+			actual, err := cmd.Output()
+			if err != nil {
+				var stderr []byte
+				if ee, ok := err.(*exec.ExitError); ok {
+					stderr = ee.Stderr
+				}
+				t.Fatalf("go run failed: %v\n%s", err, stderr)
+			}
+
+			if *update {
+				if err := os.WriteFile(goldenFile, actual, 0644); err != nil {
+					t.Fatalf("updating golden file: %v", err)
+				}
+				return
+			}
+
+			golden, err := os.ReadFile(goldenFile)
+			if err != nil {
+				t.Fatalf("reading golden file: %v", err)
+			}
+
+			if !bytes.Equal(bytes.TrimSpace(actual), bytes.TrimSpace(golden)) {
+				t.Errorf("output mismatch for %s\n--- golden ---\n%s\n--- actual ---\n%s",
+					name, golden, actual)
+			}
+		})
+	}
+}
+
+// goldenExcludes lists directories excluded from generated code golden
+// comparison and JSON output tests. name_collision is excluded because its AWS
+// provider generates ~174 MB of Go code, making it impractical to commit as a
+// golden file and too slow to compile in CI.
+var goldenExcludes = map[string]bool{
+	"name_collision": true,
+}
+
+// isGoldenExcluded returns true if the given relative path is excluded or is a
+// child of an excluded directory.
+func isGoldenExcluded(rel string) bool {
+	if goldenExcludes[rel] {
+		return true
+	}
+	for exc := range goldenExcludes {
+		if strings.HasPrefix(rel, exc+string(filepath.Separator)) {
+			return true
+		}
+	}
+	return false
+}
+
+// compareGeneratedCodeGoldens verifies every golden test directory is accounted
+// for: directories with a generate.go must have committed *.go.golden files
+// (unless explicitly excluded), and directories without generate.go are flagged
+// as having no generated code. This ensures new golden directories cannot
+// silently skip the generated code comparison.
+func compareGeneratedCodeGoldens(t *testing.T, goldenBase string) {
+	t.Helper()
+
+	// Build a map of provider directories (containing generate.go) keyed by
+	// their path relative to goldenBase (e.g. "datadog/datadog").
+	providerDirSet := map[string]string{} // rel -> abs
+	filepath.WalkDir(goldenBase, func(path string, d os.DirEntry, err error) error {
+		if err == nil && !d.IsDir() && d.Name() == "generate.go" {
+			rel, _ := filepath.Rel(goldenBase, filepath.Dir(path))
+			providerDirSet[rel] = filepath.Dir(path)
+		}
+		return nil
+	})
+
+	// Verify every top-level golden directory is accounted for.
+	for _, name := range discoverDirs(t, goldenBase) {
+		hasGen := false
+		for rel := range providerDirSet {
+			if strings.HasPrefix(rel, name+string(filepath.Separator)) || rel == name {
+				hasGen = true
+				break
+			}
+		}
+		if !hasGen {
+			t.Run(name, func(t *testing.T) {
+				t.Skipf("no generate.go — no generated code to compare")
+			})
+		}
+	}
+
+	if len(providerDirSet) == 0 {
+		t.Fatal("no generate.go files found under testdata/golden")
+	}
+
+	for rel, dir := range providerDirSet {
+		if isGoldenExcluded(rel) {
+			t.Run(rel, func(t *testing.T) {
+				t.Skipf("excluded from generated code golden comparison (too large)")
+			})
+			continue
+		}
+
+		t.Run(rel, func(t *testing.T) {
+			// Find all *_gen.go files produced by go generate and all
+			// committed *.go.golden files. Compare both sets to detect
+			// regressions where the generator stops emitting a file.
+			entries, err := os.ReadDir(dir)
+			if err != nil {
+				t.Fatalf("reading directory %s: %v", rel, err)
+			}
+
+			genSet := map[string]bool{}
+			goldenSet := map[string]bool{}
+			for _, e := range entries {
+				if e.IsDir() {
+					continue
+				}
+				if strings.HasSuffix(e.Name(), "_gen.go.golden") {
+					// "foo_gen.go.golden" → "foo_gen.go"
+					goldenSet[strings.TrimSuffix(e.Name(), ".golden")] = true
+				} else if strings.HasSuffix(e.Name(), "_gen.go") {
+					genSet[e.Name()] = true
+				}
+			}
+
+			// Fail if a committed golden has no corresponding generated file.
+			for g := range goldenSet {
+				if !genSet[g] {
+					t.Errorf("golden file %s.golden exists but %s was not generated — generator may have regressed", g, g)
+				}
+			}
+
+			if len(genSet) == 0 {
+				t.Fatalf("no *_gen.go files found in %s — did go generate run?", rel)
+			}
+
+			genFiles := make([]string, 0, len(genSet))
+			for name := range genSet {
+				genFiles = append(genFiles, name)
+			}
+			sort.Strings(genFiles)
+
+			for _, name := range genFiles {
 				name := name
 				t.Run(name, func(t *testing.T) {
-					goldenFile := filepath.Join(goldenBase, name, "main.tf.golden.json")
-					if _, err := os.Stat(goldenFile); err != nil {
-						t.Skipf("no golden file: %v", err)
-					}
-
-					// go run ./<dir> → stdout.
-					cmd := exec.Command("go", "run", "./testdata/golden/"+name)
-					cmd.Dir = root
-					actual, err := cmd.Output()
-					if err != nil {
-						var stderr []byte
-						if ee, ok := err.(*exec.ExitError); ok {
-							stderr = ee.Stderr
-						}
-						t.Fatalf("go run failed: %v\n%s", err, stderr)
-					}
+					genFile := filepath.Join(dir, name)
+					goldenFile := genFile + ".golden"
 
 					if *update {
-						if err := os.WriteFile(goldenFile, actual, 0644); err != nil {
+						src, err := os.ReadFile(genFile)
+						if err != nil {
+							t.Fatalf("reading generated file: %v", err)
+						}
+						if err := os.WriteFile(goldenFile, src, 0644); err != nil {
 							t.Fatalf("updating golden file: %v", err)
 						}
 						return
+					}
+
+					if _, err := os.Stat(goldenFile); err != nil {
+						t.Fatalf("missing golden file %s.golden — run 'make update-snapshots' to create it", name)
 					}
 
 					golden, err := os.ReadFile(goldenFile)
 					if err != nil {
 						t.Fatalf("reading golden file: %v", err)
 					}
+					actual, err := os.ReadFile(genFile)
+					if err != nil {
+						t.Fatalf("reading generated file: %v", err)
+					}
 
-					if !bytes.Equal(bytes.TrimSpace(actual), bytes.TrimSpace(golden)) {
-						t.Errorf("output mismatch for %s\n--- golden ---\n%s\n--- actual ---\n%s",
-							name, golden, actual)
+					if !bytes.Equal(golden, actual) {
+						goldenLines := strings.Split(string(golden), "\n")
+						actualLines := strings.Split(string(actual), "\n")
+						for i := 0; i < len(goldenLines) && i < len(actualLines); i++ {
+							if goldenLines[i] != actualLines[i] {
+								t.Errorf("generated code mismatch at line %d\n--- golden ---\n%s\n--- actual ---\n%s",
+									i+1, goldenLines[i], actualLines[i])
+								break
+							}
+						}
+						if len(goldenLines) != len(actualLines) {
+							t.Errorf("line count differs: golden=%d actual=%d", len(goldenLines), len(actualLines))
+						}
+						if !t.Failed() {
+							t.Errorf("files differ (binary comparison)")
+						}
 					}
 				})
 			}
@@ -403,8 +596,9 @@ func cacheVolName(toolKey, groupHash string) string {
 func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []toolInfo) {
 	t.Helper()
 
-	pluginCacheDir := "/tmp/tforge-cache"
-	os.MkdirAll(pluginCacheDir, 0755)
+		if err := os.MkdirAll(pluginCacheDir, 0755); err != nil {
+		t.Fatalf("creating plugin cache dir: %v", err)
+	}
 
 	for _, group := range groups {
 		for _, tool := range tools {
@@ -412,7 +606,9 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 			initImage := tool.image + ":latest"
 
 			// Create volume if needed.
-			exec.Command("docker", "volume", "create", vol).Run()
+			if out, err := exec.Command("docker", "volume", "create", vol).CombinedOutput(); err != nil {
+				t.Fatalf("docker volume create %s failed: %v\n%s", vol, err, out)
+			}
 
 			// Check if cache is valid by reading config.hash from volume.
 			configHash := fmt.Sprintf("%x", sha256.Sum256(group.configJSON))
@@ -426,9 +622,11 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 
 			t.Logf("Initializing %s provider cache for group %s...", tool.cmd, group.hash)
 
-			// Reset volume.
-			exec.Command("docker", "volume", "rm", vol).Run()
-			exec.Command("docker", "volume", "create", vol).Run()
+			// Reset volume: rm is best-effort (may not exist yet), create must succeed.
+			exec.Command("docker", "volume", "rm", vol).Run() //nolint:errcheck // best-effort cleanup
+			if out, err := exec.Command("docker", "volume", "create", vol).CombinedOutput(); err != nil {
+				t.Fatalf("docker volume create %s failed: %v\n%s", vol, err, out)
+			}
 
 			// Write config to temp file for docker cp.
 			tmpConfig, err := os.CreateTemp("", "tforge-config-*.tf.json")
@@ -478,8 +676,7 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 func validateVersion(t *testing.T, image, cmd, toolKey string, groups map[string]*providerGroup, goldenFiles []string) {
 	t.Helper()
 
-	pluginCacheDir := "/tmp/tforge-cache"
-
+	
 	// Map each file to its group hash.
 	fileGroup := map[string]string{}
 	for _, g := range groups {

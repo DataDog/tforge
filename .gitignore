@@ -1,6 +1,8 @@
 # Generated files
 *_gen.go
 *.tf.json
+# Golden snapshots of generated Go code (force-tracked)
+!*_gen.go.golden
 # Migration test fixtures (force-tracked)
 !testdata/migration/**/*.tf.json
 
