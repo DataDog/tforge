@@ -22,7 +22,7 @@ import (
 	"github.com/DataDog/tforge/provider"
 )
 
-const version = "0.2.0"
+const version = "0.3.0"
 
 const (
 	dirPerm  = os.FileMode(0755)

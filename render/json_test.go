@@ -219,8 +219,8 @@ func TestToJSON_ProviderWithConfig(t *testing.T) {
 func TestToJSON_ResourceBasic(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "web",
+		Type:       "aws_instance",
+		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123", "instance_type": "t3.micro"},
 	}); err != nil {
 		t.Fatal(err)
@@ -245,10 +245,10 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 func TestToJSON_ResourceProvider(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
-		Type:     "aws_instance",
-		Name:     "web",
-		Provider: "aws.west",
-		Attributes:   map[string]any{"ami": "ami-123"},
+		Type:       "aws_instance",
+		Name:       "web",
+		Provider:   "aws.west",
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -271,8 +271,8 @@ func TestToJSON_ResourceProvider(t *testing.T) {
 func TestToJSON_ResourceProviderAbsentWhenEmpty(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "web",
+		Type:       "aws_instance",
+		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
@@ -296,8 +296,8 @@ func TestToJSON_ResourceProviderAbsentWhenEmpty(t *testing.T) {
 func TestToJSON_ResourceDependsOn(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "web",
+		Type:       "aws_instance",
+		Name:       "web",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"aws_vpc.main"},
@@ -325,8 +325,8 @@ func TestToJSON_ResourceDependsOn(t *testing.T) {
 func TestToJSON_ResourceCount(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "web",
+		Type:       "aws_instance",
+		Name:       "web",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			Count: 3,
@@ -354,8 +354,8 @@ func TestToJSON_ResourceCount(t *testing.T) {
 func TestToJSON_ResourceForEach(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "web",
+		Type:       "aws_instance",
+		Name:       "web",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]any{"a": "1", "b": "2"},
@@ -502,15 +502,15 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "web",
+		Type:       "aws_instance",
+		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-web"},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "api",
+		Type:       "aws_instance",
+		Name:       "api",
 		Attributes: map[string]any{"ami": "ami-api"},
 	}); err != nil {
 		t.Fatal(err)
@@ -542,22 +542,22 @@ func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 func TestToJSON_MultipleResourceTypes(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "web",
+		Type:       "aws_instance",
+		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_vpc",
-		Name:   "main",
+		Type:       "aws_vpc",
+		Name:       "main",
 		Attributes: map[string]any{"cidr_block": "10.0.0.0/16"},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_subnet",
-		Name:   "public",
+		Type:       "aws_subnet",
+		Name:       "public",
 		Attributes: map[string]any{"cidr_block": "10.0.1.0/24"},
 	}); err != nil {
 		t.Fatal(err)
@@ -588,15 +588,15 @@ func TestToJSON_MultipleResourceTypes(t *testing.T) {
 func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_ami",
-		Name:   "ubuntu",
+		Type:       "aws_ami",
+		Name:       "ubuntu",
 		Attributes: map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_ami",
-		Name:   "amazon_linux",
+		Type:       "aws_ami",
+		Name:       "amazon_linux",
 		Attributes: map[string]any{"most_recent": false},
 	}); err != nil {
 		t.Fatal(err)
@@ -628,8 +628,8 @@ func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 func TestToJSON_DataSource(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_ami",
-		Name:   "latest",
+		Type:       "aws_ami",
+		Name:       "latest",
 		Attributes: map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
@@ -653,10 +653,10 @@ func TestToJSON_DataSource(t *testing.T) {
 func TestToJSON_DataSourceProvider(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddDataSource(config.DataSource{
-		Type:     "aws_ami",
-		Name:     "latest",
-		Provider: "aws.west",
-		Attributes:   map[string]any{"most_recent": true},
+		Type:       "aws_ami",
+		Name:       "latest",
+		Provider:   "aws.west",
+		Attributes: map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -679,8 +679,8 @@ func TestToJSON_DataSourceProvider(t *testing.T) {
 func TestToJSON_DataSourceDependsOn(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_ami",
-		Name:   "latest",
+		Type:       "aws_ami",
+		Name:       "latest",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"aws_vpc.main"},
@@ -708,8 +708,8 @@ func TestToJSON_DataSourceDependsOn(t *testing.T) {
 func TestToJSON_DataSourceCount(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_ami",
-		Name:   "latest",
+		Type:       "aws_ami",
+		Name:       "latest",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			Count: 3,
@@ -737,8 +737,8 @@ func TestToJSON_DataSourceCount(t *testing.T) {
 func TestToJSON_DataSourceForEach(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_ami",
-		Name:   "latest",
+		Type:       "aws_ami",
+		Name:       "latest",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]any{"a": "1", "b": "2"},
@@ -947,16 +947,16 @@ func TestToJSON_FullStack(t *testing.T) {
 	})
 
 	if err := stack.AddResource(config.Resource{
-		Type:   "aws_instance",
-		Name:   "web",
+		Type:       "aws_instance",
+		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
 
 	if err := stack.AddDataSource(config.DataSource{
-		Type:   "aws_ami",
-		Name:   "latest",
+		Type:       "aws_ami",
+		Name:       "latest",
 		Attributes: map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
@@ -1355,8 +1355,8 @@ func TestToJSON_ModuleWithProviders(t *testing.T) {
 func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddModule(config.Module{
-		Name:   "server",
-		Source: "./modules/server",
+		Name:      "server",
+		Source:    "./modules/server",
 		Variables: map[string]any{"name": "web"},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"aws_vpc.main"},
@@ -1396,8 +1396,8 @@ func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
 func TestToJSON_ModuleForEach(t *testing.T) {
 	stack := config.NewStack("test")
 	if err := stack.AddModule(config.Module{
-		Name:   "bucket",
-		Source: "terraform-aws-modules/s3-bucket/aws",
+		Name:      "bucket",
+		Source:    "terraform-aws-modules/s3-bucket/aws",
 		Variables: map[string]any{"bucket": "${each.key}-bucket"},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]string{"logs": "logs", "data": "data"},
