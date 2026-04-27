@@ -645,11 +645,9 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 	// Step 4: Add the resource/data source to the stack.
 	addToStack := jen.Return(jen.Id("stack").Dot(addMethod).Call(
 		jen.Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
-			jen.Id("Type"): jen.Lit(tfTypeName),
-			jen.Id("Name"): jen.Id("name"),
-			jen.Id("MetaArguments"): jen.Qual("github.com/DataDog/tforge/config", "MetaArguments").Values(jen.Dict{
-				jen.Id("Config"): jen.Id("m"),
-			}),
+			jen.Id("Type"):   jen.Lit(tfTypeName),
+			jen.Id("Name"):   jen.Id("name"),
+			jen.Id("Config"): jen.Id("m"),
 		}),
 	))
 

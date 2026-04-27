@@ -332,9 +332,9 @@ func NewActionConnectionData(stack *config.Stack, name string, opts ...ActionCon
 		return fmt.Errorf("converting datadog_action_connection config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_action_connection",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_action_connection",
 	})
 }
 
@@ -401,9 +401,9 @@ func NewAPIKeyData(stack *config.Stack, name string, opts ...APIKeyDataOption) e
 		return fmt.Errorf("converting datadog_api_key config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_api_key",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_api_key",
 	})
 }
 
@@ -449,9 +449,9 @@ func NewApmRetentionFiltersOrderData(stack *config.Stack, name string, opts ...A
 		return fmt.Errorf("converting datadog_apm_retention_filters_order config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_apm_retention_filters_order",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_apm_retention_filters_order",
 	})
 }
 
@@ -532,9 +532,9 @@ func NewAppBuilderAppData(stack *config.Stack, name string, opts ...AppBuilderAp
 		return fmt.Errorf("converting datadog_app_builder_app config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_app_builder_app",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_app_builder_app",
 	})
 }
 
@@ -693,9 +693,9 @@ func NewAwsCurConfigData(stack *config.Stack, name string, opts ...AwsCurConfigD
 		return fmt.Errorf("converting datadog_aws_cur_config config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_aws_cur_config",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_aws_cur_config",
 	})
 }
 
@@ -899,9 +899,9 @@ func NewAzureUcConfigData(stack *config.Stack, name string, opts ...AzureUcConfi
 		return fmt.Errorf("converting datadog_azure_uc_config config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_azure_uc_config",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_azure_uc_config",
 	})
 }
 
@@ -947,9 +947,9 @@ func NewCloudWorkloadSecurityAgentRulesData(stack *config.Stack, name string, op
 		return fmt.Errorf("converting datadog_cloud_workload_security_agent_rules config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_cloud_workload_security_agent_rules",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_cloud_workload_security_agent_rules",
 	})
 }
 
@@ -1237,9 +1237,9 @@ func NewCostBudgetData(stack *config.Stack, name string, opts ...CostBudgetDataO
 		return fmt.Errorf("converting datadog_cost_budget config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_cost_budget",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_cost_budget",
 	})
 }
 
@@ -1299,9 +1299,9 @@ func NewCsmThreatsAgentRulesData(stack *config.Stack, name string, opts ...CsmTh
 		return fmt.Errorf("converting datadog_csm_threats_agent_rules config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_csm_threats_agent_rules",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_csm_threats_agent_rules",
 	})
 }
 
@@ -1354,9 +1354,9 @@ func NewCsmThreatsPoliciesData(stack *config.Stack, name string, opts ...CsmThre
 		return fmt.Errorf("converting datadog_csm_threats_policies config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_csm_threats_policies",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_csm_threats_policies",
 	})
 }
 
@@ -1808,9 +1808,9 @@ func NewCustomAllocationRuleData(stack *config.Stack, name string, opts ...Custo
 		return fmt.Errorf("converting datadog_custom_allocation_rule config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_custom_allocation_rule",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_custom_allocation_rule",
 	})
 }
 
@@ -1870,9 +1870,9 @@ func NewDashboardData(stack *config.Stack, name string, opts ...DashboardDataOpt
 		return fmt.Errorf("converting datadog_dashboard config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_dashboard",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_dashboard",
 	})
 }
 
@@ -1918,9 +1918,9 @@ func NewDashboardListData(stack *config.Stack, name string, opts ...DashboardLis
 		return fmt.Errorf("converting datadog_dashboard_list config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_dashboard_list",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_dashboard_list",
 	})
 }
 
@@ -2029,9 +2029,9 @@ func NewDatastoreData(stack *config.Stack, name string, opts ...DatastoreDataOpt
 		return fmt.Errorf("converting datadog_datastore config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_datastore",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_datastore",
 	})
 }
 
@@ -2126,9 +2126,9 @@ func NewDatastoreItemData(stack *config.Stack, name string, opts ...DatastoreIte
 		return fmt.Errorf("converting datadog_datastore_item config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_datastore_item",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_datastore_item",
 	})
 }
 
@@ -2258,9 +2258,9 @@ func NewGcpUcConfigData(stack *config.Stack, name string, opts ...GcpUcConfigDat
 		return fmt.Errorf("converting datadog_gcp_uc_config config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_gcp_uc_config",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_gcp_uc_config",
 	})
 }
 
@@ -2355,9 +2355,9 @@ func NewHostsData(stack *config.Stack, name string, opts ...HostsDataOption) err
 		return fmt.Errorf("converting datadog_hosts config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_hosts",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_hosts",
 	})
 }
 
@@ -2496,9 +2496,9 @@ func NewIncidentNotificationRuleData(stack *config.Stack, name string, opts ...I
 		return fmt.Errorf("converting datadog_incident_notification_rule config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_incident_notification_rule",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_incident_notification_rule",
 	})
 }
 
@@ -2586,9 +2586,9 @@ func NewIncidentNotificationTemplateData(stack *config.Stack, name string, opts 
 		return fmt.Errorf("converting datadog_incident_notification_template config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_incident_notification_template",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_incident_notification_template",
 	})
 }
 
@@ -2648,9 +2648,9 @@ func NewIncidentTypeData(stack *config.Stack, name string, opts ...IncidentTypeD
 		return fmt.Errorf("converting datadog_incident_type config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_incident_type",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_incident_type",
 	})
 }
 
@@ -2696,9 +2696,9 @@ func NewIntegrationAwsAvailableLogsServicesData(stack *config.Stack, name string
 		return fmt.Errorf("converting datadog_integration_aws_available_logs_services config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_integration_aws_available_logs_services",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_integration_aws_available_logs_services",
 	})
 }
 
@@ -2744,9 +2744,9 @@ func NewIntegrationAwsAvailableNamespacesData(stack *config.Stack, name string, 
 		return fmt.Errorf("converting datadog_integration_aws_available_namespaces config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_integration_aws_available_namespaces",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_integration_aws_available_namespaces",
 	})
 }
 
@@ -2799,9 +2799,9 @@ func NewIntegrationAwsExternalIDData(stack *config.Stack, name string, opts ...I
 		return fmt.Errorf("converting datadog_integration_aws_external_id config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_integration_aws_external_id",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_integration_aws_external_id",
 	})
 }
 
@@ -2847,9 +2847,9 @@ func NewIntegrationAwsIAMPermissionsData(stack *config.Stack, name string, opts 
 		return fmt.Errorf("converting datadog_integration_aws_iam_permissions config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_integration_aws_iam_permissions",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_integration_aws_iam_permissions",
 	})
 }
 
@@ -2895,9 +2895,9 @@ func NewIntegrationAwsIAMPermissionsResourceCollectionData(stack *config.Stack, 
 		return fmt.Errorf("converting datadog_integration_aws_iam_permissions_resource_collection config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_integration_aws_iam_permissions_resource_collection",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_integration_aws_iam_permissions_resource_collection",
 	})
 }
 
@@ -2943,9 +2943,9 @@ func NewIntegrationAwsIAMPermissionsStandardData(stack *config.Stack, name strin
 		return fmt.Errorf("converting datadog_integration_aws_iam_permissions_standard config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_integration_aws_iam_permissions_standard",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_integration_aws_iam_permissions_standard",
 	})
 }
 
@@ -2991,9 +2991,9 @@ func NewIntegrationAwsLogsServicesData(stack *config.Stack, name string, opts ..
 		return fmt.Errorf("converting datadog_integration_aws_logs_services config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_integration_aws_logs_services",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_integration_aws_logs_services",
 	})
 }
 
@@ -3039,9 +3039,9 @@ func NewIntegrationAwsNamespaceRulesData(stack *config.Stack, name string, opts 
 		return fmt.Errorf("converting datadog_integration_aws_namespace_rules config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_integration_aws_namespace_rules",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_integration_aws_namespace_rules",
 	})
 }
 
@@ -3220,9 +3220,9 @@ func NewIPRangesData(stack *config.Stack, name string, opts ...IPRangesDataOptio
 		return fmt.Errorf("converting datadog_ip_ranges config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_ip_ranges",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_ip_ranges",
 	})
 }
 
@@ -3268,9 +3268,9 @@ func NewLogsArchivesOrderData(stack *config.Stack, name string, opts ...LogsArch
 		return fmt.Errorf("converting datadog_logs_archives_order config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_logs_archives_order",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_logs_archives_order",
 	})
 }
 
@@ -3316,9 +3316,9 @@ func NewLogsIndexesData(stack *config.Stack, name string, opts ...LogsIndexesDat
 		return fmt.Errorf("converting datadog_logs_indexes config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_logs_indexes",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_logs_indexes",
 	})
 }
 
@@ -3364,9 +3364,9 @@ func NewLogsIndexesOrderData(stack *config.Stack, name string, opts ...LogsIndex
 		return fmt.Errorf("converting datadog_logs_indexes_order config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_logs_indexes_order",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_logs_indexes_order",
 	})
 }
 
@@ -3419,9 +3419,9 @@ func NewLogsPipelinesData(stack *config.Stack, name string, opts ...LogsPipeline
 		return fmt.Errorf("converting datadog_logs_pipelines config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_logs_pipelines",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_logs_pipelines",
 	})
 }
 
@@ -3467,9 +3467,9 @@ func NewLogsPipelinesOrderData(stack *config.Stack, name string, opts ...LogsPip
 		return fmt.Errorf("converting datadog_logs_pipelines_order config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_logs_pipelines_order",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_logs_pipelines_order",
 	})
 }
 
@@ -3536,9 +3536,9 @@ func NewMetricActiveTagsAndAggregationsData(stack *config.Stack, name string, op
 		return fmt.Errorf("converting datadog_metric_active_tags_and_aggregations config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_metric_active_tags_and_aggregations",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_metric_active_tags_and_aggregations",
 	})
 }
 
@@ -3633,9 +3633,9 @@ func NewMetricMetadataData(stack *config.Stack, name string, opts ...MetricMetad
 		return fmt.Errorf("converting datadog_metric_metadata config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_metric_metadata",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_metric_metadata",
 	})
 }
 
@@ -3688,9 +3688,9 @@ func NewMetricTagsData(stack *config.Stack, name string, opts ...MetricTagsDataO
 		return fmt.Errorf("converting datadog_metric_tags config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_metric_tags",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_metric_tags",
 	})
 }
 
@@ -3743,9 +3743,9 @@ func NewMetricsData(stack *config.Stack, name string, opts ...MetricsDataOption)
 		return fmt.Errorf("converting datadog_metrics config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_metrics",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_metrics",
 	})
 }
 
@@ -4008,9 +4008,9 @@ func NewMonitorData(stack *config.Stack, name string, opts ...MonitorDataOption)
 		return fmt.Errorf("converting datadog_monitor config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_monitor",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_monitor",
 	})
 }
 
@@ -4056,9 +4056,9 @@ func NewMonitorConfigPoliciesData(stack *config.Stack, name string, opts ...Moni
 		return fmt.Errorf("converting datadog_monitor_config_policies config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_monitor_config_policies",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_monitor_config_policies",
 	})
 }
 
@@ -4125,9 +4125,9 @@ func NewMonitorsData(stack *config.Stack, name string, opts ...MonitorsDataOptio
 		return fmt.Errorf("converting datadog_monitors config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_monitors",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_monitors",
 	})
 }
 
@@ -4379,9 +4379,9 @@ func NewOrganizationSettingsData(stack *config.Stack, name string, opts ...Organ
 		return fmt.Errorf("converting datadog_organization_settings config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_organization_settings",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_organization_settings",
 	})
 }
 
@@ -4434,9 +4434,9 @@ func NewPermissionsData(stack *config.Stack, name string, opts ...PermissionsDat
 		return fmt.Errorf("converting datadog_permissions config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_permissions",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_permissions",
 	})
 }
 
@@ -4482,9 +4482,9 @@ func NewPowerpackData(stack *config.Stack, name string, opts ...PowerpackDataOpt
 		return fmt.Errorf("converting datadog_powerpack config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_powerpack",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_powerpack",
 	})
 }
 
@@ -4880,9 +4880,9 @@ func NewReferenceTableData(stack *config.Stack, name string, opts ...ReferenceTa
 		return fmt.Errorf("converting datadog_reference_table config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_reference_table",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_reference_table",
 	})
 }
 
@@ -4965,9 +4965,9 @@ func NewReferenceTableRowsData(stack *config.Stack, name string, opts ...Referen
 		return fmt.Errorf("converting datadog_reference_table_rows config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_reference_table_rows",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_reference_table_rows",
 	})
 }
 
@@ -5027,9 +5027,9 @@ func NewRoleData(stack *config.Stack, name string, opts ...RoleDataOption) error
 		return fmt.Errorf("converting datadog_role config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_role",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_role",
 	})
 }
 
@@ -5096,9 +5096,9 @@ func NewRoleUsersData(stack *config.Stack, name string, opts ...RoleUsersDataOpt
 		return fmt.Errorf("converting datadog_role_users config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_role_users",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_role_users",
 	})
 }
 
@@ -5151,9 +5151,9 @@ func NewRolesData(stack *config.Stack, name string, opts ...RolesDataOption) err
 		return fmt.Errorf("converting datadog_roles config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_roles",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_roles",
 	})
 }
 
@@ -5234,9 +5234,9 @@ func NewRumApplicationData(stack *config.Stack, name string, opts ...RumApplicat
 		return fmt.Errorf("converting datadog_rum_application config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_rum_application",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_rum_application",
 	})
 }
 
@@ -5289,9 +5289,9 @@ func NewRumRetentionFiltersData(stack *config.Stack, name string, opts ...RumRet
 		return fmt.Errorf("converting datadog_rum_retention_filters config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_rum_retention_filters",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_rum_retention_filters",
 	})
 }
 
@@ -5365,9 +5365,9 @@ func NewSecurityMonitoringCriticalAssetData(stack *config.Stack, name string, op
 		return fmt.Errorf("converting datadog_security_monitoring_critical_asset config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_security_monitoring_critical_asset",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_security_monitoring_critical_asset",
 	})
 }
 
@@ -5413,9 +5413,9 @@ func NewSecurityMonitoringCriticalAssetsData(stack *config.Stack, name string, o
 		return fmt.Errorf("converting datadog_security_monitoring_critical_assets config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_security_monitoring_critical_assets",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_security_monitoring_critical_assets",
 	})
 }
 
@@ -5468,9 +5468,9 @@ func NewSecurityMonitoringFiltersData(stack *config.Stack, name string, opts ...
 		return fmt.Errorf("converting datadog_security_monitoring_filters config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_security_monitoring_filters",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_security_monitoring_filters",
 	})
 }
 
@@ -5551,9 +5551,9 @@ func NewSecurityMonitoringRulesData(stack *config.Stack, name string, opts ...Se
 		return fmt.Errorf("converting datadog_security_monitoring_rules config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_security_monitoring_rules",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_security_monitoring_rules",
 	})
 }
 
@@ -5606,9 +5606,9 @@ func NewSecurityMonitoringSuppressionsData(stack *config.Stack, name string, opt
 		return fmt.Errorf("converting datadog_security_monitoring_suppressions config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_security_monitoring_suppressions",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_security_monitoring_suppressions",
 	})
 }
 
@@ -5654,9 +5654,9 @@ func NewSensitiveDataScannerGroupOrderData(stack *config.Stack, name string, opt
 		return fmt.Errorf("converting datadog_sensitive_data_scanner_group_order config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_sensitive_data_scanner_group_order",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_sensitive_data_scanner_group_order",
 	})
 }
 
@@ -5737,9 +5737,9 @@ func NewSensitiveDataScannerStandardPatternData(stack *config.Stack, name string
 		return fmt.Errorf("converting datadog_sensitive_data_scanner_standard_pattern config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_sensitive_data_scanner_standard_pattern",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_sensitive_data_scanner_standard_pattern",
 	})
 }
 
@@ -5862,9 +5862,9 @@ func NewServiceAccountData(stack *config.Stack, name string, opts ...ServiceAcco
 		return fmt.Errorf("converting datadog_service_account config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_service_account",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_service_account",
 	})
 }
 
@@ -5980,9 +5980,9 @@ func NewServiceLevelObjectiveData(stack *config.Stack, name string, opts ...Serv
 		return fmt.Errorf("converting datadog_service_level_objective config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_service_level_objective",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_service_level_objective",
 	})
 }
 
@@ -6070,9 +6070,9 @@ func NewServiceLevelObjectivesData(stack *config.Stack, name string, opts ...Ser
 		return fmt.Errorf("converting datadog_service_level_objectives config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_service_level_objectives",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_service_level_objectives",
 	})
 }
 
@@ -6167,9 +6167,9 @@ func NewSoftwareCatalogData(stack *config.Stack, name string, opts ...SoftwareCa
 		return fmt.Errorf("converting datadog_software_catalog config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_software_catalog",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_software_catalog",
 	})
 }
 
@@ -6222,9 +6222,9 @@ func NewSyntheticsGlobalVariableData(stack *config.Stack, name string, opts ...S
 		return fmt.Errorf("converting datadog_synthetics_global_variable config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_synthetics_global_variable",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_synthetics_global_variable",
 	})
 }
 
@@ -6270,9 +6270,9 @@ func NewSyntheticsLocationsData(stack *config.Stack, name string, opts ...Synthe
 		return fmt.Errorf("converting datadog_synthetics_locations config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_synthetics_locations",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_synthetics_locations",
 	})
 }
 
@@ -6339,9 +6339,9 @@ func NewSyntheticsTestData(stack *config.Stack, name string, opts ...SyntheticsT
 		return fmt.Errorf("converting datadog_synthetics_test config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_synthetics_test",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_synthetics_test",
 	})
 }
 
@@ -6686,9 +6686,9 @@ func NewTagPipelineRulesetData(stack *config.Stack, name string, opts ...TagPipe
 		return fmt.Errorf("converting datadog_tag_pipeline_ruleset config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_tag_pipeline_ruleset",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_tag_pipeline_ruleset",
 	})
 }
 
@@ -6783,9 +6783,9 @@ func NewTeamData(stack *config.Stack, name string, opts ...TeamDataOption) error
 		return fmt.Errorf("converting datadog_team config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_team",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_team",
 	})
 }
 
@@ -6859,9 +6859,9 @@ func NewTeamHierarchyLinksData(stack *config.Stack, name string, opts ...TeamHie
 		return fmt.Errorf("converting datadog_team_hierarchy_links config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_team_hierarchy_links",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_team_hierarchy_links",
 	})
 }
 
@@ -6928,9 +6928,9 @@ func NewTeamMembershipsData(stack *config.Stack, name string, opts ...TeamMember
 		return fmt.Errorf("converting datadog_team_memberships config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_team_memberships",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_team_memberships",
 	})
 }
 
@@ -7110,9 +7110,9 @@ func NewTeamNotificationRuleData(stack *config.Stack, name string, opts ...TeamN
 		return fmt.Errorf("converting datadog_team_notification_rule config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_team_notification_rule",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_team_notification_rule",
 	})
 }
 
@@ -7315,9 +7315,9 @@ func NewTeamNotificationRulesData(stack *config.Stack, name string, opts ...Team
 		return fmt.Errorf("converting datadog_team_notification_rules config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_team_notification_rules",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_team_notification_rules",
 	})
 }
 
@@ -7442,9 +7442,9 @@ func NewTeamsData(stack *config.Stack, name string, opts ...TeamsDataOption) err
 		return fmt.Errorf("converting datadog_teams config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_teams",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_teams",
 	})
 }
 
@@ -7588,9 +7588,9 @@ func NewUserData(stack *config.Stack, name string, opts ...UserDataOption) error
 		return fmt.Errorf("converting datadog_user config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_user",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_user",
 	})
 }
 
@@ -7650,9 +7650,9 @@ func NewUsersData(stack *config.Stack, name string, opts ...UsersDataOption) err
 		return fmt.Errorf("converting datadog_users config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_users",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_users",
 	})
 }
 
@@ -7726,8 +7726,8 @@ func NewWorkflowAutomationData(stack *config.Stack, name string, opts ...Workflo
 		return fmt.Errorf("converting datadog_workflow_automation config: %w", err)
 	}
 	return stack.AddDataSource(config.DataSource{
-		MetaArguments: config.MetaArguments{Config: m},
-		Name:          name,
-		Type:          "datadog_workflow_automation",
+		Config: m,
+		Name:   name,
+		Type:   "datadog_workflow_automation",
 	})
 }

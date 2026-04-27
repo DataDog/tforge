@@ -4,9 +4,6 @@ import "fmt"
 
 // MetaArguments contains Terraform meta-arguments shared across Resource, DataSource, and Module.
 type MetaArguments struct {
-	// Config contains the block configuration (resource attributes, data source filters, module inputs).
-	Config map[string]any
-
 	// DependsOn lists explicit dependencies.
 	DependsOn []string
 
@@ -28,6 +25,9 @@ type Resource struct {
 	// Provider specifies a non-default provider configuration.
 	// Format: "provider.alias" (e.g., "aws.west")
 	Provider string
+
+	// Config contains the resource attributes.
+	Config map[string]any
 
 	MetaArguments
 
@@ -64,6 +64,9 @@ type DataSource struct {
 
 	// Provider specifies a non-default provider configuration.
 	Provider string
+
+	// Config contains the data source filter/query attributes.
+	Config map[string]any
 
 	MetaArguments
 }

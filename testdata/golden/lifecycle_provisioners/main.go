@@ -59,13 +59,11 @@ func main() {
 				OnFailure: config.OnFailureContinue,
 			},
 		},
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"ami":           "ami-0c55b159cbfafe1f0",
-				"instance_type": "t3.medium",
-				"tags": map[string]string{
-					"Name": "app-server",
-				},
+		Config: map[string]any{
+			"ami":           "ami-0c55b159cbfafe1f0",
+			"instance_type": "t3.medium",
+			"tags": map[string]string{
+				"Name": "app-server",
 			},
 		},
 	}); err != nil {
@@ -83,16 +81,16 @@ func main() {
 			Create: "60m",
 			Delete: "45m",
 		},
+		Config: map[string]any{
+			"engine":            "postgres",
+			"engine_version":    "15.4",
+			"instance_class":    "db.t3.medium",
+			"allocated_storage": 50,
+			"db_name":           "myapp",
+			"username":          "admin",
+			"password":          "${var.db_password}",
+		},
 		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"engine":            "postgres",
-				"engine_version":    "15.4",
-				"instance_class":    "db.t3.medium",
-				"allocated_storage": 50,
-				"db_name":           "myapp",
-				"username":          "admin",
-				"password":          "${var.db_password}",
-			},
 			DependsOn: []string{"aws_instance.app"},
 		},
 	}); err != nil {

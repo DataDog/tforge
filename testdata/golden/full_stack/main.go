@@ -35,14 +35,12 @@ func main() {
 	if err := stack.AddResource(config.Resource{
 		Type: "aws_instance",
 		Name: "web",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"ami":           "ami-0c55b159cbfafe1f0",
-				"instance_type": "t3.micro",
-				"tags": map[string]string{
-					"Name":        "web-server",
-					"Environment": "production",
-				},
+		Config: map[string]any{
+			"ami":           "ami-0c55b159cbfafe1f0",
+			"instance_type": "t3.micro",
+			"tags": map[string]string{
+				"Name":        "web-server",
+				"Environment": "production",
 			},
 		},
 	}); err != nil {
@@ -52,15 +50,13 @@ func main() {
 	if err := stack.AddDataSource(config.DataSource{
 		Type: "aws_ami",
 		Name: "ubuntu",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"most_recent": true,
-				"owners":      []string{"099720109477"},
-				"filter": []map[string]any{
-					{
-						"name":   "name",
-						"values": []string{"ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"},
-					},
+		Config: map[string]any{
+			"most_recent": true,
+			"owners":      []string{"099720109477"},
+			"filter": []map[string]any{
+				{
+					"name":   "name",
+					"values": []string{"ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"},
 				},
 			},
 		},

@@ -33,11 +33,9 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "google_service_account",
 		Name: "sa",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"account_id":   "cluster-admin",
-				"display_name": "Cluster Admin",
-			},
+		Config: map[string]any{
+			"account_id":   "cluster-admin",
+			"display_name": "Cluster Admin",
 		},
 	}))
 
@@ -45,28 +43,24 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "google_container_cluster",
 		Name: "cluster",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"name":                     "cluster",
-				"remove_default_node_pool": true,
-				"initial_node_count":       1,
-			},
+		Config: map[string]any{
+			"name":                     "cluster",
+			"remove_default_node_pool": true,
+			"initial_node_count":       1,
 		},
 	}))
 
 	must(stack.AddResource(config.Resource{
 		Type: "google_container_node_pool",
 		Name: "main-pool",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"name":    "main",
-				"cluster": cluster.Ref("name"),
-				"node_config": map[string]any{
-					"machine_type":    "e2-medium",
-					"preemptible":     true,
-					"service_account": sa.Ref("email"),
-					"oauth_scopes":    []string{"https://www.googleapis.com/auth/cloud-platform"},
-				},
+		Config: map[string]any{
+			"name":    "main",
+			"cluster": cluster.Ref("name"),
+			"node_config": map[string]any{
+				"machine_type":    "e2-medium",
+				"preemptible":     true,
+				"service_account": sa.Ref("email"),
+				"oauth_scopes":    []string{"https://www.googleapis.com/auth/cloud-platform"},
 			},
 		},
 	}))
@@ -76,23 +70,19 @@ func NewMyStack() *config.Stack {
 		Name:    "auth",
 		Source:  "terraform-google-modules/kubernetes-engine/google//modules/auth",
 		Version: "14.3.0",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"cluster_name": cluster.Ref("name"),
-				"location":     cluster.Ref("location"),
-				"project_id":   cluster.Ref("project"),
-			},
+		Config: map[string]any{
+			"cluster_name": cluster.Ref("name"),
+			"location":     cluster.Ref("location"),
+			"project_id":   cluster.Ref("project"),
 		},
 	}))
 
 	must(stack.AddResource(config.Resource{
 		Type: "local_file",
 		Name: "kubeconfig",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"filename": "kubeconfig.yaml",
-				"content":  auth.Ref("kubeconfig_raw"),
-			},
+		Config: map[string]any{
+			"filename": "kubeconfig.yaml",
+			"content":  auth.Ref("kubeconfig_raw"),
 		},
 	}))
 
@@ -110,11 +100,9 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "kubernetes_namespace",
 		Name: "namespace",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"metadata": map[string]any{
-					"name": "development",
-				},
+		Config: map[string]any{
+			"metadata": map[string]any{
+				"name": "development",
 			},
 		},
 	}))
@@ -135,15 +123,13 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "helm_release",
 		Name: "cert-manager",
-		MetaArguments: config.MetaArguments{
-			Config: map[string]any{
-				"name":             "cert-manager",
-				"repository":       "https://charts.jetstack.io",
-				"chart":            "cert-manager",
-				"create_namespace": true,
-				"namespace":        "cert-manager",
-				"version":          "v1.3.1",
-			},
+		Config: map[string]any{
+			"name":             "cert-manager",
+			"repository":       "https://charts.jetstack.io",
+			"chart":            "cert-manager",
+			"create_namespace": true,
+			"namespace":        "cert-manager",
+			"version":          "v1.3.1",
 		},
 	}))
 

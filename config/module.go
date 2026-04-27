@@ -18,6 +18,9 @@ type Module struct {
 	// configurations to use (e.g., {"aws": "aws.west"}).
 	Providers map[string]string
 
+	// Config contains the module input variables.
+	Config map[string]any
+
 	MetaArguments
 }
 
