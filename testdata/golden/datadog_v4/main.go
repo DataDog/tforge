@@ -54,7 +54,7 @@ func main() {
 		},
 	}
 
-	if err := datadog.NewComplianceCustomFramework(stack, "security", datadog.FromComplianceCustomFramework(framework)); err != nil {
+	if err := datadog.NewComplianceCustomFramework(stack, "security", nil, datadog.FromComplianceCustomFramework(framework)); err != nil {
 		log.Fatal(err)
 	}
 

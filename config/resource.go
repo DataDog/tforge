@@ -185,3 +185,35 @@ type Timeouts struct {
 	Update string `json:"update,omitempty"`
 	Delete string `json:"delete,omitempty"`
 }
+
+// ResourceOption configures resource-level meta-arguments (Lifecycle, Provider, etc.)
+// on resources created by generated constructors.
+type ResourceOption func(*Resource)
+
+// WithLifecycle sets lifecycle customizations on a resource.
+func WithLifecycle(l Lifecycle) ResourceOption {
+	return func(r *Resource) {
+		r.Lifecycle = &l
+	}
+}
+
+// WithProvider sets a non-default provider configuration on a resource.
+func WithProvider(provider string) ResourceOption {
+	return func(r *Resource) {
+		r.Provider = provider
+	}
+}
+
+// WithDependsOn sets explicit dependencies on a resource.
+func WithDependsOn(deps ...string) ResourceOption {
+	return func(r *Resource) {
+		r.DependsOn = deps
+	}
+}
+
+// WithTimeouts sets operation timeouts on a resource.
+func WithTimeouts(t Timeouts) ResourceOption {
+	return func(r *Resource) {
+		r.Timeouts = &t
+	}
+}

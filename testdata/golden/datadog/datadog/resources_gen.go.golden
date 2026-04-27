@@ -43,7 +43,7 @@ func FromAPIKey(cfg APIKey) APIKeyOption {
 }
 
 // NewAPIKey creates a datadog_api_key Resource and adds it to the stack.
-func NewAPIKey(stack *config.Stack, name string, opts ...APIKeyOption) error {
+func NewAPIKey(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...APIKeyOption) error {
 	var cfg APIKey
 	for _, opt := range opts {
 		opt(&cfg)
@@ -56,11 +56,15 @@ func NewAPIKey(stack *config.Stack, name string, opts ...APIKeyOption) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_api_key config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_api_key",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // ApmRetentionFilter represents the datadog_apm_retention_filter resource.
@@ -142,7 +146,7 @@ func FromApmRetentionFilter(cfg ApmRetentionFilter) ApmRetentionFilterOption {
 }
 
 // NewApmRetentionFilter creates a datadog_apm_retention_filter Resource and adds it to the stack.
-func NewApmRetentionFilter(stack *config.Stack, name string, opts ...ApmRetentionFilterOption) error {
+func NewApmRetentionFilter(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...ApmRetentionFilterOption) error {
 	var cfg ApmRetentionFilter
 	for _, opt := range opts {
 		opt(&cfg)
@@ -155,11 +159,15 @@ func NewApmRetentionFilter(stack *config.Stack, name string, opts ...ApmRetentio
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_apm_retention_filter config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_apm_retention_filter",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // ApmRetentionFilterOrder represents the datadog_apm_retention_filter_order resource.
@@ -190,7 +198,7 @@ func FromApmRetentionFilterOrder(cfg ApmRetentionFilterOrder) ApmRetentionFilter
 }
 
 // NewApmRetentionFilterOrder creates a datadog_apm_retention_filter_order Resource and adds it to the stack.
-func NewApmRetentionFilterOrder(stack *config.Stack, name string, opts ...ApmRetentionFilterOrderOption) error {
+func NewApmRetentionFilterOrder(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...ApmRetentionFilterOrderOption) error {
 	var cfg ApmRetentionFilterOrder
 	for _, opt := range opts {
 		opt(&cfg)
@@ -203,11 +211,15 @@ func NewApmRetentionFilterOrder(stack *config.Stack, name string, opts ...ApmRet
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_apm_retention_filter_order config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_apm_retention_filter_order",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // ApplicationKey represents the datadog_application_key resource.
@@ -245,7 +257,7 @@ func FromApplicationKey(cfg ApplicationKey) ApplicationKeyOption {
 }
 
 // NewApplicationKey creates a datadog_application_key Resource and adds it to the stack.
-func NewApplicationKey(stack *config.Stack, name string, opts ...ApplicationKeyOption) error {
+func NewApplicationKey(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...ApplicationKeyOption) error {
 	var cfg ApplicationKey
 	for _, opt := range opts {
 		opt(&cfg)
@@ -258,11 +270,15 @@ func NewApplicationKey(stack *config.Stack, name string, opts ...ApplicationKeyO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_application_key config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_application_key",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // AuthnMapping represents the datadog_authn_mapping resource.
@@ -314,7 +330,7 @@ func FromAuthnMapping(cfg AuthnMapping) AuthnMappingOption {
 }
 
 // NewAuthnMapping creates a datadog_authn_mapping Resource and adds it to the stack.
-func NewAuthnMapping(stack *config.Stack, name string, opts ...AuthnMappingOption) error {
+func NewAuthnMapping(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...AuthnMappingOption) error {
 	var cfg AuthnMapping
 	for _, opt := range opts {
 		opt(&cfg)
@@ -327,11 +343,15 @@ func NewAuthnMapping(stack *config.Stack, name string, opts ...AuthnMappingOptio
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_authn_mapping config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_authn_mapping",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // ChildOrganization represents the datadog_child_organization resource.
@@ -404,7 +424,7 @@ func FromChildOrganization(cfg ChildOrganization) ChildOrganizationOption {
 }
 
 // NewChildOrganization creates a datadog_child_organization Resource and adds it to the stack.
-func NewChildOrganization(stack *config.Stack, name string, opts ...ChildOrganizationOption) error {
+func NewChildOrganization(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...ChildOrganizationOption) error {
 	var cfg ChildOrganization
 	for _, opt := range opts {
 		opt(&cfg)
@@ -417,11 +437,15 @@ func NewChildOrganization(stack *config.Stack, name string, opts ...ChildOrganiz
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_child_organization config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_child_organization",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // CloudConfigurationRule represents the datadog_cloud_configuration_rule resource.
@@ -552,7 +576,7 @@ func FromCloudConfigurationRule(cfg CloudConfigurationRule) CloudConfigurationRu
 }
 
 // NewCloudConfigurationRule creates a datadog_cloud_configuration_rule Resource and adds it to the stack.
-func NewCloudConfigurationRule(stack *config.Stack, name string, opts ...CloudConfigurationRuleOption) error {
+func NewCloudConfigurationRule(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...CloudConfigurationRuleOption) error {
 	var cfg CloudConfigurationRule
 	for _, opt := range opts {
 		opt(&cfg)
@@ -565,11 +589,15 @@ func NewCloudConfigurationRule(stack *config.Stack, name string, opts ...CloudCo
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_cloud_configuration_rule config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_cloud_configuration_rule",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // CloudWorkloadSecurityAgentRule represents the datadog_cloud_workload_security_agent_rule resource.
@@ -621,7 +649,7 @@ func FromCloudWorkloadSecurityAgentRule(cfg CloudWorkloadSecurityAgentRule) Clou
 }
 
 // NewCloudWorkloadSecurityAgentRule creates a datadog_cloud_workload_security_agent_rule Resource and adds it to the stack.
-func NewCloudWorkloadSecurityAgentRule(stack *config.Stack, name string, opts ...CloudWorkloadSecurityAgentRuleOption) error {
+func NewCloudWorkloadSecurityAgentRule(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...CloudWorkloadSecurityAgentRuleOption) error {
 	var cfg CloudWorkloadSecurityAgentRule
 	for _, opt := range opts {
 		opt(&cfg)
@@ -634,11 +662,15 @@ func NewCloudWorkloadSecurityAgentRule(stack *config.Stack, name string, opts ..
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_cloud_workload_security_agent_rule config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_cloud_workload_security_agent_rule",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // CsmThreatsAgentRule represents the datadog_csm_threats_agent_rule resource.
@@ -690,7 +722,7 @@ func FromCsmThreatsAgentRule(cfg CsmThreatsAgentRule) CsmThreatsAgentRuleOption 
 }
 
 // NewCsmThreatsAgentRule creates a datadog_csm_threats_agent_rule Resource and adds it to the stack.
-func NewCsmThreatsAgentRule(stack *config.Stack, name string, opts ...CsmThreatsAgentRuleOption) error {
+func NewCsmThreatsAgentRule(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...CsmThreatsAgentRuleOption) error {
 	var cfg CsmThreatsAgentRule
 	for _, opt := range opts {
 		opt(&cfg)
@@ -703,11 +735,15 @@ func NewCsmThreatsAgentRule(stack *config.Stack, name string, opts ...CsmThreats
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_csm_threats_agent_rule config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_csm_threats_agent_rule",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // Dashboard represents the datadog_dashboard resource.
@@ -91252,7 +91288,7 @@ func FromDashboard(cfg Dashboard) DashboardOption {
 }
 
 // NewDashboard creates a datadog_dashboard Resource and adds it to the stack.
-func NewDashboard(stack *config.Stack, name string, opts ...DashboardOption) error {
+func NewDashboard(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...DashboardOption) error {
 	var cfg Dashboard
 	for _, opt := range opts {
 		opt(&cfg)
@@ -91265,11 +91301,15 @@ func NewDashboard(stack *config.Stack, name string, opts ...DashboardOption) err
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_dashboard config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_dashboard",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // DashboardJSON represents the datadog_dashboard_json resource.
@@ -91321,7 +91361,7 @@ func FromDashboardJSON(cfg DashboardJSON) DashboardJSONOption {
 }
 
 // NewDashboardJSON creates a datadog_dashboard_json Resource and adds it to the stack.
-func NewDashboardJSON(stack *config.Stack, name string, opts ...DashboardJSONOption) error {
+func NewDashboardJSON(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...DashboardJSONOption) error {
 	var cfg DashboardJSON
 	for _, opt := range opts {
 		opt(&cfg)
@@ -91334,11 +91374,15 @@ func NewDashboardJSON(stack *config.Stack, name string, opts ...DashboardJSONOpt
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_dashboard_json config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_dashboard_json",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // DashboardList represents the datadog_dashboard_list resource.
@@ -91406,7 +91450,7 @@ func FromDashboardList(cfg DashboardList) DashboardListOption {
 }
 
 // NewDashboardList creates a datadog_dashboard_list Resource and adds it to the stack.
-func NewDashboardList(stack *config.Stack, name string, opts ...DashboardListOption) error {
+func NewDashboardList(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...DashboardListOption) error {
 	var cfg DashboardList
 	for _, opt := range opts {
 		opt(&cfg)
@@ -91419,11 +91463,15 @@ func NewDashboardList(stack *config.Stack, name string, opts ...DashboardListOpt
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_dashboard_list config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_dashboard_list",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // Downtime represents the datadog_downtime resource.
@@ -91603,7 +91651,7 @@ func FromDowntime(cfg Downtime) DowntimeOption {
 }
 
 // NewDowntime creates a datadog_downtime Resource and adds it to the stack.
-func NewDowntime(stack *config.Stack, name string, opts ...DowntimeOption) error {
+func NewDowntime(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...DowntimeOption) error {
 	var cfg Downtime
 	for _, opt := range opts {
 		opt(&cfg)
@@ -91616,11 +91664,15 @@ func NewDowntime(stack *config.Stack, name string, opts ...DowntimeOption) error
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_downtime config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_downtime",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // DowntimeSchedule represents the datadog_downtime_schedule resource.
@@ -91830,7 +91882,7 @@ func FromDowntimeSchedule(cfg DowntimeSchedule) DowntimeScheduleOption {
 }
 
 // NewDowntimeSchedule creates a datadog_downtime_schedule Resource and adds it to the stack.
-func NewDowntimeSchedule(stack *config.Stack, name string, opts ...DowntimeScheduleOption) error {
+func NewDowntimeSchedule(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...DowntimeScheduleOption) error {
 	var cfg DowntimeSchedule
 	for _, opt := range opts {
 		opt(&cfg)
@@ -91843,11 +91895,15 @@ func NewDowntimeSchedule(stack *config.Stack, name string, opts ...DowntimeSched
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_downtime_schedule config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_downtime_schedule",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationAws represents the datadog_integration_aws resource.
@@ -91962,7 +92018,7 @@ func FromIntegrationAws(cfg IntegrationAws) IntegrationAwsOption {
 }
 
 // NewIntegrationAws creates a datadog_integration_aws Resource and adds it to the stack.
-func NewIntegrationAws(stack *config.Stack, name string, opts ...IntegrationAwsOption) error {
+func NewIntegrationAws(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationAwsOption) error {
 	var cfg IntegrationAws
 	for _, opt := range opts {
 		opt(&cfg)
@@ -91975,11 +92031,15 @@ func NewIntegrationAws(stack *config.Stack, name string, opts ...IntegrationAwsO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_aws config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_aws",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationAwsEventBridge represents the datadog_integration_aws_event_bridge resource.
@@ -92031,7 +92091,7 @@ func FromIntegrationAwsEventBridge(cfg IntegrationAwsEventBridge) IntegrationAws
 }
 
 // NewIntegrationAwsEventBridge creates a datadog_integration_aws_event_bridge Resource and adds it to the stack.
-func NewIntegrationAwsEventBridge(stack *config.Stack, name string, opts ...IntegrationAwsEventBridgeOption) error {
+func NewIntegrationAwsEventBridge(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationAwsEventBridgeOption) error {
 	var cfg IntegrationAwsEventBridge
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92044,11 +92104,15 @@ func NewIntegrationAwsEventBridge(stack *config.Stack, name string, opts ...Inte
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_aws_event_bridge config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_aws_event_bridge",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationAwsLambdaARN represents the datadog_integration_aws_lambda_arn resource.
@@ -92086,7 +92150,7 @@ func FromIntegrationAwsLambdaARN(cfg IntegrationAwsLambdaARN) IntegrationAwsLamb
 }
 
 // NewIntegrationAwsLambdaARN creates a datadog_integration_aws_lambda_arn Resource and adds it to the stack.
-func NewIntegrationAwsLambdaARN(stack *config.Stack, name string, opts ...IntegrationAwsLambdaARNOption) error {
+func NewIntegrationAwsLambdaARN(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationAwsLambdaARNOption) error {
 	var cfg IntegrationAwsLambdaARN
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92099,11 +92163,15 @@ func NewIntegrationAwsLambdaARN(stack *config.Stack, name string, opts ...Integr
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_aws_lambda_arn config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_aws_lambda_arn",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationAwsLogCollection represents the datadog_integration_aws_log_collection resource.
@@ -92141,7 +92209,7 @@ func FromIntegrationAwsLogCollection(cfg IntegrationAwsLogCollection) Integratio
 }
 
 // NewIntegrationAwsLogCollection creates a datadog_integration_aws_log_collection Resource and adds it to the stack.
-func NewIntegrationAwsLogCollection(stack *config.Stack, name string, opts ...IntegrationAwsLogCollectionOption) error {
+func NewIntegrationAwsLogCollection(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationAwsLogCollectionOption) error {
 	var cfg IntegrationAwsLogCollection
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92154,11 +92222,15 @@ func NewIntegrationAwsLogCollection(stack *config.Stack, name string, opts ...In
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_aws_log_collection config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_aws_log_collection",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationAwsTagFilter represents the datadog_integration_aws_tag_filter resource.
@@ -92203,7 +92275,7 @@ func FromIntegrationAwsTagFilter(cfg IntegrationAwsTagFilter) IntegrationAwsTagF
 }
 
 // NewIntegrationAwsTagFilter creates a datadog_integration_aws_tag_filter Resource and adds it to the stack.
-func NewIntegrationAwsTagFilter(stack *config.Stack, name string, opts ...IntegrationAwsTagFilterOption) error {
+func NewIntegrationAwsTagFilter(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationAwsTagFilterOption) error {
 	var cfg IntegrationAwsTagFilter
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92216,11 +92288,15 @@ func NewIntegrationAwsTagFilter(stack *config.Stack, name string, opts ...Integr
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_aws_tag_filter config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_aws_tag_filter",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationAzure represents the datadog_integration_azure resource.
@@ -92314,7 +92390,7 @@ func FromIntegrationAzure(cfg IntegrationAzure) IntegrationAzureOption {
 }
 
 // NewIntegrationAzure creates a datadog_integration_azure Resource and adds it to the stack.
-func NewIntegrationAzure(stack *config.Stack, name string, opts ...IntegrationAzureOption) error {
+func NewIntegrationAzure(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationAzureOption) error {
 	var cfg IntegrationAzure
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92327,11 +92403,15 @@ func NewIntegrationAzure(stack *config.Stack, name string, opts ...IntegrationAz
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_azure config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_azure",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationCloudflareAccount represents the datadog_integration_cloudflare_account resource.
@@ -92376,7 +92456,7 @@ func FromIntegrationCloudflareAccount(cfg IntegrationCloudflareAccount) Integrat
 }
 
 // NewIntegrationCloudflareAccount creates a datadog_integration_cloudflare_account Resource and adds it to the stack.
-func NewIntegrationCloudflareAccount(stack *config.Stack, name string, opts ...IntegrationCloudflareAccountOption) error {
+func NewIntegrationCloudflareAccount(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationCloudflareAccountOption) error {
 	var cfg IntegrationCloudflareAccount
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92389,11 +92469,15 @@ func NewIntegrationCloudflareAccount(stack *config.Stack, name string, opts ...I
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_cloudflare_account config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_cloudflare_account",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationConfluentAccount represents the datadog_integration_confluent_account resource.
@@ -92438,7 +92522,7 @@ func FromIntegrationConfluentAccount(cfg IntegrationConfluentAccount) Integratio
 }
 
 // NewIntegrationConfluentAccount creates a datadog_integration_confluent_account Resource and adds it to the stack.
-func NewIntegrationConfluentAccount(stack *config.Stack, name string, opts ...IntegrationConfluentAccountOption) error {
+func NewIntegrationConfluentAccount(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationConfluentAccountOption) error {
 	var cfg IntegrationConfluentAccount
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92451,11 +92535,15 @@ func NewIntegrationConfluentAccount(stack *config.Stack, name string, opts ...In
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_confluent_account config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_confluent_account",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationConfluentResource represents the datadog_integration_confluent_resource resource.
@@ -92514,7 +92602,7 @@ func FromIntegrationConfluentResource(cfg IntegrationConfluentResource) Integrat
 }
 
 // NewIntegrationConfluentResource creates a datadog_integration_confluent_resource Resource and adds it to the stack.
-func NewIntegrationConfluentResource(stack *config.Stack, name string, opts ...IntegrationConfluentResourceOption) error {
+func NewIntegrationConfluentResource(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationConfluentResourceOption) error {
 	var cfg IntegrationConfluentResource
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92527,11 +92615,15 @@ func NewIntegrationConfluentResource(stack *config.Stack, name string, opts ...I
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_confluent_resource config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_confluent_resource",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationFastlyAccount represents the datadog_integration_fastly_account resource.
@@ -92569,7 +92661,7 @@ func FromIntegrationFastlyAccount(cfg IntegrationFastlyAccount) IntegrationFastl
 }
 
 // NewIntegrationFastlyAccount creates a datadog_integration_fastly_account Resource and adds it to the stack.
-func NewIntegrationFastlyAccount(stack *config.Stack, name string, opts ...IntegrationFastlyAccountOption) error {
+func NewIntegrationFastlyAccount(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationFastlyAccountOption) error {
 	var cfg IntegrationFastlyAccount
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92582,11 +92674,15 @@ func NewIntegrationFastlyAccount(stack *config.Stack, name string, opts ...Integ
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_fastly_account config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_fastly_account",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationFastlyService represents the datadog_integration_fastly_service resource.
@@ -92631,7 +92727,7 @@ func FromIntegrationFastlyService(cfg IntegrationFastlyService) IntegrationFastl
 }
 
 // NewIntegrationFastlyService creates a datadog_integration_fastly_service Resource and adds it to the stack.
-func NewIntegrationFastlyService(stack *config.Stack, name string, opts ...IntegrationFastlyServiceOption) error {
+func NewIntegrationFastlyService(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationFastlyServiceOption) error {
 	var cfg IntegrationFastlyService
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92644,11 +92740,15 @@ func NewIntegrationFastlyService(stack *config.Stack, name string, opts ...Integ
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_fastly_service config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_fastly_service",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationGcp represents the datadog_integration_gcp resource.
@@ -92742,7 +92842,7 @@ func FromIntegrationGcp(cfg IntegrationGcp) IntegrationGcpOption {
 }
 
 // NewIntegrationGcp creates a datadog_integration_gcp Resource and adds it to the stack.
-func NewIntegrationGcp(stack *config.Stack, name string, opts ...IntegrationGcpOption) error {
+func NewIntegrationGcp(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationGcpOption) error {
 	var cfg IntegrationGcp
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92755,11 +92855,15 @@ func NewIntegrationGcp(stack *config.Stack, name string, opts ...IntegrationGcpO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_gcp config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_gcp",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationGcpSts represents the datadog_integration_gcp_sts resource.
@@ -92839,7 +92943,7 @@ func FromIntegrationGcpSts(cfg IntegrationGcpSts) IntegrationGcpStsOption {
 }
 
 // NewIntegrationGcpSts creates a datadog_integration_gcp_sts Resource and adds it to the stack.
-func NewIntegrationGcpSts(stack *config.Stack, name string, opts ...IntegrationGcpStsOption) error {
+func NewIntegrationGcpSts(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationGcpStsOption) error {
 	var cfg IntegrationGcpSts
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92852,11 +92956,15 @@ func NewIntegrationGcpSts(stack *config.Stack, name string, opts ...IntegrationG
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_gcp_sts config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_gcp_sts",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationOpsgenieServiceObject represents the datadog_integration_opsgenie_service_object resource.
@@ -92908,7 +93016,7 @@ func FromIntegrationOpsgenieServiceObject(cfg IntegrationOpsgenieServiceObject) 
 }
 
 // NewIntegrationOpsgenieServiceObject creates a datadog_integration_opsgenie_service_object Resource and adds it to the stack.
-func NewIntegrationOpsgenieServiceObject(stack *config.Stack, name string, opts ...IntegrationOpsgenieServiceObjectOption) error {
+func NewIntegrationOpsgenieServiceObject(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationOpsgenieServiceObjectOption) error {
 	var cfg IntegrationOpsgenieServiceObject
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92921,11 +93029,15 @@ func NewIntegrationOpsgenieServiceObject(stack *config.Stack, name string, opts 
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_opsgenie_service_object config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_opsgenie_service_object",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationPagerduty represents the datadog_integration_pagerduty resource.
@@ -92970,7 +93082,7 @@ func FromIntegrationPagerduty(cfg IntegrationPagerduty) IntegrationPagerdutyOpti
 }
 
 // NewIntegrationPagerduty creates a datadog_integration_pagerduty Resource and adds it to the stack.
-func NewIntegrationPagerduty(stack *config.Stack, name string, opts ...IntegrationPagerdutyOption) error {
+func NewIntegrationPagerduty(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationPagerdutyOption) error {
 	var cfg IntegrationPagerduty
 	for _, opt := range opts {
 		opt(&cfg)
@@ -92983,11 +93095,15 @@ func NewIntegrationPagerduty(stack *config.Stack, name string, opts ...Integrati
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_pagerduty config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_pagerduty",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationPagerdutyServiceObject represents the datadog_integration_pagerduty_service_object resource.
@@ -93025,7 +93141,7 @@ func FromIntegrationPagerdutyServiceObject(cfg IntegrationPagerdutyServiceObject
 }
 
 // NewIntegrationPagerdutyServiceObject creates a datadog_integration_pagerduty_service_object Resource and adds it to the stack.
-func NewIntegrationPagerdutyServiceObject(stack *config.Stack, name string, opts ...IntegrationPagerdutyServiceObjectOption) error {
+func NewIntegrationPagerdutyServiceObject(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationPagerdutyServiceObjectOption) error {
 	var cfg IntegrationPagerdutyServiceObject
 	for _, opt := range opts {
 		opt(&cfg)
@@ -93038,11 +93154,15 @@ func NewIntegrationPagerdutyServiceObject(stack *config.Stack, name string, opts
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_pagerduty_service_object config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_pagerduty_service_object",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IntegrationSlackChannel represents the datadog_integration_slack_channel resource.
@@ -93131,7 +93251,7 @@ func FromIntegrationSlackChannel(cfg IntegrationSlackChannel) IntegrationSlackCh
 }
 
 // NewIntegrationSlackChannel creates a datadog_integration_slack_channel Resource and adds it to the stack.
-func NewIntegrationSlackChannel(stack *config.Stack, name string, opts ...IntegrationSlackChannelOption) error {
+func NewIntegrationSlackChannel(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IntegrationSlackChannelOption) error {
 	var cfg IntegrationSlackChannel
 	for _, opt := range opts {
 		opt(&cfg)
@@ -93144,11 +93264,15 @@ func NewIntegrationSlackChannel(stack *config.Stack, name string, opts ...Integr
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_integration_slack_channel config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_integration_slack_channel",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // IPAllowlist represents the datadog_ip_allowlist resource.
@@ -93216,7 +93340,7 @@ func FromIPAllowlist(cfg IPAllowlist) IPAllowlistOption {
 }
 
 // NewIPAllowlist creates a datadog_ip_allowlist Resource and adds it to the stack.
-func NewIPAllowlist(stack *config.Stack, name string, opts ...IPAllowlistOption) error {
+func NewIPAllowlist(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...IPAllowlistOption) error {
 	var cfg IPAllowlist
 	for _, opt := range opts {
 		opt(&cfg)
@@ -93229,11 +93353,15 @@ func NewIPAllowlist(stack *config.Stack, name string, opts ...IPAllowlistOption)
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_ip_allowlist config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_ip_allowlist",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // LogsArchive represents the datadog_logs_archive resource.
@@ -93452,7 +93580,7 @@ func FromLogsArchive(cfg LogsArchive) LogsArchiveOption {
 }
 
 // NewLogsArchive creates a datadog_logs_archive Resource and adds it to the stack.
-func NewLogsArchive(stack *config.Stack, name string, opts ...LogsArchiveOption) error {
+func NewLogsArchive(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...LogsArchiveOption) error {
 	var cfg LogsArchive
 	for _, opt := range opts {
 		opt(&cfg)
@@ -93465,11 +93593,15 @@ func NewLogsArchive(stack *config.Stack, name string, opts ...LogsArchiveOption)
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_logs_archive config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_logs_archive",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // LogsArchiveOrder represents the datadog_logs_archive_order resource.
@@ -93500,7 +93632,7 @@ func FromLogsArchiveOrder(cfg LogsArchiveOrder) LogsArchiveOrderOption {
 }
 
 // NewLogsArchiveOrder creates a datadog_logs_archive_order Resource and adds it to the stack.
-func NewLogsArchiveOrder(stack *config.Stack, name string, opts ...LogsArchiveOrderOption) error {
+func NewLogsArchiveOrder(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...LogsArchiveOrderOption) error {
 	var cfg LogsArchiveOrder
 	for _, opt := range opts {
 		opt(&cfg)
@@ -93513,11 +93645,15 @@ func NewLogsArchiveOrder(stack *config.Stack, name string, opts ...LogsArchiveOr
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_logs_archive_order config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_logs_archive_order",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // LogsCustomPipeline represents the datadog_logs_custom_pipeline resource.
@@ -95497,7 +95633,7 @@ func FromLogsCustomPipeline(cfg LogsCustomPipeline) LogsCustomPipelineOption {
 }
 
 // NewLogsCustomPipeline creates a datadog_logs_custom_pipeline Resource and adds it to the stack.
-func NewLogsCustomPipeline(stack *config.Stack, name string, opts ...LogsCustomPipelineOption) error {
+func NewLogsCustomPipeline(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...LogsCustomPipelineOption) error {
 	var cfg LogsCustomPipeline
 	for _, opt := range opts {
 		opt(&cfg)
@@ -95510,11 +95646,15 @@ func NewLogsCustomPipeline(stack *config.Stack, name string, opts ...LogsCustomP
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_logs_custom_pipeline config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_logs_custom_pipeline",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // LogsIndex represents the datadog_logs_index resource.
@@ -95713,7 +95853,7 @@ func FromLogsIndex(cfg LogsIndex) LogsIndexOption {
 }
 
 // NewLogsIndex creates a datadog_logs_index Resource and adds it to the stack.
-func NewLogsIndex(stack *config.Stack, name string, opts ...LogsIndexOption) error {
+func NewLogsIndex(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...LogsIndexOption) error {
 	var cfg LogsIndex
 	for _, opt := range opts {
 		opt(&cfg)
@@ -95726,11 +95866,15 @@ func NewLogsIndex(stack *config.Stack, name string, opts ...LogsIndexOption) err
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_logs_index config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_logs_index",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // LogsIndexOrder represents the datadog_logs_index_order resource.
@@ -95768,7 +95912,7 @@ func FromLogsIndexOrder(cfg LogsIndexOrder) LogsIndexOrderOption {
 }
 
 // NewLogsIndexOrder creates a datadog_logs_index_order Resource and adds it to the stack.
-func NewLogsIndexOrder(stack *config.Stack, name string, opts ...LogsIndexOrderOption) error {
+func NewLogsIndexOrder(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...LogsIndexOrderOption) error {
 	var cfg LogsIndexOrder
 	for _, opt := range opts {
 		opt(&cfg)
@@ -95781,11 +95925,15 @@ func NewLogsIndexOrder(stack *config.Stack, name string, opts ...LogsIndexOrderO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_logs_index_order config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_logs_index_order",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // LogsIntegrationPipeline represents the datadog_logs_integration_pipeline resource.
@@ -95816,7 +95964,7 @@ func FromLogsIntegrationPipeline(cfg LogsIntegrationPipeline) LogsIntegrationPip
 }
 
 // NewLogsIntegrationPipeline creates a datadog_logs_integration_pipeline Resource and adds it to the stack.
-func NewLogsIntegrationPipeline(stack *config.Stack, name string, opts ...LogsIntegrationPipelineOption) error {
+func NewLogsIntegrationPipeline(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...LogsIntegrationPipelineOption) error {
 	var cfg LogsIntegrationPipeline
 	for _, opt := range opts {
 		opt(&cfg)
@@ -95829,11 +95977,15 @@ func NewLogsIntegrationPipeline(stack *config.Stack, name string, opts ...LogsIn
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_logs_integration_pipeline config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_logs_integration_pipeline",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // LogsMetric represents the datadog_logs_metric resource.
@@ -95975,7 +96127,7 @@ func FromLogsMetric(cfg LogsMetric) LogsMetricOption {
 }
 
 // NewLogsMetric creates a datadog_logs_metric Resource and adds it to the stack.
-func NewLogsMetric(stack *config.Stack, name string, opts ...LogsMetricOption) error {
+func NewLogsMetric(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...LogsMetricOption) error {
 	var cfg LogsMetric
 	for _, opt := range opts {
 		opt(&cfg)
@@ -95988,11 +96140,15 @@ func NewLogsMetric(stack *config.Stack, name string, opts ...LogsMetricOption) e
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_logs_metric config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_logs_metric",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // LogsPipelineOrder represents the datadog_logs_pipeline_order resource.
@@ -96030,7 +96186,7 @@ func FromLogsPipelineOrder(cfg LogsPipelineOrder) LogsPipelineOrderOption {
 }
 
 // NewLogsPipelineOrder creates a datadog_logs_pipeline_order Resource and adds it to the stack.
-func NewLogsPipelineOrder(stack *config.Stack, name string, opts ...LogsPipelineOrderOption) error {
+func NewLogsPipelineOrder(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...LogsPipelineOrderOption) error {
 	var cfg LogsPipelineOrder
 	for _, opt := range opts {
 		opt(&cfg)
@@ -96043,11 +96199,15 @@ func NewLogsPipelineOrder(stack *config.Stack, name string, opts ...LogsPipeline
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_logs_pipeline_order config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_logs_pipeline_order",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // MetricMetadata represents the datadog_metric_metadata resource.
@@ -96120,7 +96280,7 @@ func FromMetricMetadata(cfg MetricMetadata) MetricMetadataOption {
 }
 
 // NewMetricMetadata creates a datadog_metric_metadata Resource and adds it to the stack.
-func NewMetricMetadata(stack *config.Stack, name string, opts ...MetricMetadataOption) error {
+func NewMetricMetadata(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...MetricMetadataOption) error {
 	var cfg MetricMetadata
 	for _, opt := range opts {
 		opt(&cfg)
@@ -96133,11 +96293,15 @@ func NewMetricMetadata(stack *config.Stack, name string, opts ...MetricMetadataO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_metric_metadata config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_metric_metadata",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // MetricTagConfiguration represents the datadog_metric_tag_configuration resource.
@@ -96233,7 +96397,7 @@ func FromMetricTagConfiguration(cfg MetricTagConfiguration) MetricTagConfigurati
 }
 
 // NewMetricTagConfiguration creates a datadog_metric_tag_configuration Resource and adds it to the stack.
-func NewMetricTagConfiguration(stack *config.Stack, name string, opts ...MetricTagConfigurationOption) error {
+func NewMetricTagConfiguration(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...MetricTagConfigurationOption) error {
 	var cfg MetricTagConfiguration
 	for _, opt := range opts {
 		opt(&cfg)
@@ -96246,11 +96410,15 @@ func NewMetricTagConfiguration(stack *config.Stack, name string, opts ...MetricT
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_metric_tag_configuration config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_metric_tag_configuration",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // Monitor represents the datadog_monitor resource.
@@ -96941,7 +97109,7 @@ func FromMonitor(cfg Monitor) MonitorOption {
 }
 
 // NewMonitor creates a datadog_monitor Resource and adds it to the stack.
-func NewMonitor(stack *config.Stack, name string, opts ...MonitorOption) error {
+func NewMonitor(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...MonitorOption) error {
 	var cfg Monitor
 	for _, opt := range opts {
 		opt(&cfg)
@@ -96954,11 +97122,15 @@ func NewMonitor(stack *config.Stack, name string, opts ...MonitorOption) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_monitor config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_monitor",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // MonitorConfigPolicy represents the datadog_monitor_config_policy resource.
@@ -97033,7 +97205,7 @@ func FromMonitorConfigPolicy(cfg MonitorConfigPolicy) MonitorConfigPolicyOption 
 }
 
 // NewMonitorConfigPolicy creates a datadog_monitor_config_policy Resource and adds it to the stack.
-func NewMonitorConfigPolicy(stack *config.Stack, name string, opts ...MonitorConfigPolicyOption) error {
+func NewMonitorConfigPolicy(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...MonitorConfigPolicyOption) error {
 	var cfg MonitorConfigPolicy
 	for _, opt := range opts {
 		opt(&cfg)
@@ -97046,11 +97218,15 @@ func NewMonitorConfigPolicy(stack *config.Stack, name string, opts ...MonitorCon
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_monitor_config_policy config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_monitor_config_policy",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // MonitorJSON represents the datadog_monitor_json resource.
@@ -97088,7 +97264,7 @@ func FromMonitorJSON(cfg MonitorJSON) MonitorJSONOption {
 }
 
 // NewMonitorJSON creates a datadog_monitor_json Resource and adds it to the stack.
-func NewMonitorJSON(stack *config.Stack, name string, opts ...MonitorJSONOption) error {
+func NewMonitorJSON(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...MonitorJSONOption) error {
 	var cfg MonitorJSON
 	for _, opt := range opts {
 		opt(&cfg)
@@ -97101,11 +97277,15 @@ func NewMonitorJSON(stack *config.Stack, name string, opts ...MonitorJSONOption)
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_monitor_json config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_monitor_json",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // OpenapiAPI represents the datadog_openapi_api resource.
@@ -97136,7 +97316,7 @@ func FromOpenapiAPI(cfg OpenapiAPI) OpenapiAPIOption {
 }
 
 // NewOpenapiAPI creates a datadog_openapi_api Resource and adds it to the stack.
-func NewOpenapiAPI(stack *config.Stack, name string, opts ...OpenapiAPIOption) error {
+func NewOpenapiAPI(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...OpenapiAPIOption) error {
 	var cfg OpenapiAPI
 	for _, opt := range opts {
 		opt(&cfg)
@@ -97149,11 +97329,15 @@ func NewOpenapiAPI(stack *config.Stack, name string, opts ...OpenapiAPIOption) e
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_openapi_api config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_openapi_api",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // OrganizationSettings represents the datadog_organization_settings resource.
@@ -97390,7 +97574,7 @@ func FromOrganizationSettings(cfg OrganizationSettings) OrganizationSettingsOpti
 }
 
 // NewOrganizationSettings creates a datadog_organization_settings Resource and adds it to the stack.
-func NewOrganizationSettings(stack *config.Stack, name string, opts ...OrganizationSettingsOption) error {
+func NewOrganizationSettings(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...OrganizationSettingsOption) error {
 	var cfg OrganizationSettings
 	for _, opt := range opts {
 		opt(&cfg)
@@ -97403,11 +97587,15 @@ func NewOrganizationSettings(stack *config.Stack, name string, opts ...Organizat
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_organization_settings config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_organization_settings",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // Powerpack represents the datadog_powerpack resource.
@@ -123440,7 +123628,7 @@ func FromPowerpack(cfg Powerpack) PowerpackOption {
 }
 
 // NewPowerpack creates a datadog_powerpack Resource and adds it to the stack.
-func NewPowerpack(stack *config.Stack, name string, opts ...PowerpackOption) error {
+func NewPowerpack(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...PowerpackOption) error {
 	var cfg Powerpack
 	for _, opt := range opts {
 		opt(&cfg)
@@ -123453,11 +123641,15 @@ func NewPowerpack(stack *config.Stack, name string, opts ...PowerpackOption) err
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_powerpack config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_powerpack",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // RestrictionPolicy represents the datadog_restriction_policy resource.
@@ -123524,7 +123716,7 @@ func FromRestrictionPolicy(cfg RestrictionPolicy) RestrictionPolicyOption {
 }
 
 // NewRestrictionPolicy creates a datadog_restriction_policy Resource and adds it to the stack.
-func NewRestrictionPolicy(stack *config.Stack, name string, opts ...RestrictionPolicyOption) error {
+func NewRestrictionPolicy(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...RestrictionPolicyOption) error {
 	var cfg RestrictionPolicy
 	for _, opt := range opts {
 		opt(&cfg)
@@ -123537,11 +123729,15 @@ func NewRestrictionPolicy(stack *config.Stack, name string, opts ...RestrictionP
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_restriction_policy config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_restriction_policy",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // Role represents the datadog_role resource.
@@ -123623,7 +123819,7 @@ func FromRole(cfg Role) RoleOption {
 }
 
 // NewRole creates a datadog_role Resource and adds it to the stack.
-func NewRole(stack *config.Stack, name string, opts ...RoleOption) error {
+func NewRole(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...RoleOption) error {
 	var cfg Role
 	for _, opt := range opts {
 		opt(&cfg)
@@ -123636,11 +123832,15 @@ func NewRole(stack *config.Stack, name string, opts ...RoleOption) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_role config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_role",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // RumApplication represents the datadog_rum_application resource.
@@ -123685,7 +123885,7 @@ func FromRumApplication(cfg RumApplication) RumApplicationOption {
 }
 
 // NewRumApplication creates a datadog_rum_application Resource and adds it to the stack.
-func NewRumApplication(stack *config.Stack, name string, opts ...RumApplicationOption) error {
+func NewRumApplication(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...RumApplicationOption) error {
 	var cfg RumApplication
 	for _, opt := range opts {
 		opt(&cfg)
@@ -123698,11 +123898,15 @@ func NewRumApplication(stack *config.Stack, name string, opts ...RumApplicationO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_rum_application config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_rum_application",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SecurityMonitoringDefaultRule represents the datadog_security_monitoring_default_rule resource.
@@ -123844,7 +124048,7 @@ func FromSecurityMonitoringDefaultRule(cfg SecurityMonitoringDefaultRule) Securi
 }
 
 // NewSecurityMonitoringDefaultRule creates a datadog_security_monitoring_default_rule Resource and adds it to the stack.
-func NewSecurityMonitoringDefaultRule(stack *config.Stack, name string, opts ...SecurityMonitoringDefaultRuleOption) error {
+func NewSecurityMonitoringDefaultRule(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SecurityMonitoringDefaultRuleOption) error {
 	var cfg SecurityMonitoringDefaultRule
 	for _, opt := range opts {
 		opt(&cfg)
@@ -123857,11 +124061,15 @@ func NewSecurityMonitoringDefaultRule(stack *config.Stack, name string, opts ...
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_security_monitoring_default_rule config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_security_monitoring_default_rule",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SecurityMonitoringFilter represents the datadog_security_monitoring_filter resource.
@@ -123957,7 +124165,7 @@ func FromSecurityMonitoringFilter(cfg SecurityMonitoringFilter) SecurityMonitori
 }
 
 // NewSecurityMonitoringFilter creates a datadog_security_monitoring_filter Resource and adds it to the stack.
-func NewSecurityMonitoringFilter(stack *config.Stack, name string, opts ...SecurityMonitoringFilterOption) error {
+func NewSecurityMonitoringFilter(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SecurityMonitoringFilterOption) error {
 	var cfg SecurityMonitoringFilter
 	for _, opt := range opts {
 		opt(&cfg)
@@ -123970,11 +124178,15 @@ func NewSecurityMonitoringFilter(stack *config.Stack, name string, opts ...Secur
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_security_monitoring_filter config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_security_monitoring_filter",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SecurityMonitoringRule represents the datadog_security_monitoring_rule resource.
@@ -124573,7 +124785,7 @@ func FromSecurityMonitoringRule(cfg SecurityMonitoringRule) SecurityMonitoringRu
 }
 
 // NewSecurityMonitoringRule creates a datadog_security_monitoring_rule Resource and adds it to the stack.
-func NewSecurityMonitoringRule(stack *config.Stack, name string, opts ...SecurityMonitoringRuleOption) error {
+func NewSecurityMonitoringRule(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SecurityMonitoringRuleOption) error {
 	var cfg SecurityMonitoringRule
 	for _, opt := range opts {
 		opt(&cfg)
@@ -124586,11 +124798,15 @@ func NewSecurityMonitoringRule(stack *config.Stack, name string, opts ...Securit
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_security_monitoring_rule config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_security_monitoring_rule",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SecurityMonitoringSuppression represents the datadog_security_monitoring_suppression resource.
@@ -124663,7 +124879,7 @@ func FromSecurityMonitoringSuppression(cfg SecurityMonitoringSuppression) Securi
 }
 
 // NewSecurityMonitoringSuppression creates a datadog_security_monitoring_suppression Resource and adds it to the stack.
-func NewSecurityMonitoringSuppression(stack *config.Stack, name string, opts ...SecurityMonitoringSuppressionOption) error {
+func NewSecurityMonitoringSuppression(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SecurityMonitoringSuppressionOption) error {
 	var cfg SecurityMonitoringSuppression
 	for _, opt := range opts {
 		opt(&cfg)
@@ -124676,11 +124892,15 @@ func NewSecurityMonitoringSuppression(stack *config.Stack, name string, opts ...
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_security_monitoring_suppression config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_security_monitoring_suppression",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SensitiveDataScannerGroup represents the datadog_sensitive_data_scanner_group resource.
@@ -124762,7 +124982,7 @@ func FromSensitiveDataScannerGroup(cfg SensitiveDataScannerGroup) SensitiveDataS
 }
 
 // NewSensitiveDataScannerGroup creates a datadog_sensitive_data_scanner_group Resource and adds it to the stack.
-func NewSensitiveDataScannerGroup(stack *config.Stack, name string, opts ...SensitiveDataScannerGroupOption) error {
+func NewSensitiveDataScannerGroup(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SensitiveDataScannerGroupOption) error {
 	var cfg SensitiveDataScannerGroup
 	for _, opt := range opts {
 		opt(&cfg)
@@ -124775,11 +124995,15 @@ func NewSensitiveDataScannerGroup(stack *config.Stack, name string, opts ...Sens
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_sensitive_data_scanner_group config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_sensitive_data_scanner_group",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SensitiveDataScannerGroupOrder represents the datadog_sensitive_data_scanner_group_order resource.
@@ -124810,7 +125034,7 @@ func FromSensitiveDataScannerGroupOrder(cfg SensitiveDataScannerGroupOrder) Sens
 }
 
 // NewSensitiveDataScannerGroupOrder creates a datadog_sensitive_data_scanner_group_order Resource and adds it to the stack.
-func NewSensitiveDataScannerGroupOrder(stack *config.Stack, name string, opts ...SensitiveDataScannerGroupOrderOption) error {
+func NewSensitiveDataScannerGroupOrder(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SensitiveDataScannerGroupOrderOption) error {
 	var cfg SensitiveDataScannerGroupOrder
 	for _, opt := range opts {
 		opt(&cfg)
@@ -124823,11 +125047,15 @@ func NewSensitiveDataScannerGroupOrder(stack *config.Stack, name string, opts ..
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_sensitive_data_scanner_group_order config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_sensitive_data_scanner_group_order",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SensitiveDataScannerRule represents the datadog_sensitive_data_scanner_rule resource.
@@ -124995,7 +125223,7 @@ func FromSensitiveDataScannerRule(cfg SensitiveDataScannerRule) SensitiveDataSca
 }
 
 // NewSensitiveDataScannerRule creates a datadog_sensitive_data_scanner_rule Resource and adds it to the stack.
-func NewSensitiveDataScannerRule(stack *config.Stack, name string, opts ...SensitiveDataScannerRuleOption) error {
+func NewSensitiveDataScannerRule(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SensitiveDataScannerRuleOption) error {
 	var cfg SensitiveDataScannerRule
 	for _, opt := range opts {
 		opt(&cfg)
@@ -125008,11 +125236,15 @@ func NewSensitiveDataScannerRule(stack *config.Stack, name string, opts ...Sensi
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_sensitive_data_scanner_rule config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_sensitive_data_scanner_rule",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // ServiceAccount represents the datadog_service_account resource.
@@ -125064,7 +125296,7 @@ func FromServiceAccount(cfg ServiceAccount) ServiceAccountOption {
 }
 
 // NewServiceAccount creates a datadog_service_account Resource and adds it to the stack.
-func NewServiceAccount(stack *config.Stack, name string, opts ...ServiceAccountOption) error {
+func NewServiceAccount(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...ServiceAccountOption) error {
 	var cfg ServiceAccount
 	for _, opt := range opts {
 		opt(&cfg)
@@ -125077,11 +125309,15 @@ func NewServiceAccount(stack *config.Stack, name string, opts ...ServiceAccountO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_service_account config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_service_account",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // ServiceAccountApplicationKey represents the datadog_service_account_application_key resource.
@@ -125140,7 +125376,7 @@ func FromServiceAccountApplicationKey(cfg ServiceAccountApplicationKey) ServiceA
 }
 
 // NewServiceAccountApplicationKey creates a datadog_service_account_application_key Resource and adds it to the stack.
-func NewServiceAccountApplicationKey(stack *config.Stack, name string, opts ...ServiceAccountApplicationKeyOption) error {
+func NewServiceAccountApplicationKey(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...ServiceAccountApplicationKeyOption) error {
 	var cfg ServiceAccountApplicationKey
 	for _, opt := range opts {
 		opt(&cfg)
@@ -125153,11 +125389,15 @@ func NewServiceAccountApplicationKey(stack *config.Stack, name string, opts ...S
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_service_account_application_key config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_service_account_application_key",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // ServiceDefinitionYaml represents the datadog_service_definition_yaml resource.
@@ -125188,7 +125428,7 @@ func FromServiceDefinitionYaml(cfg ServiceDefinitionYaml) ServiceDefinitionYamlO
 }
 
 // NewServiceDefinitionYaml creates a datadog_service_definition_yaml Resource and adds it to the stack.
-func NewServiceDefinitionYaml(stack *config.Stack, name string, opts ...ServiceDefinitionYamlOption) error {
+func NewServiceDefinitionYaml(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...ServiceDefinitionYamlOption) error {
 	var cfg ServiceDefinitionYaml
 	for _, opt := range opts {
 		opt(&cfg)
@@ -125201,11 +125441,15 @@ func NewServiceDefinitionYaml(stack *config.Stack, name string, opts ...ServiceD
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_service_definition_yaml config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_service_definition_yaml",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // ServiceLevelObjective represents the datadog_service_level_objective resource.
@@ -125588,7 +125832,7 @@ func FromServiceLevelObjective(cfg ServiceLevelObjective) ServiceLevelObjectiveO
 }
 
 // NewServiceLevelObjective creates a datadog_service_level_objective Resource and adds it to the stack.
-func NewServiceLevelObjective(stack *config.Stack, name string, opts ...ServiceLevelObjectiveOption) error {
+func NewServiceLevelObjective(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...ServiceLevelObjectiveOption) error {
 	var cfg ServiceLevelObjective
 	for _, opt := range opts {
 		opt(&cfg)
@@ -125601,11 +125845,15 @@ func NewServiceLevelObjective(stack *config.Stack, name string, opts ...ServiceL
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_service_level_objective config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_service_level_objective",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SloCorrection represents the datadog_slo_correction resource.
@@ -125685,7 +125933,7 @@ func FromSloCorrection(cfg SloCorrection) SloCorrectionOption {
 }
 
 // NewSloCorrection creates a datadog_slo_correction Resource and adds it to the stack.
-func NewSloCorrection(stack *config.Stack, name string, opts ...SloCorrectionOption) error {
+func NewSloCorrection(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SloCorrectionOption) error {
 	var cfg SloCorrection
 	for _, opt := range opts {
 		opt(&cfg)
@@ -125698,11 +125946,15 @@ func NewSloCorrection(stack *config.Stack, name string, opts ...SloCorrectionOpt
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_slo_correction config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_slo_correction",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SpansMetric represents the datadog_spans_metric resource.
@@ -125841,7 +126093,7 @@ func FromSpansMetric(cfg SpansMetric) SpansMetricOption {
 }
 
 // NewSpansMetric creates a datadog_spans_metric Resource and adds it to the stack.
-func NewSpansMetric(stack *config.Stack, name string, opts ...SpansMetricOption) error {
+func NewSpansMetric(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SpansMetricOption) error {
 	var cfg SpansMetric
 	for _, opt := range opts {
 		opt(&cfg)
@@ -125854,11 +126106,15 @@ func NewSpansMetric(stack *config.Stack, name string, opts ...SpansMetricOption)
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_spans_metric config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_spans_metric",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SyntheticsConcurrencyCap represents the datadog_synthetics_concurrency_cap resource.
@@ -125889,7 +126145,7 @@ func FromSyntheticsConcurrencyCap(cfg SyntheticsConcurrencyCap) SyntheticsConcur
 }
 
 // NewSyntheticsConcurrencyCap creates a datadog_synthetics_concurrency_cap Resource and adds it to the stack.
-func NewSyntheticsConcurrencyCap(stack *config.Stack, name string, opts ...SyntheticsConcurrencyCapOption) error {
+func NewSyntheticsConcurrencyCap(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SyntheticsConcurrencyCapOption) error {
 	var cfg SyntheticsConcurrencyCap
 	for _, opt := range opts {
 		opt(&cfg)
@@ -125902,11 +126158,15 @@ func NewSyntheticsConcurrencyCap(stack *config.Stack, name string, opts ...Synth
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_synthetics_concurrency_cap config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_synthetics_concurrency_cap",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SyntheticsGlobalVariable represents the datadog_synthetics_global_variable resource.
@@ -126119,7 +126379,7 @@ func FromSyntheticsGlobalVariable(cfg SyntheticsGlobalVariable) SyntheticsGlobal
 }
 
 // NewSyntheticsGlobalVariable creates a datadog_synthetics_global_variable Resource and adds it to the stack.
-func NewSyntheticsGlobalVariable(stack *config.Stack, name string, opts ...SyntheticsGlobalVariableOption) error {
+func NewSyntheticsGlobalVariable(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SyntheticsGlobalVariableOption) error {
 	var cfg SyntheticsGlobalVariable
 	for _, opt := range opts {
 		opt(&cfg)
@@ -126132,11 +126392,15 @@ func NewSyntheticsGlobalVariable(stack *config.Stack, name string, opts ...Synth
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_synthetics_global_variable config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_synthetics_global_variable",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SyntheticsPrivateLocation represents the datadog_synthetics_private_location resource.
@@ -126218,7 +126482,7 @@ func FromSyntheticsPrivateLocation(cfg SyntheticsPrivateLocation) SyntheticsPriv
 }
 
 // NewSyntheticsPrivateLocation creates a datadog_synthetics_private_location Resource and adds it to the stack.
-func NewSyntheticsPrivateLocation(stack *config.Stack, name string, opts ...SyntheticsPrivateLocationOption) error {
+func NewSyntheticsPrivateLocation(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SyntheticsPrivateLocationOption) error {
 	var cfg SyntheticsPrivateLocation
 	for _, opt := range opts {
 		opt(&cfg)
@@ -126231,11 +126495,15 @@ func NewSyntheticsPrivateLocation(stack *config.Stack, name string, opts ...Synt
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_synthetics_private_location config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_synthetics_private_location",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // SyntheticsTest represents the datadog_synthetics_test resource.
@@ -128526,7 +128794,7 @@ func FromSyntheticsTest(cfg SyntheticsTest) SyntheticsTestOption {
 }
 
 // NewSyntheticsTest creates a datadog_synthetics_test Resource and adds it to the stack.
-func NewSyntheticsTest(stack *config.Stack, name string, opts ...SyntheticsTestOption) error {
+func NewSyntheticsTest(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...SyntheticsTestOption) error {
 	var cfg SyntheticsTest
 	for _, opt := range opts {
 		opt(&cfg)
@@ -128539,11 +128807,15 @@ func NewSyntheticsTest(stack *config.Stack, name string, opts ...SyntheticsTestO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_synthetics_test config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_synthetics_test",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // Team represents the datadog_team resource.
@@ -128609,7 +128881,7 @@ func FromTeam(cfg Team) TeamOption {
 }
 
 // NewTeam creates a datadog_team Resource and adds it to the stack.
-func NewTeam(stack *config.Stack, name string, opts ...TeamOption) error {
+func NewTeam(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...TeamOption) error {
 	var cfg Team
 	for _, opt := range opts {
 		opt(&cfg)
@@ -128622,11 +128894,15 @@ func NewTeam(stack *config.Stack, name string, opts ...TeamOption) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_team config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_team",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // TeamLink represents the datadog_team_link resource.
@@ -128678,7 +128954,7 @@ func FromTeamLink(cfg TeamLink) TeamLinkOption {
 }
 
 // NewTeamLink creates a datadog_team_link Resource and adds it to the stack.
-func NewTeamLink(stack *config.Stack, name string, opts ...TeamLinkOption) error {
+func NewTeamLink(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...TeamLinkOption) error {
 	var cfg TeamLink
 	for _, opt := range opts {
 		opt(&cfg)
@@ -128691,11 +128967,15 @@ func NewTeamLink(stack *config.Stack, name string, opts ...TeamLinkOption) error
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_team_link config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_team_link",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // TeamMembership represents the datadog_team_membership resource.
@@ -128740,7 +129020,7 @@ func FromTeamMembership(cfg TeamMembership) TeamMembershipOption {
 }
 
 // NewTeamMembership creates a datadog_team_membership Resource and adds it to the stack.
-func NewTeamMembership(stack *config.Stack, name string, opts ...TeamMembershipOption) error {
+func NewTeamMembership(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...TeamMembershipOption) error {
 	var cfg TeamMembership
 	for _, opt := range opts {
 		opt(&cfg)
@@ -128753,11 +129033,15 @@ func NewTeamMembership(stack *config.Stack, name string, opts ...TeamMembershipO
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_team_membership config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_team_membership",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // TeamPermissionSetting represents the datadog_team_permission_setting resource.
@@ -128802,7 +129086,7 @@ func FromTeamPermissionSetting(cfg TeamPermissionSetting) TeamPermissionSettingO
 }
 
 // NewTeamPermissionSetting creates a datadog_team_permission_setting Resource and adds it to the stack.
-func NewTeamPermissionSetting(stack *config.Stack, name string, opts ...TeamPermissionSettingOption) error {
+func NewTeamPermissionSetting(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...TeamPermissionSettingOption) error {
 	var cfg TeamPermissionSetting
 	for _, opt := range opts {
 		opt(&cfg)
@@ -128815,11 +129099,15 @@ func NewTeamPermissionSetting(stack *config.Stack, name string, opts ...TeamPerm
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_team_permission_setting config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_team_permission_setting",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // User represents the datadog_user resource.
@@ -128892,7 +129180,7 @@ func FromUser(cfg User) UserOption {
 }
 
 // NewUser creates a datadog_user Resource and adds it to the stack.
-func NewUser(stack *config.Stack, name string, opts ...UserOption) error {
+func NewUser(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...UserOption) error {
 	var cfg User
 	for _, opt := range opts {
 		opt(&cfg)
@@ -128905,11 +129193,15 @@ func NewUser(stack *config.Stack, name string, opts ...UserOption) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_user config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_user",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // UserRole represents the datadog_user_role resource.
@@ -128947,7 +129239,7 @@ func FromUserRole(cfg UserRole) UserRoleOption {
 }
 
 // NewUserRole creates a datadog_user_role Resource and adds it to the stack.
-func NewUserRole(stack *config.Stack, name string, opts ...UserRoleOption) error {
+func NewUserRole(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...UserRoleOption) error {
 	var cfg UserRole
 	for _, opt := range opts {
 		opt(&cfg)
@@ -128960,11 +129252,15 @@ func NewUserRole(stack *config.Stack, name string, opts ...UserRoleOption) error
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_user_role config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_user_role",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // Webhook represents the datadog_webhook resource.
@@ -129023,7 +129319,7 @@ func FromWebhook(cfg Webhook) WebhookOption {
 }
 
 // NewWebhook creates a datadog_webhook Resource and adds it to the stack.
-func NewWebhook(stack *config.Stack, name string, opts ...WebhookOption) error {
+func NewWebhook(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...WebhookOption) error {
 	var cfg Webhook
 	for _, opt := range opts {
 		opt(&cfg)
@@ -129036,11 +129332,15 @@ func NewWebhook(stack *config.Stack, name string, opts ...WebhookOption) error {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_webhook config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_webhook",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }
 
 // WebhookCustomVariable represents the datadog_webhook_custom_variable resource.
@@ -129085,7 +129385,7 @@ func FromWebhookCustomVariable(cfg WebhookCustomVariable) WebhookCustomVariableO
 }
 
 // NewWebhookCustomVariable creates a datadog_webhook_custom_variable Resource and adds it to the stack.
-func NewWebhookCustomVariable(stack *config.Stack, name string, opts ...WebhookCustomVariableOption) error {
+func NewWebhookCustomVariable(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...WebhookCustomVariableOption) error {
 	var cfg WebhookCustomVariable
 	for _, opt := range opts {
 		opt(&cfg)
@@ -129098,9 +129398,13 @@ func NewWebhookCustomVariable(stack *config.Stack, name string, opts ...WebhookC
 	if err := json.Unmarshal(data, &m); err != nil {
 		return fmt.Errorf("converting datadog_webhook_custom_variable config: %w", err)
 	}
-	return stack.AddResource(config.Resource{
+	r := config.Resource{
 		Attributes: m,
 		Name:       name,
 		Type:       "datadog_webhook_custom_variable",
-	})
+	}
+	for _, ro := range resourceOpts {
+		ro(&r)
+	}
+	return stack.AddResource(r)
 }

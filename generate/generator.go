@@ -588,30 +588,30 @@ func (g *Generator) generateConfigBridge(f *jen.File, structName string) {
 
 // generateConstructor generates a typed constructor function for a resource or data source.
 //
-// Output (for "datadog_monitor" resource):
+// For resources, the generated function accepts optional config.ResourceOption arguments
+// to configure resource-level meta-arguments (Lifecycle, Provider, etc.):
 //
-//	func NewMonitor(stack *config.Stack, name string, opts ...MonitorOption) error {
-//	    // Step 1: Apply functional options to a zero-value struct.
+//	func NewMonitor(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...MonitorOption) error {
 //	    var cfg Monitor
-//	    for _, opt := range opts {
-//	        opt(&cfg)
-//	    }
-//	    // Step 2: Marshal struct to JSON bytes.
+//	    for _, opt := range opts { opt(&cfg) }
 //	    data, err := json.Marshal(cfg)
-//	    if err != nil { return fmt.Errorf("marshaling datadog_monitor config: %w", err) }
-//	    // Step 3: Unmarshal into map[string]any for the config.Resource.
-//	    var m map[string]any
-//	    if err := json.Unmarshal(data, &m); err != nil { return fmt.Errorf("converting ...") }
-//	    // Step 4: Add to the stack.
-//	    return stack.AddResource(config.Resource{...})
+//	    ...
+//	    r := config.Resource{Type: "datadog_monitor", Name: name, MetaArguments: config.MetaArguments{Config: m}}
+//	    for _, ro := range resourceOpts { ro(&r) }
+//	    return stack.AddResource(r)
 //	}
+//
+// For data sources, the signature omits resourceOpts:
+//
+//	func NewMonitorData(stack *config.Stack, name string, opts ...MonitorDataOption) error { ... }
 func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, addMethod string) {
 	funcName := "New" + structName
 	short := g.shortName(structName)
 	optionType := short + "Option"
 
+	isResource := addMethod == "AddResource"
 	configType := "Resource"
-	if addMethod == "AddDataSource" {
+	if !isResource {
 		configType = "DataSource"
 	}
 
@@ -642,14 +642,25 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 		),
 	}
 
-	// Step 4: Add the resource/data source to the stack.
-	addToStack := jen.Return(jen.Id("stack").Dot(addMethod).Call(
-		jen.Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
+	// Step 4: Build the resource/data source. For resources, bind it to `r`
+	// so the resource-options loop below can mutate it; for data sources, add
+	// directly to the stack.
+	var addToStack jen.Code
+	if isResource {
+		addToStack = jen.Id("r").Op(":=").Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
 			jen.Id("Type"):       jen.Lit(tfTypeName),
 			jen.Id("Name"):       jen.Id("name"),
 			jen.Id("Attributes"): jen.Id("m"),
-		}),
-	))
+		})
+	} else {
+		addToStack = jen.Return(jen.Id("stack").Dot(addMethod).Call(
+			jen.Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
+				jen.Id("Type"):       jen.Lit(tfTypeName),
+				jen.Id("Name"):       jen.Id("name"),
+				jen.Id("Attributes"): jen.Id("m"),
+			}),
+		))
+	}
 
 	// Assemble the function body from all steps.
 	var body []jen.Code
@@ -658,12 +669,32 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 	body = append(body, unmarshal...)
 	body = append(body, addToStack)
 
+	if isResource {
+		// Apply resource-level options (Lifecycle, Provider, etc.)
+		body = append(body,
+			jen.For(jen.List(jen.Id("_"), jen.Id("ro")).Op(":=").Range().Id("resourceOpts")).Block(
+				jen.Id("ro").Call(jen.Op("&").Id("r")),
+			),
+			jen.Return(jen.Id("stack").Dot(addMethod).Call(jen.Id("r"))),
+		)
+	}
+
 	f.Commentf("%s creates a %s %s and adds it to the stack.", funcName, tfTypeName, configType)
-	f.Func().Id(funcName).Params(
-		jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
-		jen.Id("name").String(),
-		jen.Id("opts").Op("...").Id(optionType),
-	).Error().Block(body...)
+
+	if isResource {
+		f.Func().Id(funcName).Params(
+			jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
+			jen.Id("name").String(),
+			jen.Id("resourceOpts").Index().Qual("github.com/DataDog/tforge/config", "ResourceOption"),
+			jen.Id("opts").Op("...").Id(optionType),
+		).Error().Block(body...)
+	} else {
+		f.Func().Id(funcName).Params(
+			jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
+			jen.Id("name").String(),
+			jen.Id("opts").Op("...").Id(optionType),
+		).Error().Block(body...)
+	}
 	f.Line()
 }
 

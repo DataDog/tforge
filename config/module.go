@@ -33,3 +33,43 @@ func (m Module) Address() string {
 func (m Module) Ref(output string) string {
 	return fmt.Sprintf("${module.%s.%s}", m.Name, output)
 }
+
+// TerraformHclModuleConfig holds the user-facing configuration for a Terraform HCL module call.
+// It mirrors the fields available in cdktf.TerraformHclModuleConfig.
+type TerraformHclModuleConfig struct {
+	// Source is the module source address (e.g., "terraform-aws-modules/eks/aws", "./modules/vpc").
+	Source string
+
+	// Version is the module version constraint (e.g., "~> 19.0"). Only for registry modules.
+	Version string
+
+	// Variables contains the input variables to pass to the module.
+	Variables map[string]any
+
+	// Providers maps provider configuration aliases for the module.
+	// Keys are the provider names expected by the module, values are the provider
+	// configurations to use (e.g., {"aws": "aws.west"}).
+	Providers map[string]string
+
+	// DependsOn lists explicit dependencies.
+	DependsOn []string
+
+	// ForEach specifies iteration (mutually exclusive with Count).
+	ForEach any
+}
+
+// NewTerraformHclModule creates a Terraform HCL module call and adds it to the stack.
+// This provides a cdktf-compatible convenience API over Stack.AddModule.
+func NewTerraformHclModule(stack *Stack, name string, cfg TerraformHclModuleConfig) error {
+	return stack.AddModule(Module{
+		Name:      name,
+		Source:    cfg.Source,
+		Version:   cfg.Version,
+		Providers: cfg.Providers,
+		Variables: cfg.Variables,
+		MetaArguments: MetaArguments{
+			DependsOn: cfg.DependsOn,
+			ForEach:   cfg.ForEach,
+		},
+	})
+}

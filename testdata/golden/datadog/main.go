@@ -21,7 +21,7 @@ func main() {
 		},
 	})
 
-	if err := datadog.NewMonitor(stack, "cpu_alert",
+	if err := datadog.NewMonitor(stack, "cpu_alert", nil,
 		datadog.Monitor_SetName("High CPU Usage Alert"),
 		datadog.Monitor_SetType("metric alert"),
 		datadog.Monitor_SetMessage("CPU usage is above threshold. @slack-alerts"),
