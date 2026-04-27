@@ -194,12 +194,12 @@ func TestAddDataSource(t *testing.T) {
 
 func TestAddResourceDuplicate(t *testing.T) {
 	s := NewStack("test")
-	err := s.AddResource(Resource{Type: "aws_instance", Name: "web", MetaArguments: MetaArguments{Config: map[string]any{"ami": "first"}}})
+	err := s.AddResource(Resource{Type: "aws_instance", Name: "web", Attributes: map[string]any{"ami": "first"}})
 	if err != nil {
 		t.Fatalf("first AddResource() error = %v", err)
 	}
 
-	err = s.AddResource(Resource{Type: "aws_instance", Name: "web", MetaArguments: MetaArguments{Config: map[string]any{"ami": "second"}}})
+	err = s.AddResource(Resource{Type: "aws_instance", Name: "web", Attributes: map[string]any{"ami": "second"}})
 	if err == nil {
 		t.Fatal("second AddResource() with same type and name should return error")
 	}
@@ -226,12 +226,12 @@ func TestAddResourceDuplicate(t *testing.T) {
 
 func TestAddDataSourceDuplicate(t *testing.T) {
 	s := NewStack("test")
-	err := s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", MetaArguments: MetaArguments{Config: map[string]any{"filter": "first"}}})
+	err := s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", Attributes: map[string]any{"filter": "first"}})
 	if err != nil {
 		t.Fatalf("first AddDataSource() error = %v", err)
 	}
 
-	err = s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", MetaArguments: MetaArguments{Config: map[string]any{"filter": "second"}}})
+	err = s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", Attributes: map[string]any{"filter": "second"}})
 	if err == nil {
 		t.Fatal("second AddDataSource() with same type and name should return error")
 	}
