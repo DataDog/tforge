@@ -59,7 +59,7 @@ func main() {
 				OnFailure: config.OnFailureContinue,
 			},
 		},
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"ami":           "ami-0c55b159cbfafe1f0",
 			"instance_type": "t3.medium",
 			"tags": map[string]string{
@@ -81,7 +81,7 @@ func main() {
 			Create: "60m",
 			Delete: "45m",
 		},
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"engine":            "postgres",
 			"engine_version":    "15.4",
 			"instance_class":    "db.t3.medium",

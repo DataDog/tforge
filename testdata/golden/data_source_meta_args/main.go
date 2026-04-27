@@ -30,7 +30,7 @@ func main() {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_availability_zones",
 		Name:   "counted",
-		Config: map[string]any{"state": "available"},
+		Attributes: map[string]any{"state": "available"},
 		MetaArguments: config.MetaArguments{
 			Count: 3,
 		},
@@ -42,7 +42,7 @@ func main() {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "per_region",
-		Config: map[string]any{"most_recent": true},
+		Attributes: map[string]any{"most_recent": true},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]any{
 				"us-east-1": "ami-east",
@@ -57,7 +57,7 @@ func main() {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_caller_identity",
 		Name:   "current",
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"data.aws_availability_zones.counted"},
 		},
@@ -70,7 +70,7 @@ func main() {
 		Type:     "aws_vpc",
 		Name:     "west_vpc",
 		Provider: "aws.west",
-		Config:   map[string]any{"default": true},
+		Attributes:   map[string]any{"default": true},
 	}); err != nil {
 		log.Fatal(err)
 	}
@@ -80,7 +80,7 @@ func main() {
 		Type:     "aws_subnet",
 		Name:     "all_meta",
 		Provider: "aws.west",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"vpc_id": "${data.aws_vpc.west_vpc.id}",
 		},
 		MetaArguments: config.MetaArguments{

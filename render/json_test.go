@@ -221,7 +221,7 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
-		Config: map[string]any{"ami": "ami-123", "instance_type": "t3.micro"},
+		Attributes: map[string]any{"ami": "ami-123", "instance_type": "t3.micro"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -248,7 +248,7 @@ func TestToJSON_ResourceProvider(t *testing.T) {
 		Type:     "aws_instance",
 		Name:     "web",
 		Provider: "aws.west",
-		Config:   map[string]any{"ami": "ami-123"},
+		Attributes:   map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -273,7 +273,7 @@ func TestToJSON_ResourceProviderAbsentWhenEmpty(t *testing.T) {
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
-		Config: map[string]any{"ami": "ami-123"},
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -298,7 +298,7 @@ func TestToJSON_ResourceDependsOn(t *testing.T) {
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"aws_vpc.main"},
 		},
@@ -327,7 +327,7 @@ func TestToJSON_ResourceCount(t *testing.T) {
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			Count: 3,
 		},
@@ -356,7 +356,7 @@ func TestToJSON_ResourceForEach(t *testing.T) {
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]any{"a": "1", "b": "2"},
 		},
@@ -391,7 +391,7 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 			IgnoreChanges:       []string{"tags"},
 			ReplaceTriggeredBy:  []string{"null_resource.trigger"},
 		},
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -428,7 +428,7 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 			Create: "30m",
 			Delete: "10m",
 		},
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -468,7 +468,7 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 				OnFailure: config.OnFailureContinue,
 			},
 		},
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -504,14 +504,14 @@ func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
-		Config: map[string]any{"ami": "ami-web"},
+		Attributes: map[string]any{"ami": "ami-web"},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "api",
-		Config: map[string]any{"ami": "ami-api"},
+		Attributes: map[string]any{"ami": "ami-api"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -544,21 +544,21 @@ func TestToJSON_MultipleResourceTypes(t *testing.T) {
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
-		Config: map[string]any{"ami": "ami-123"},
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_vpc",
 		Name:   "main",
-		Config: map[string]any{"cidr_block": "10.0.0.0/16"},
+		Attributes: map[string]any{"cidr_block": "10.0.0.0/16"},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_subnet",
 		Name:   "public",
-		Config: map[string]any{"cidr_block": "10.0.1.0/24"},
+		Attributes: map[string]any{"cidr_block": "10.0.1.0/24"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -590,14 +590,14 @@ func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "ubuntu",
-		Config: map[string]any{"most_recent": true},
+		Attributes: map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
 	}
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "amazon_linux",
-		Config: map[string]any{"most_recent": false},
+		Attributes: map[string]any{"most_recent": false},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -630,7 +630,7 @@ func TestToJSON_DataSource(t *testing.T) {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "latest",
-		Config: map[string]any{"most_recent": true},
+		Attributes: map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -656,7 +656,7 @@ func TestToJSON_DataSourceProvider(t *testing.T) {
 		Type:     "aws_ami",
 		Name:     "latest",
 		Provider: "aws.west",
-		Config:   map[string]any{"most_recent": true},
+		Attributes:   map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -681,7 +681,7 @@ func TestToJSON_DataSourceDependsOn(t *testing.T) {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "latest",
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"aws_vpc.main"},
 		},
@@ -710,7 +710,7 @@ func TestToJSON_DataSourceCount(t *testing.T) {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "latest",
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			Count: 3,
 		},
@@ -739,7 +739,7 @@ func TestToJSON_DataSourceForEach(t *testing.T) {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "latest",
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]any{"a": "1", "b": "2"},
 		},
@@ -949,7 +949,7 @@ func TestToJSON_FullStack(t *testing.T) {
 	if err := stack.AddResource(config.Resource{
 		Type:   "aws_instance",
 		Name:   "web",
-		Config: map[string]any{"ami": "ami-123"},
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -957,7 +957,7 @@ func TestToJSON_FullStack(t *testing.T) {
 	if err := stack.AddDataSource(config.DataSource{
 		Type:   "aws_ami",
 		Name:   "latest",
-		Config: map[string]any{"most_recent": true},
+		Attributes: map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1056,7 +1056,7 @@ func TestToJSON_ResourceConnection(t *testing.T) {
 			Port:    22,
 			Timeout: "5m",
 		},
-		Config: map[string]any{"ami": "ami-123"},
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1103,7 +1103,7 @@ func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
 				"insecure": true,
 			},
 		},
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1141,7 +1141,7 @@ func TestToJSON_LifecyclePrecondition(t *testing.T) {
 				ErrorMessage: "x must be positive",
 			},
 		},
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1177,7 +1177,7 @@ func TestToJSON_LifecyclePostcondition(t *testing.T) {
 				ErrorMessage: "instance must have a public IP",
 			},
 		},
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1251,7 +1251,7 @@ func TestToJSON_ProvisionerConnection(t *testing.T) {
 				},
 			},
 		},
-		Config: map[string]any{},
+		Attributes: map[string]any{},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1289,7 +1289,7 @@ func TestToJSON_ModuleBasic(t *testing.T) {
 		Name:    "eks",
 		Source:  "terraform-aws-modules/eks/aws",
 		Version: "~> 19.0",
-		Config: map[string]any{
+		Variables: map[string]any{
 			"cluster_name":    "my-eks",
 			"cluster_version": "1.27",
 		},
@@ -1330,7 +1330,7 @@ func TestToJSON_ModuleWithProviders(t *testing.T) {
 		Providers: map[string]string{
 			"aws": "aws.west",
 		},
-		Config: map[string]any{"cidr": "10.0.0.0/16"},
+		Variables: map[string]any{"cidr": "10.0.0.0/16"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1357,7 +1357,7 @@ func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
 	if err := stack.AddModule(config.Module{
 		Name:   "server",
 		Source: "./modules/server",
-		Config: map[string]any{"name": "web"},
+		Variables: map[string]any{"name": "web"},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"aws_vpc.main"},
 			Count:     3,
@@ -1398,7 +1398,7 @@ func TestToJSON_ModuleForEach(t *testing.T) {
 	if err := stack.AddModule(config.Module{
 		Name:   "bucket",
 		Source: "terraform-aws-modules/s3-bucket/aws",
-		Config: map[string]any{"bucket": "${each.key}-bucket"},
+		Variables: map[string]any{"bucket": "${each.key}-bucket"},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]string{"logs": "logs", "data": "data"},
 		},
@@ -1436,7 +1436,7 @@ func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 				"host": "evil.example.com",
 			},
 		},
-		Config: map[string]any{"ami": "ami-123"},
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1470,7 +1470,7 @@ func TestConnectionJSON_NilExtra(t *testing.T) {
 			Host: "1.2.3.4",
 			User: "admin",
 		},
-		Config: map[string]any{"ami": "ami-123"},
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1507,7 +1507,7 @@ func TestConnectionJSON_EmptyExtra(t *testing.T) {
 			Host:  "1.2.3.4",
 			Extra: map[string]any{},
 		},
-		Config: map[string]any{"ami": "ami-123"},
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -1545,7 +1545,7 @@ func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 				"bastion_user": "bastion",
 			},
 		},
-		Config: map[string]any{"ami": "ami-123"},
+		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}

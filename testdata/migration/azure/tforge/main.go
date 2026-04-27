@@ -24,7 +24,7 @@ func NewMyStack() *config.Stack {
 		Name:    "null",
 		Source:  "vancluever/module/null",
 		Version: "2.0.2",
-		Config: map[string]any{
+		Variables: map[string]any{
 			"trigger": "one",
 		},
 	}))
@@ -33,7 +33,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_resource_group",
 		Name: "test_rg",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":     "test-rg",
 			"location": "westeurope",
 		},
@@ -43,7 +43,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_virtual_network",
 		Name: "test_vm_nw",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":                "test-vm-nw",
 			"address_space":       []string{"10.0.0.0/16"},
 			"location":            rg.Ref("location"),
@@ -55,7 +55,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_subnet",
 		Name: "test_vm_nw_sn",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":                 "test-vm-nw-sn",
 			"resource_group_name":  rg.Ref("name"),
 			"virtual_network_name": vmNw.Ref("name"),
@@ -67,7 +67,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_network_interface",
 		Name: "test_vm_nic",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":                "test-vm-nic",
 			"location":            rg.Ref("location"),
 			"resource_group_name": rg.Ref("name"),
@@ -84,7 +84,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "azurerm_linux_virtual_machine",
 		Name: "test_vm",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":                  "test-vm",
 			"location":              rg.Ref("location"),
 			"resource_group_name":   rg.Ref("name"),

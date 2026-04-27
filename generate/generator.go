@@ -647,7 +647,7 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, add
 		jen.Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
 			jen.Id("Type"):   jen.Lit(tfTypeName),
 			jen.Id("Name"):   jen.Id("name"),
-			jen.Id("Config"): jen.Id("m"),
+			jen.Id("Attributes"): jen.Id("m"),
 		}),
 	))
 

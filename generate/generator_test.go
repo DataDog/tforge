@@ -1071,8 +1071,8 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 	if r.Name != "basic" {
 		t.Errorf("name = %q, want basic", r.Name)
 	}
-	if r.Config["name"] != "hello" {
-		t.Errorf("config[name] = %v, want hello", r.Config["name"])
+	if r.Attributes["name"] != "hello" {
+		t.Errorf("config[name] = %v, want hello", r.Attributes["name"])
 	}
 
 	// Case 2: Optional bool set to false must appear in config (not omitted).
@@ -1088,10 +1088,10 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Fatalf("NewWidget: %v", err)
 	}
 	r2 := stack2.Resources[0]
-	if _, exists := r2.Config["enabled"]; !exists {
+	if _, exists := r2.Attributes["enabled"]; !exists {
 		t.Error("config[enabled] should be present when explicitly set to false")
-	} else if r2.Config["enabled"] != false {
-		t.Errorf("config[enabled] = %v, want false", r2.Config["enabled"])
+	} else if r2.Attributes["enabled"] != false {
+		t.Errorf("config[enabled] = %v, want false", r2.Attributes["enabled"])
 	}
 
 	// Case 2b: Optional float64 set to 0 must appear in config (not omitted).
@@ -1105,10 +1105,10 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Fatalf("NewWidget: %v", err)
 	}
 	r2b := stack2b.Resources[0]
-	if _, exists := r2b.Config["count"]; !exists {
+	if _, exists := r2b.Attributes["count"]; !exists {
 		t.Error("config[count] should be present when explicitly set to 0")
-	} else if r2b.Config["count"] != float64(0) {
-		t.Errorf("config[count] = %v, want 0", r2b.Config["count"])
+	} else if r2b.Attributes["count"] != float64(0) {
+		t.Errorf("config[count] = %v, want 0", r2b.Attributes["count"])
 	}
 
 	// Case 3: Optional bool set to true must appear
@@ -1121,8 +1121,8 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Fatalf("NewWidget: %v", err)
 	}
 	r3 := stack3.Resources[0]
-	if r3.Config["enabled"] != true {
-		t.Errorf("config[enabled] = %v, want true", r3.Config["enabled"])
+	if r3.Attributes["enabled"] != true {
+		t.Errorf("config[enabled] = %v, want true", r3.Attributes["enabled"])
 	}
 
 	// Case 4: Nested block round-trip using nested constructor
@@ -1138,7 +1138,7 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 		t.Fatalf("NewWidget: %v", err)
 	}
 	r4 := stack4.Resources[0]
-	settingRaw, ok := r4.Config["setting"]
+	settingRaw, ok := r4.Attributes["setting"]
 	if !ok {
 		t.Fatal("config[setting] missing")
 	}
@@ -1167,13 +1167,13 @@ func TestResourceConstructorRoundTrip(t *testing.T) {
 	}
 	r5 := stack5.Resources[0]
 	for _, key := range []string{"tags", "count", "enabled", "setting"} {
-		if _, exists := r5.Config[key]; exists {
-			t.Errorf("config[%s] should be absent for unset optional, got %v", key, r5.Config[key])
+		if _, exists := r5.Attributes[key]; exists {
+			t.Errorf("config[%s] should be absent for unset optional, got %v", key, r5.Attributes[key])
 		}
 	}
 
 	// Case 6: Verify the config can be rendered to valid JSON
-	data, err := json.Marshal(r5.Config)
+	data, err := json.Marshal(r5.Attributes)
 	if err != nil {
 		t.Fatalf("marshal config: %v", err)
 	}
@@ -1199,8 +1199,8 @@ func TestDataSourceConstructorRoundTrip(t *testing.T) {
 	if ds.Name != "myds" {
 		t.Errorf("name = %q, want myds", ds.Name)
 	}
-	if ds.Config["filter"] != "active" {
-		t.Errorf("config[filter] = %v, want active", ds.Config["filter"])
+	if ds.Attributes["filter"] != "active" {
+		t.Errorf("config[filter] = %v, want active", ds.Attributes["filter"])
 	}
 }
 
@@ -1217,13 +1217,13 @@ func TestFromBridgeRoundTrip(t *testing.T) {
 		t.Fatalf("NewWidget with FromWidget: %v", err)
 	}
 	r := stack.Resources[0]
-	if r.Config["name"] != "direct" {
-		t.Errorf("config[name] = %v, want direct", r.Config["name"])
+	if r.Attributes["name"] != "direct" {
+		t.Errorf("config[name] = %v, want direct", r.Attributes["name"])
 	}
-	if r.Config["enabled"] != true {
-		t.Errorf("config[enabled] = %v, want true", r.Config["enabled"])
+	if r.Attributes["enabled"] != true {
+		t.Errorf("config[enabled] = %v, want true", r.Attributes["enabled"])
 	}
-	tagsRaw := r.Config["tags"].([]any)
+	tagsRaw := r.Attributes["tags"].([]any)
 	if len(tagsRaw) != 2 || tagsRaw[0] != "a" || tagsRaw[1] != "b" {
 		t.Errorf("config[tags] = %v, want [a b]", tagsRaw)
 	}

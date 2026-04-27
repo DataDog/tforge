@@ -33,7 +33,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "google_service_account",
 		Name: "sa",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"account_id":   "cluster-admin",
 			"display_name": "Cluster Admin",
 		},
@@ -43,7 +43,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "google_container_cluster",
 		Name: "cluster",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":                     "cluster",
 			"remove_default_node_pool": true,
 			"initial_node_count":       1,
@@ -53,7 +53,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "google_container_node_pool",
 		Name: "main-pool",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":    "main",
 			"cluster": cluster.Ref("name"),
 			"node_config": map[string]any{
@@ -70,7 +70,7 @@ func NewMyStack() *config.Stack {
 		Name:    "auth",
 		Source:  "terraform-google-modules/kubernetes-engine/google//modules/auth",
 		Version: "14.3.0",
-		Config: map[string]any{
+		Variables: map[string]any{
 			"cluster_name": cluster.Ref("name"),
 			"location":     cluster.Ref("location"),
 			"project_id":   cluster.Ref("project"),
@@ -80,7 +80,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "local_file",
 		Name: "kubeconfig",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"filename": "kubeconfig.yaml",
 			"content":  auth.Ref("kubeconfig_raw"),
 		},
@@ -100,7 +100,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "kubernetes_namespace",
 		Name: "namespace",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"metadata": map[string]any{
 				"name": "development",
 			},
@@ -123,7 +123,7 @@ func NewMyStack() *config.Stack {
 	must(stack.AddResource(config.Resource{
 		Type: "helm_release",
 		Name: "cert-manager",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":             "cert-manager",
 			"repository":       "https://charts.jetstack.io",
 			"chart":            "cert-manager",

@@ -35,7 +35,7 @@ func main() {
 	if err := stack.AddResource(config.Resource{
 		Type: "random_pet",
 		Name: "name",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"length": 2,
 		},
 	}); err != nil {
@@ -46,7 +46,7 @@ func main() {
 		Type:     "aws_instance",
 		Name:     "east",
 		Provider: "aws",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"ami":           "ami-east-123",
 			"instance_type": "t3.micro",
 			"tags": map[string]string{
@@ -64,7 +64,7 @@ func main() {
 		Type:     "aws_instance",
 		Name:     "west",
 		Provider: "aws.west",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"ami":           "ami-west-456",
 			"instance_type": "t3.micro",
 			"tags": map[string]string{
@@ -81,7 +81,7 @@ func main() {
 	if err := stack.AddResource(config.Resource{
 		Type: "aws_s3_bucket",
 		Name: "logs",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"bucket": "${each.key}-${random_pet.name.id}",
 			"tags": map[string]string{
 				"Purpose": "${each.key}",
@@ -102,7 +102,7 @@ func main() {
 		Type:     "aws_availability_zones",
 		Name:     "available",
 		Provider: "aws.west",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"state": "available",
 		},
 	}); err != nil {

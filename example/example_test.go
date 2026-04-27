@@ -52,7 +52,7 @@ func buildExampleStack() *config.Stack {
 	stack.AddResource(config.Resource{
 		Type: "datadog_monitor",
 		Name: "cpu_alert",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"name":    "High CPU Usage Alert",
 			"type":    "metric alert",
 			"message": "CPU usage is above threshold. @slack-alerts",

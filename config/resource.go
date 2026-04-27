@@ -26,8 +26,8 @@ type Resource struct {
 	// Format: "provider.alias" (e.g., "aws.west")
 	Provider string
 
-	// Config contains the resource attributes.
-	Config map[string]any
+	// Attributes contains the resource attributes.
+	Attributes map[string]any
 
 	MetaArguments
 
@@ -65,8 +65,8 @@ type DataSource struct {
 	// Provider specifies a non-default provider configuration.
 	Provider string
 
-	// Config contains the data source filter/query attributes.
-	Config map[string]any
+	// Attributes contains the data source filter/query attributes.
+	Attributes map[string]any
 
 	MetaArguments
 }

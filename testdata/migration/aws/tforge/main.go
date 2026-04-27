@@ -32,7 +32,7 @@ func NewExampleCdktfGoAwsStack() *config.Stack {
 		Name:    "EKS",
 		Source:  "terraform-aws-modules/eks/aws",
 		Version: "~> 19.0",
-		Config: map[string]any{
+		Variables: map[string]any{
 			"cluster_name":    "my-eks",
 			"cluster_version": "1.17",
 			"subnet_ids":      []string{"a", "b"},

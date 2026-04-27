@@ -445,7 +445,7 @@ func buildResourceConfig(r config.Resource) resourceConfigJSON {
 	}
 
 	return resourceConfigJSON{
-		Config:       r.Config,
+		Config:       r.Attributes,
 		Provider:     r.Provider,
 		DependsOn:    r.DependsOn,
 		Count:        r.Count,
@@ -467,7 +467,7 @@ func buildDataSources(dataSources []config.DataSource) map[string]map[string]any
 		}
 
 		result[d.Type][d.Name] = dataSourceConfigJSON{
-			Config:    d.Config,
+			Config:    d.Attributes,
 			Provider:  d.Provider,
 			DependsOn: d.DependsOn,
 			Count:     d.Count,
@@ -486,7 +486,7 @@ func buildModules(modules []config.Module) map[string]any {
 		result[m.Name] = moduleConfigJSON{
 			Source:    m.Source,
 			Version:   m.Version,
-			Config:    m.Config,
+			Config:    m.Variables,
 			Providers: m.Providers,
 			DependsOn: m.DependsOn,
 			Count:     m.Count,

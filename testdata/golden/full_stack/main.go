@@ -35,7 +35,7 @@ func main() {
 	if err := stack.AddResource(config.Resource{
 		Type: "aws_instance",
 		Name: "web",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"ami":           "ami-0c55b159cbfafe1f0",
 			"instance_type": "t3.micro",
 			"tags": map[string]string{
@@ -50,7 +50,7 @@ func main() {
 	if err := stack.AddDataSource(config.DataSource{
 		Type: "aws_ami",
 		Name: "ubuntu",
-		Config: map[string]any{
+		Attributes: map[string]any{
 			"most_recent": true,
 			"owners":      []string{"099720109477"},
 			"filter": []map[string]any{
