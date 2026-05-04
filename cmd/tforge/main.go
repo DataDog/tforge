@@ -113,8 +113,9 @@ func runGenerate(args []string, stderr io.Writer) error {
 	fs.SetOutput(stderr)
 
 	providerSource := fs.String("provider", "", "Provider source (namespace/name), e.g., datadog/datadog")
-	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0")
+	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0. Mutually exclusive with -provider-binary (the version is read from the archive).")
 	schemaFile := fs.String("schema", "", "Path to cached schema JSON file (alternative to -provider/-version)")
+	providerBinary := fs.String("provider-binary", "", "Path to a local Terraform provider release zip (e.g. terraform-provider-datadog_3.39.0_linux_amd64.zip). When set, the schema is extracted offline via Terraform dev_overrides instead of fetching from the registry. Requires -provider; the version is read from the archive.")
 	outputDir := fs.String("output", generate.DefaultOutputDir, "Output directory for generated code")
 	packageName := fs.String("package", "", "Go package name (defaults to provider name)")
 	fs.Usage = func() {
@@ -132,6 +133,11 @@ Examples:
   # Generate from cached schema
   tforge generate -schema ./schema.json -package aws -output ./aws
 
+  # Generate from a local provider archive (offline; for hermetic builds)
+  tforge generate -provider datadog/datadog \
+      -provider-binary ./terraform-provider-datadog_3.39.0_linux_amd64.zip \
+      -package datadog -output ./datadog
+
   # Use with go:generate
   //go:generate tforge generate -provider datadog/datadog -version 3.39.0 -package datadog`)
 	}
@@ -140,22 +146,47 @@ Examples:
 		return err
 	}
 
-	if *schemaFile == "" && (*providerSource == "" || *providerVersion == "") {
-		fs.Usage()
-		return fmt.Errorf("either -schema or both -provider and -version are required")
+	switch {
+	case *providerBinary != "":
+		if *providerSource == "" {
+			fs.Usage()
+			return fmt.Errorf("-provider is required with -provider-binary")
+		}
+		if *providerVersion != "" {
+			fs.Usage()
+			return fmt.Errorf("-version is incompatible with -provider-binary; the version is read from the archive")
+		}
+		if *schemaFile != "" {
+			fs.Usage()
+			return fmt.Errorf("-provider-binary and -schema are mutually exclusive")
+		}
+	case *schemaFile == "":
+		if *providerSource == "" || *providerVersion == "" {
+			fs.Usage()
+			return fmt.Errorf("either -schema or both -provider and -version are required")
+		}
 	}
 
 	var ps *provider.ProviderSchema
 	var source provider.Source
 	var err error
 
-	if *schemaFile != "" {
+	switch {
+	case *schemaFile != "":
 		fmt.Fprintf(stderr, "Loading schema from %s...\n", *schemaFile)
 		ps, err = provider.LoadSchemaFromFile(*schemaFile)
 		if err != nil {
 			return fmt.Errorf("loading schema: %w", err)
 		}
-	} else {
+	case *providerBinary != "":
+		fmt.Fprintf(stderr, "Loading schema from local provider %s (%s)...\n", *providerBinary, *providerSource)
+		schema, fetchErr := provider.FetchSchemaFromBinary(context.Background(), *providerSource, *providerBinary)
+		if fetchErr != nil {
+			return fmt.Errorf("loading schema from binary: %w", fetchErr)
+		}
+		ps = schema.Provider
+		source = schema.Source
+	default:
 		fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
 		schema, fetchErr := provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
 		if fetchErr != nil {
@@ -196,7 +227,8 @@ func runSchema(args []string, stdout, stderr io.Writer) error {
 	fs.SetOutput(stderr)
 
 	providerSource := fs.String("provider", "", "Provider source (namespace/name), e.g., datadog/datadog")
-	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0")
+	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0. Mutually exclusive with -provider-binary (the version is read from the archive).")
+	providerBinary := fs.String("provider-binary", "", "Path to a local Terraform provider release zip (e.g. terraform-provider-datadog_3.39.0_linux_amd64.zip). When set, the schema is extracted offline via Terraform dev_overrides instead of fetching from the registry. Requires -provider; the version is read from the archive.")
 	outputFile := fs.String("output", "", "Output file path (default: stdout)")
 
 	fs.Usage = func() {
@@ -211,6 +243,11 @@ Examples:
   # Save schema to file
   tforge schema -provider datadog/datadog -version 3.39.0 -output datadog-schema.json
 
+  # Extract schema from a local provider archive (offline)
+  tforge schema -provider datadog/datadog \
+      -provider-binary ./terraform-provider-datadog_3.39.0_linux_amd64.zip \
+      -output datadog-schema.json
+
   # Print schema to stdout
   tforge schema -provider hashicorp/aws -version 5.0.0`)
 	}
@@ -219,16 +256,36 @@ Examples:
 		return err
 	}
 
-	if *providerSource == "" || *providerVersion == "" {
-		fs.Usage()
-		return fmt.Errorf("-provider and -version are required")
+	if *providerBinary == "" {
+		if *providerSource == "" || *providerVersion == "" {
+			fs.Usage()
+			return fmt.Errorf("-provider and -version are required")
+		}
+	} else {
+		if *providerSource == "" {
+			fs.Usage()
+			return fmt.Errorf("-provider is required with -provider-binary")
+		}
+		if *providerVersion != "" {
+			fs.Usage()
+			return fmt.Errorf("-version is incompatible with -provider-binary; the version is read from the archive")
+		}
 	}
 
-	fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
-
-	schema, err := provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
-	if err != nil {
-		return fmt.Errorf("fetching schema: %w", err)
+	var schema *provider.Schema
+	var err error
+	if *providerBinary != "" {
+		fmt.Fprintf(stderr, "Loading schema from local provider %s (%s)...\n", *providerBinary, *providerSource)
+		schema, err = provider.FetchSchemaFromBinary(context.Background(), *providerSource, *providerBinary)
+		if err != nil {
+			return fmt.Errorf("loading schema from binary: %w", err)
+		}
+	} else {
+		fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
+		schema, err = provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
+		if err != nil {
+			return fmt.Errorf("fetching schema: %w", err)
+		}
 	}
 
 	data, err := json.MarshalIndent(schema.Provider, "", "  ")
