@@ -499,6 +499,68 @@ func TestGenerateMaxItemsOneCollapse(t *testing.T) {
 	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
+// TestGenerateProviderMetadata verifies that when the generator is given the
+// provider source and version, it emits matching ProviderName/Source/Version
+// constants and a NewProvider helper that wires them automatically. Without
+// the metadata in the Config, neither should be emitted (backwards-compatible).
+func TestGenerateProviderMetadata(t *testing.T) {
+	schema := &provider.ProviderSchema{
+		ConfigSchema: &provider.SchemaBlock{Block: &provider.BlockType{}},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_thing": {Block: &provider.BlockType{}},
+		},
+	}
+
+	t.Run("with metadata", func(t *testing.T) {
+		tmpDir, err := os.MkdirTemp("", "tforge-gen-providermeta-*")
+		require.NoError(t, err)
+		defer os.RemoveAll(tmpDir)
+
+		g := New(Config{
+			PackageName:     "testpkg",
+			OutputDir:       tmpDir,
+			ProviderSource:  "DataDog/datadog",
+			ProviderVersion: "3.39.0",
+		})
+		require.NoError(t, g.Generate(schema))
+
+		data, err := os.ReadFile(filepath.Join(tmpDir, "provider_gen.go"))
+		require.NoError(t, err)
+		content := string(data)
+
+		require.Contains(t, content, `ProviderName    = "datadog"`,
+			"local provider name should come from the source after '/'")
+		require.Contains(t, content, `ProviderSource  = "DataDog/datadog"`)
+		require.Contains(t, content, `ProviderVersion = "3.39.0"`)
+		require.Contains(t, content, "func NewProvider(stack *config.Stack, opts ...config.ProviderOption)",
+			"NewProvider helper signature should be emitted")
+		require.Contains(t, content, "stack.AddProvider(p)",
+			"NewProvider should call AddProvider")
+
+		compileGeneratedCode(t, tmpDir, "testpkg")
+	})
+
+	t.Run("without metadata", func(t *testing.T) {
+		tmpDir, err := os.MkdirTemp("", "tforge-gen-no-providermeta-*")
+		require.NoError(t, err)
+		defer os.RemoveAll(tmpDir)
+
+		g := New(Config{PackageName: "testpkg", OutputDir: tmpDir})
+		require.NoError(t, g.Generate(schema))
+
+		data, err := os.ReadFile(filepath.Join(tmpDir, "provider_gen.go"))
+		require.NoError(t, err)
+		content := string(data)
+
+		require.NotContains(t, content, "ProviderSource",
+			"metadata constants must not leak when ProviderSource is unset")
+		require.NotContains(t, content, "NewProvider",
+			"NewProvider helper must not leak when the metadata is missing")
+
+		compileGeneratedCode(t, tmpDir, "testpkg")
+	})
+}
+
 func TestGenerateWithComments(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-comments-*")
 	require.NoError(t, err)

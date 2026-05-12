@@ -168,6 +168,7 @@ Examples:
 
 	var ps *provider.ProviderSchema
 	var source provider.Source
+	var resolvedVersion string
 	var err error
 
 	switch {
@@ -185,6 +186,7 @@ Examples:
 		}
 		ps = schema.Provider
 		source = schema.Source
+		resolvedVersion = schema.Version
 	default:
 		fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
 		schema, fetchErr := provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
@@ -193,6 +195,7 @@ Examples:
 		}
 		ps = schema.Provider
 		source = schema.Source
+		resolvedVersion = schema.Version
 	}
 
 	pkg := *packageName
@@ -206,9 +209,26 @@ Examples:
 
 	fmt.Fprintf(stderr, "Generating Go code to %s (package %s)...\n", *outputDir, pkg)
 
+	// Prefer the source/version resolved from the schema fetch (these come from
+	// the archive metadata in the binary path, or the registry resolution in
+	// the registry path). When the user passed -schema (a cached JSON), the
+	// loader doesn't have that metadata, so fall back to -provider/-version
+	// flag values.
+	providerSourceStr := ""
+	if source.Name != "" {
+		providerSourceStr = source.String()
+	} else {
+		providerSourceStr = *providerSource
+	}
+	if resolvedVersion == "" {
+		resolvedVersion = *providerVersion
+	}
+
 	gen := generate.New(generate.Config{
-		OutputDir:   *outputDir,
-		PackageName: pkg,
+		OutputDir:       *outputDir,
+		PackageName:     pkg,
+		ProviderSource:  providerSourceStr,
+		ProviderVersion: resolvedVersion,
 	})
 
 	if err := gen.Generate(ps); err != nil {

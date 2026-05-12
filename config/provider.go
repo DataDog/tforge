@@ -28,6 +28,29 @@ func (p Provider) Address() string {
 	return p.Name
 }
 
+// ProviderOption mutates a Provider as part of a functional-options
+// constructor (see the generated `NewProvider` in each provider package). It
+// lets callers override fields like Alias or Config without having to repeat
+// the Name/Source/Version that the generated helper already knows.
+type ProviderOption func(*Provider)
+
+// WithProviderAlias sets the provider alias, used when a stack needs multiple
+// configurations of the same provider.
+func WithProviderAlias(alias string) ProviderOption {
+	return func(p *Provider) {
+		p.Alias = alias
+	}
+}
+
+// WithProviderConfig sets provider-specific configuration as a free-form map
+// (e.g. credentials, endpoints). Pair this with a generated FromProviderConfig
+// bridge to feed a typed ProviderConfig in instead of a raw map.
+func WithProviderConfig(cfg map[string]any) ProviderOption {
+	return func(p *Provider) {
+		p.Config = cfg
+	}
+}
+
 // Variable represents a Terraform input variable.
 type Variable struct {
 	// Name is the variable name.
