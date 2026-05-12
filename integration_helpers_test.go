@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 var update = flag.Bool("update", false, "update golden files")
@@ -27,18 +29,14 @@ func requireCLI(t *testing.T, name string) {
 func requireDocker(t *testing.T) {
 	t.Helper()
 	out, err := exec.Command("docker", "info").CombinedOutput()
-	if err != nil {
-		t.Fatalf("Docker not available: %v\n%s", err, out)
-	}
+	require.NoError(t, err, "Docker not available: %v\n%s", err, out)
 }
 
 // tforgeRoot returns the absolute path to the repository root.
 func tforgeRoot(t *testing.T) string {
 	t.Helper()
 	root, err := filepath.Abs(".")
-	if err != nil {
-		t.Fatalf("resolving repo root: %v", err)
-	}
+	require.NoError(t, err, "resolving repo root")
 	return root
 }
 
@@ -76,9 +74,7 @@ func copyDir(t *testing.T, src, dst string, excludes ...string) {
 		}
 		return os.WriteFile(target, data, 0644)
 	})
-	if err != nil {
-		t.Fatalf("copying %s to %s: %v", src, dst, err)
-	}
+	require.NoError(t, err, "copying %s to %s", src, dst)
 }
 
 // normalizeTFJSON unmarshals JSON and strips CDKTF metadata for comparison:
@@ -86,9 +82,7 @@ func copyDir(t *testing.T, src, dst string, excludes ...string) {
 func normalizeTFJSON(t *testing.T, data []byte) map[string]any {
 	t.Helper()
 	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		t.Fatalf("unmarshal JSON: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &m), "unmarshal JSON")
 	cleanJSON(m)
 	delete(m, "//")
 	if tf, ok := m["terraform"].(map[string]any); ok {
@@ -131,13 +125,9 @@ func cleanJSON(v any) any {
 func jsonEqual(t *testing.T, label string, want, got map[string]any) bool {
 	t.Helper()
 	wantBytes, err := json.MarshalIndent(want, "", "  ")
-	if err != nil {
-		t.Fatalf("marshal want: %v", err)
-	}
+	require.NoError(t, err, "marshal want")
 	gotBytes, err := json.MarshalIndent(got, "", "  ")
-	if err != nil {
-		t.Fatalf("marshal got: %v", err)
-	}
+	require.NoError(t, err, "marshal got")
 	if string(wantBytes) == string(gotBytes) {
 		return true
 	}
@@ -161,9 +151,7 @@ func runCmd(t *testing.T, dir string, env []string, name string, args ...string)
 func discoverDirs(t *testing.T, path string) []string {
 	t.Helper()
 	entries, err := os.ReadDir(path)
-	if err != nil {
-		t.Fatalf("reading %s: %v", path, err)
-	}
+	require.NoError(t, err, "reading %s", path)
 	var dirs []string
 	for _, e := range entries {
 		if e.IsDir() {

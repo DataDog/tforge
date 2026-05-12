@@ -13,6 +13,8 @@ import (
 	"sort"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // pluginCacheDir is the host directory used to cache Terraform/OpenTofu
@@ -48,13 +50,9 @@ func TestMigration(t *testing.T) {
 	t.Run("invalid_cdktf_json", func(t *testing.T) {
 		requireCLI(t, "tforge")
 		dir := t.TempDir()
-		if err := os.WriteFile(filepath.Join(dir, "cdktf.json"), []byte("not json"), 0644); err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "cdktf.json"), []byte("not json"), 0644))
 		out, err := runCmd(t, dir, nil, "tforge", "migrate", "-dir", dir)
-		if err == nil {
-			t.Error("expected tforge migrate to fail on invalid cdktf.json")
-		}
+		require.Error(t, err, "expected tforge migrate to fail on invalid cdktf.json")
 		t.Logf("output: %s", out)
 	})
 
@@ -62,22 +60,16 @@ func TestMigration(t *testing.T) {
 		requireCLI(t, "tforge")
 		dir := t.TempDir()
 		out, err := runCmd(t, dir, nil, "tforge", "migrate", "-dir", dir)
-		if err == nil {
-			t.Error("expected tforge migrate to fail when cdktf.json is missing")
-		}
+		require.Error(t, err, "expected tforge migrate to fail when cdktf.json is missing")
 		t.Logf("output: %s", out)
 	})
 
 	t.Run("no_providers", func(t *testing.T) {
 		requireCLI(t, "tforge")
 		dir := t.TempDir()
-		if err := os.WriteFile(filepath.Join(dir, "cdktf.json"), []byte(`{"terraformProviders":[]}`), 0644); err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "cdktf.json"), []byte(`{"terraformProviders":[]}`), 0644))
 		out, err := runCmd(t, dir, nil, "tforge", "migrate", "-dir", dir)
-		if err == nil {
-			t.Error("expected tforge migrate to fail with no providers")
-		}
+		require.Error(t, err, "expected tforge migrate to fail with no providers")
 		t.Logf("output: %s", out)
 	})
 }
@@ -110,54 +102,37 @@ func testMigrationExample(t *testing.T, root, migrationDir, name, cli string) {
 	// Step 2: Run tforge migrate.
 	env := []string{"TFORGE_CLI=" + cli}
 	out, err := runCmd(t, tmpDir, env, "tforge", "migrate", "-dir", tmpDir)
-	if err != nil {
-		t.Fatalf("tforge migrate failed: %v\n%s", err, out)
-	}
+	require.NoError(t, err, "tforge migrate failed: %v\n%s", err, out)
 
 	// Step 3: Verify cdktf.json deleted.
-	if _, err := os.Stat(filepath.Join(tmpDir, "cdktf.json")); !os.IsNotExist(err) {
-		t.Error("cdktf.json should have been deleted by tforge migrate")
-	}
+	_, err = os.Stat(filepath.Join(tmpDir, "cdktf.json"))
+	require.True(t, os.IsNotExist(err), "cdktf.json should have been deleted by tforge migrate")
 
 	// Step 4: Verify at least one generate.go created.
 	genFiles := findFiles(t, tmpDir, "generate.go")
-	if len(genFiles) == 0 {
-		t.Fatal("no generate.go files created by tforge migrate")
-	}
+	require.NotEmpty(t, genFiles, "no generate.go files created by tforge migrate")
 
 	// Step 5: Swap in tforge main.go and go.mod.
 	copyFile(t, filepath.Join(tforgeDir, "main.go"), filepath.Join(tmpDir, "main.go"))
 	goModSrc, err := os.ReadFile(filepath.Join(tforgeDir, "go.mod"))
-	if err != nil {
-		t.Fatalf("reading tforge/go.mod: %v", err)
-	}
+	require.NoError(t, err, "reading tforge/go.mod")
 	goMod := string(goModSrc) + "\nreplace github.com/DataDog/tforge => " + root + "\n"
-	if err := os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644); err != nil {
-		t.Fatalf("writing go.mod: %v", err)
-	}
+	require.NoError(t, os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644), "writing go.mod")
 
 	// Step 6: go generate.
 	out, err = runCmd(t, tmpDir, env, "go", "generate", "./...")
-	if err != nil {
-		t.Fatalf("go generate failed: %v\n%s", err, out)
-	}
+	require.NoError(t, err, "go generate failed: %v\n%s", err, out)
 
 	// Step 7: go run . → produces main.tf.json in the temp dir.
 	out, err = runCmd(t, tmpDir, env, "go", "run", ".")
-	if err != nil {
-		t.Fatalf("go run failed: %v\n%s", err, out)
-	}
+	require.NoError(t, err, "go run failed: %v\n%s", err, out)
 
 	actual, err := os.ReadFile(filepath.Join(tmpDir, "main.tf.json"))
-	if err != nil {
-		t.Fatalf("reading main.tf.json: %v", err)
-	}
+	require.NoError(t, err, "reading main.tf.json")
 
 	// Step 8: Normalize and compare.
 	expectedData, err := os.ReadFile(expectedFile)
-	if err != nil {
-		t.Fatalf("reading expected: %v", err)
-	}
+	require.NoError(t, err, "reading expected")
 	wantNorm := normalizeTFJSON(t, expectedData)
 	gotNorm := normalizeTFJSON(t, actual)
 	jsonEqual(t, name, wantNorm, gotNorm)
@@ -199,12 +174,8 @@ func findFiles(t *testing.T, dir, name string) []string {
 func copyFile(t *testing.T, src, dst string) {
 	t.Helper()
 	data, err := os.ReadFile(src)
-	if err != nil {
-		t.Fatalf("reading %s: %v", src, err)
-	}
-	if err := os.WriteFile(dst, data, 0644); err != nil {
-		t.Fatalf("writing %s: %v", dst, err)
-	}
+	require.NoError(t, err, "reading %s", src)
+	require.NoError(t, os.WriteFile(dst, data, 0644), "writing %s", dst)
 }
 
 // ---------------------------------------------------------------------------
@@ -231,9 +202,7 @@ func TestSnapshots(t *testing.T) {
 					continue
 				}
 				out, err := runCmd(t, root, env, "go", "generate", "./testdata/golden/"+name+"/...")
-				if err != nil {
-					t.Fatalf("go generate %s failed with %s: %v\n%s", name, cli, err, out)
-				}
+				require.NoError(t, err, "go generate %s failed with %s: %v\n%s", name, cli, err, out)
 			}
 
 			// Compare generated Go code against *.go.golden snapshots.
@@ -262,9 +231,8 @@ func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
 			}
 
 			goldenFile := filepath.Join(goldenBase, name, "main.tf.golden.json")
-			if _, err := os.Stat(goldenFile); err != nil {
-				t.Fatalf("missing golden file %s — run 'make update-snapshots' to create it", goldenFile)
-			}
+			_, err := os.Stat(goldenFile)
+			require.NoError(t, err, "missing golden file %s — run 'make update-snapshots' to create it", goldenFile)
 
 			// go run ./<dir> → stdout.
 			cmd := exec.Command("go", "run", "./testdata/golden/"+name)
@@ -275,20 +243,16 @@ func compareJSONOutputGoldens(t *testing.T, root, goldenBase string) {
 				if ee, ok := err.(*exec.ExitError); ok {
 					stderr = ee.Stderr
 				}
-				t.Fatalf("go run failed: %v\n%s", err, stderr)
+				require.NoError(t, err, "go run failed: %v\n%s", err, stderr)
 			}
 
 			if *update {
-				if err := os.WriteFile(goldenFile, actual, 0644); err != nil {
-					t.Fatalf("updating golden file: %v", err)
-				}
+				require.NoError(t, os.WriteFile(goldenFile, actual, 0644), "updating golden file")
 				return
 			}
 
 			golden, err := os.ReadFile(goldenFile)
-			if err != nil {
-				t.Fatalf("reading golden file: %v", err)
-			}
+			require.NoError(t, err, "reading golden file")
 
 			if !bytes.Equal(bytes.TrimSpace(actual), bytes.TrimSpace(golden)) {
 				t.Errorf("output mismatch for %s\n--- golden ---\n%s\n--- actual ---\n%s",
@@ -355,9 +319,7 @@ func compareGeneratedCodeGoldens(t *testing.T, goldenBase string) {
 		}
 	}
 
-	if len(providerDirSet) == 0 {
-		t.Fatal("no generate.go files found under testdata/golden")
-	}
+	require.NotEmpty(t, providerDirSet, "no generate.go files found under testdata/golden")
 
 	for rel, dir := range providerDirSet {
 		if isGoldenExcluded(rel) {
@@ -372,9 +334,7 @@ func compareGeneratedCodeGoldens(t *testing.T, goldenBase string) {
 			// committed *.go.golden files. Compare both sets to detect
 			// regressions where the generator stops emitting a file.
 			entries, err := os.ReadDir(dir)
-			if err != nil {
-				t.Fatalf("reading directory %s: %v", rel, err)
-			}
+			require.NoError(t, err, "reading directory %s", rel)
 
 			genSet := map[string]bool{}
 			goldenSet := map[string]bool{}
@@ -397,9 +357,7 @@ func compareGeneratedCodeGoldens(t *testing.T, goldenBase string) {
 				}
 			}
 
-			if len(genSet) == 0 {
-				t.Fatalf("no *_gen.go files found in %s — did go generate run?", rel)
-			}
+			require.NotEmpty(t, genSet, "no *_gen.go files found in %s — did go generate run?", rel)
 
 			genFiles := make([]string, 0, len(genSet))
 			for name := range genSet {
@@ -415,27 +373,18 @@ func compareGeneratedCodeGoldens(t *testing.T, goldenBase string) {
 
 					if *update {
 						src, err := os.ReadFile(genFile)
-						if err != nil {
-							t.Fatalf("reading generated file: %v", err)
-						}
-						if err := os.WriteFile(goldenFile, src, 0644); err != nil {
-							t.Fatalf("updating golden file: %v", err)
-						}
+						require.NoError(t, err, "reading generated file")
+						require.NoError(t, os.WriteFile(goldenFile, src, 0644), "updating golden file")
 						return
 					}
 
-					if _, err := os.Stat(goldenFile); err != nil {
-						t.Fatalf("missing golden file %s.golden — run 'make update-snapshots' to create it", name)
-					}
+					_, err := os.Stat(goldenFile)
+					require.NoError(t, err, "missing golden file %s.golden — run 'make update-snapshots' to create it", name)
 
 					golden, err := os.ReadFile(goldenFile)
-					if err != nil {
-						t.Fatalf("reading golden file: %v", err)
-					}
+					require.NoError(t, err, "reading golden file")
 					actual, err := os.ReadFile(genFile)
-					if err != nil {
-						t.Fatalf("reading generated file: %v", err)
-					}
+					require.NoError(t, err, "reading generated file")
 
 					if !bytes.Equal(golden, actual) {
 						goldenLines := strings.Split(string(golden), "\n")
@@ -493,9 +442,7 @@ func TestTerraformValidate(t *testing.T) {
 			goldenFiles = append(goldenFiles, f)
 		}
 	}
-	if len(goldenFiles) == 0 {
-		t.Fatal("no golden files found")
-	}
+	require.NotEmpty(t, goldenFiles, "no golden files found")
 
 	// Group by required_providers hash.
 	groups := groupByProviders(t, goldenFiles)
@@ -550,13 +497,9 @@ func groupByProviders(t *testing.T, files []string) map[string]*providerGroup {
 
 	for _, f := range files {
 		data, err := os.ReadFile(f)
-		if err != nil {
-			t.Fatalf("reading %s: %v", f, err)
-		}
+		require.NoError(t, err, "reading %s", f)
 		var doc map[string]any
-		if err := json.Unmarshal(data, &doc); err != nil {
-			t.Fatalf("parsing %s: %v", f, err)
-		}
+		require.NoError(t, json.Unmarshal(data, &doc), "parsing %s", f)
 
 		// Extract required_providers.
 		rp := map[string]any{}
@@ -596,9 +539,7 @@ func cacheVolName(toolKey, groupHash string) string {
 func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []toolInfo) {
 	t.Helper()
 
-		if err := os.MkdirAll(pluginCacheDir, 0755); err != nil {
-		t.Fatalf("creating plugin cache dir: %v", err)
-	}
+	require.NoError(t, os.MkdirAll(pluginCacheDir, 0755), "creating plugin cache dir")
 
 	for _, group := range groups {
 		for _, tool := range tools {
@@ -606,9 +547,8 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 			initImage := tool.image + ":latest"
 
 			// Create volume if needed.
-			if out, err := exec.Command("docker", "volume", "create", vol).CombinedOutput(); err != nil {
-				t.Fatalf("docker volume create %s failed: %v\n%s", vol, err, out)
-			}
+			out, err := exec.Command("docker", "volume", "create", vol).CombinedOutput()
+			require.NoError(t, err, "docker volume create %s failed: %v\n%s", vol, err, out)
 
 			// Check if cache is valid by reading config.hash from volume.
 			configHash := fmt.Sprintf("%x", sha256.Sum256(group.configJSON))
@@ -624,15 +564,12 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 
 			// Reset volume: rm is best-effort (may not exist yet), create must succeed.
 			exec.Command("docker", "volume", "rm", vol).Run() //nolint:errcheck // best-effort cleanup
-			if out, err := exec.Command("docker", "volume", "create", vol).CombinedOutput(); err != nil {
-				t.Fatalf("docker volume create %s failed: %v\n%s", vol, err, out)
-			}
+			out, err = exec.Command("docker", "volume", "create", vol).CombinedOutput()
+			require.NoError(t, err, "docker volume create %s failed: %v\n%s", vol, err, out)
 
 			// Write config to temp file for docker cp.
 			tmpConfig, err := os.CreateTemp("", "tforge-config-*.tf.json")
-			if err != nil {
-				t.Fatalf("creating temp config: %v", err)
-			}
+			require.NoError(t, err, "creating temp config")
 			tmpConfig.Write(group.configJSON)
 			tmpConfig.Close()
 			defer os.Remove(tmpConfig.Name())
@@ -651,23 +588,20 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 				"-e", "TF_PLUGIN_CACHE_DIR=/plugin-cache",
 				initImage,
 				"-c", script).Output()
-			if err != nil {
-				t.Fatalf("docker create failed for %s init: %v", tool.cmd, err)
-			}
+			require.NoError(t, err, "docker create failed for %s init", tool.cmd)
 			containerID := strings.TrimSpace(string(createOut))
 
 			// Copy config file into container.
-			if out, err := exec.Command("docker", "cp", tmpConfig.Name(), containerID+":/tmp/config.tf.json").CombinedOutput(); err != nil {
+			out, err = exec.Command("docker", "cp", tmpConfig.Name(), containerID+":/tmp/config.tf.json").CombinedOutput()
+			if err != nil {
 				exec.Command("docker", "rm", containerID).Run()
-				t.Fatalf("docker cp failed: %v\n%s", err, out)
+				require.NoError(t, err, "docker cp failed: %v\n%s", err, out)
 			}
 
 			// Start container.
-			out, err := exec.Command("docker", "start", "-a", containerID).CombinedOutput()
+			out, err = exec.Command("docker", "start", "-a", containerID).CombinedOutput()
 			exec.Command("docker", "rm", containerID).Run()
-			if err != nil {
-				t.Fatalf("init failed for %s group %s: %v\n%s", tool.cmd, group.hash, err, out)
-			}
+			require.NoError(t, err, "init failed for %s group %s: %v\n%s", tool.cmd, group.hash, err, out)
 		}
 	}
 }
@@ -676,7 +610,6 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 func validateVersion(t *testing.T, image, cmd, toolKey string, groups map[string]*providerGroup, goldenFiles []string) {
 	t.Helper()
 
-	
 	// Map each file to its group hash.
 	fileGroup := map[string]string{}
 	for _, g := range groups {
@@ -727,17 +660,14 @@ func validateVersion(t *testing.T, image, cmd, toolKey string, groups map[string
 		"-c", script.String())
 
 	createOut, err := exec.Command("docker", args...).Output()
-	if err != nil {
-		t.Fatalf("docker create failed: %v", err)
-	}
+	require.NoError(t, err, "docker create failed")
 	containerID := strings.TrimSpace(string(createOut))
 	defer exec.Command("docker", "rm", containerID).Run()
 
 	// Copy golden files.
 	for i, f := range goldenFiles {
-		if out, err := exec.Command("docker", "cp", f, fmt.Sprintf("%s:/tmp/golden_%d.tf.json", containerID, i)).CombinedOutput(); err != nil {
-			t.Fatalf("docker cp %s failed: %v\n%s", f, err, out)
-		}
+		out, err := exec.Command("docker", "cp", f, fmt.Sprintf("%s:/tmp/golden_%d.tf.json", containerID, i)).CombinedOutput()
+		require.NoError(t, err, "docker cp %s failed: %v\n%s", f, err, out)
 	}
 
 	// Run.

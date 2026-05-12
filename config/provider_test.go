@@ -2,6 +2,8 @@ package config
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestProviderAddress(t *testing.T) {
@@ -25,9 +27,7 @@ func TestProviderAddress(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.provider.Address()
-			if got != tt.want {
-				t.Fatalf("Address() = %q, want %q", got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "Address() = %q, want %q", got, tt.want)
 		})
 	}
 }

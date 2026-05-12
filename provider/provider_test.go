@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseSourceValid(t *testing.T) {
@@ -23,15 +25,9 @@ func TestParseSourceValid(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			src, err := ParseSource(tt.input)
-			if err != nil {
-				t.Fatalf("ParseSource(%q) returned error: %v", tt.input, err)
-			}
-			if src.Namespace != tt.namespace {
-				t.Errorf("Namespace = %q, want %q", src.Namespace, tt.namespace)
-			}
-			if src.Name != tt.name {
-				t.Errorf("Name = %q, want %q", src.Name, tt.name)
-			}
+			require.NoError(t, err, "ParseSource(%q) returned error", tt.input)
+			require.Equal(t, tt.namespace, src.Namespace, "Namespace = %q, want %q", src.Namespace, tt.namespace)
+			require.Equal(t, tt.name, src.Name, "Name = %q, want %q", src.Name, tt.name)
 		})
 	}
 }
@@ -49,53 +45,33 @@ func TestParseSourceInvalid(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, err := ParseSource(tt.input)
-			if err == nil {
-				t.Errorf("ParseSource(%q) expected error, got nil", tt.input)
-			}
+			require.Error(t, err, "ParseSource(%q) expected error, got nil", tt.input)
 		})
 	}
 }
 
 func TestSourceString(t *testing.T) {
 	src := Source{Namespace: "dd", Name: "dd"}
-	if got := src.String(); got != "dd/dd" {
-		t.Errorf("String() = %q, want %q", got, "dd/dd")
-	}
+	require.Equal(t, "dd/dd", src.String())
 }
 
 func TestLoadSchemaFromJSONValid(t *testing.T) {
 	validJSON := []byte(`{"resource_schemas":{"test_thing":{"block":{"attributes":{"id":{"type":"string","computed":true}}}}}}`)
 	schema, err := LoadSchemaFromJSON(validJSON)
-	if err != nil {
-		t.Fatalf("LoadSchemaFromJSON returned error: %v", err)
-	}
-	if schema == nil {
-		t.Fatal("LoadSchemaFromJSON returned nil schema")
-	}
-	if schema.ResourceSchemas == nil {
-		t.Fatal("ResourceSchemas is nil")
-	}
+	require.NoError(t, err, "LoadSchemaFromJSON returned error")
+	require.NotNil(t, schema, "LoadSchemaFromJSON returned nil schema")
+	require.NotNil(t, schema.ResourceSchemas, "ResourceSchemas is nil")
 	rs, ok := schema.ResourceSchemas["test_thing"]
-	if !ok {
-		t.Fatal("test_thing resource not found")
-	}
-	if rs.Block == nil {
-		t.Fatal("test_thing block is nil")
-	}
+	require.True(t, ok, "test_thing resource not found")
+	require.NotNil(t, rs.Block, "test_thing block is nil")
 	attr, ok := rs.Block.Attributes["id"]
-	if !ok {
-		t.Fatal("id attribute not found")
-	}
-	if !attr.Computed {
-		t.Error("expected id to be computed")
-	}
+	require.True(t, ok, "id attribute not found")
+	require.True(t, attr.Computed, "expected id to be computed")
 }
 
 func TestLoadSchemaFromJSONInvalid(t *testing.T) {
 	_, err := LoadSchemaFromJSON([]byte(`{not json`))
-	if err == nil {
-		t.Error("expected error for invalid JSON, got nil")
-	}
+	require.Error(t, err, "expected error for invalid JSON, got nil")
 }
 
 func TestSaveAndLoadSchemaRoundtrip(t *testing.T) {
@@ -124,45 +100,24 @@ func TestSaveAndLoadSchemaRoundtrip(t *testing.T) {
 
 	// Marshal and write manually (SaveSchemaToFile was removed as unused)
 	data, err := json.MarshalIndent(original.Provider, "", "  ")
-	if err != nil {
-		t.Fatalf("MarshalIndent: %v", err)
-	}
-	if err := os.WriteFile(path, data, 0644); err != nil {
-		t.Fatalf("WriteFile: %v", err)
-	}
+	require.NoError(t, err, "MarshalIndent")
+	require.NoError(t, os.WriteFile(path, data, 0644), "WriteFile")
 
 	loaded, err := LoadSchemaFromFile(path)
-	if err != nil {
-		t.Fatalf("LoadSchemaFromFile: %v", err)
-	}
-
-	if loaded == nil {
-		t.Fatal("loaded schema is nil")
-	}
+	require.NoError(t, err, "LoadSchemaFromFile")
+	require.NotNil(t, loaded, "loaded schema is nil")
 	rs, ok := loaded.ResourceSchemas["test_resource"]
-	if !ok {
-		t.Fatal("test_resource not found after roundtrip")
-	}
-	if rs.Block == nil {
-		t.Fatal("block is nil after roundtrip")
-	}
-	if rs.Block.Description != "a resource" {
-		t.Errorf("description = %q, want %q", rs.Block.Description, "a resource")
-	}
+	require.True(t, ok, "test_resource not found after roundtrip")
+	require.NotNil(t, rs.Block, "block is nil after roundtrip")
+	require.Equal(t, "a resource", rs.Block.Description)
 	attr, ok := rs.Block.Attributes["name"]
-	if !ok {
-		t.Fatal("name attribute not found after roundtrip")
-	}
-	if !attr.Required {
-		t.Error("expected name to be required after roundtrip")
-	}
+	require.True(t, ok, "name attribute not found after roundtrip")
+	require.True(t, attr.Required, "expected name to be required after roundtrip")
 }
 
 func TestLoadSchemaFromFileNotFound(t *testing.T) {
 	_, err := LoadSchemaFromFile("/nonexistent/path/schema.json")
-	if err == nil {
-		t.Error("expected error for nonexistent file, got nil")
-	}
+	require.Error(t, err, "expected error for nonexistent file, got nil")
 }
 
 // ---------------------------------------------------------------------------
@@ -185,15 +140,10 @@ func TestParseSchemaOutput_ExactMatch(t *testing.T) {
 	}`)
 
 	ps, err := parseSchemaOutput(data, src)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if ps.ConfigSchema == nil {
-		t.Fatal("ConfigSchema is nil")
-	}
-	if _, ok := ps.ResourceSchemas["datadog_monitor"]; !ok {
-		t.Error("expected datadog_monitor in ResourceSchemas")
-	}
+	require.NoError(t, err, "unexpected error")
+	require.NotNil(t, ps.ConfigSchema, "ConfigSchema is nil")
+	_, ok := ps.ResourceSchemas["datadog_monitor"]
+	require.True(t, ok, "expected datadog_monitor in ResourceSchemas")
 }
 
 func TestParseSchemaOutput_ContainsSrcString(t *testing.T) {
@@ -210,12 +160,9 @@ func TestParseSchemaOutput_ContainsSrcString(t *testing.T) {
 	}`)
 
 	ps, err := parseSchemaOutput(data, src)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := ps.ResourceSchemas["aws_instance"]; !ok {
-		t.Error("expected aws_instance in ResourceSchemas")
-	}
+	require.NoError(t, err, "unexpected error")
+	_, ok := ps.ResourceSchemas["aws_instance"]
+	require.True(t, ok, "expected aws_instance in ResourceSchemas")
 }
 
 func TestParseSchemaOutput_SuffixMatch(t *testing.T) {
@@ -233,12 +180,9 @@ func TestParseSchemaOutput_SuffixMatch(t *testing.T) {
 	}`)
 
 	ps, err := parseSchemaOutput(data, src)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := ps.ResourceSchemas["mycloud_thing"]; !ok {
-		t.Error("expected mycloud_thing in ResourceSchemas")
-	}
+	require.NoError(t, err, "unexpected error")
+	_, ok := ps.ResourceSchemas["mycloud_thing"]
+	require.True(t, ok, "expected mycloud_thing in ResourceSchemas")
 }
 
 func TestParseSchemaOutput_ExactMatchPreferredOverSuffix(t *testing.T) {
@@ -262,15 +206,11 @@ func TestParseSchemaOutput_ExactMatchPreferredOverSuffix(t *testing.T) {
 	}`)
 
 	ps, err := parseSchemaOutput(data, src)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := ps.ResourceSchemas["aws_correct"]; !ok {
-		t.Error("expected aws_correct in ResourceSchemas (exact match)")
-	}
-	if _, ok := ps.ResourceSchemas["aws_wrong"]; ok {
-		t.Error("should not have returned hashicorp/aws schema")
-	}
+	require.NoError(t, err, "unexpected error")
+	_, ok := ps.ResourceSchemas["aws_correct"]
+	require.True(t, ok, "expected aws_correct in ResourceSchemas (exact match)")
+	_, ok = ps.ResourceSchemas["aws_wrong"]
+	require.False(t, ok, "should not have returned hashicorp/aws schema")
 }
 
 func TestParseSchemaOutput_SuffixMatchRejectsWrongNamespace(t *testing.T) {
@@ -291,12 +231,9 @@ func TestParseSchemaOutput_SuffixMatchRejectsWrongNamespace(t *testing.T) {
 
 	// Single suffix candidate: falls back gracefully.
 	ps, err := parseSchemaOutput(data, src)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := ps.ResourceSchemas["aws_instance"]; !ok {
-		t.Error("expected aws_instance via suffix fallback")
-	}
+	require.NoError(t, err, "unexpected error")
+	_, ok := ps.ResourceSchemas["aws_instance"]
+	require.True(t, ok, "expected aws_instance via suffix fallback")
 }
 
 func TestParseSchemaOutput_AmbiguousSuffixReturnsError(t *testing.T) {
@@ -321,12 +258,8 @@ func TestParseSchemaOutput_AmbiguousSuffixReturnsError(t *testing.T) {
 	}`)
 
 	_, err := parseSchemaOutput(data, src)
-	if err == nil {
-		t.Fatal("expected error for ambiguous suffix match, got nil")
-	}
-	if !strings.Contains(err.Error(), "multiple") {
-		t.Errorf("error = %q, want it to mention 'multiple'", err.Error())
-	}
+	require.Error(t, err, "expected error for ambiguous suffix match, got nil")
+	require.Contains(t, err.Error(), "multiple", "error = %q, want it to mention 'multiple'", err.Error())
 }
 
 func TestParseSchemaOutput_CrossRegistryExactMatch(t *testing.T) {
@@ -349,12 +282,9 @@ func TestParseSchemaOutput_CrossRegistryExactMatch(t *testing.T) {
 	}`)
 
 	ps, err := parseSchemaOutput(data, src)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if _, ok := ps.ResourceSchemas["datadog_monitor"]; !ok {
-		t.Error("expected datadog_monitor from exact match")
-	}
+	require.NoError(t, err, "unexpected error")
+	_, ok := ps.ResourceSchemas["datadog_monitor"]
+	require.True(t, ok, "expected datadog_monitor from exact match")
 }
 
 func TestParseSchemaOutput_ProviderNotFound(t *testing.T) {
@@ -371,12 +301,8 @@ func TestParseSchemaOutput_ProviderNotFound(t *testing.T) {
 	}`)
 
 	_, err := parseSchemaOutput(data, src)
-	if err == nil {
-		t.Fatal("expected error for provider not found, got nil")
-	}
-	if got := err.Error(); !strings.Contains(got, "not found") {
-		t.Errorf("error = %q, want it to contain 'not found'", got)
-	}
+	require.Error(t, err, "expected error for provider not found, got nil")
+	require.Contains(t, err.Error(), "not found", "error = %q, want it to contain 'not found'", err.Error())
 }
 
 func TestParseSchemaOutput_EmptyProviders(t *testing.T) {
@@ -384,17 +310,13 @@ func TestParseSchemaOutput_EmptyProviders(t *testing.T) {
 	data := []byte(`{"format_version": "1.0", "provider_schemas": {}}`)
 
 	_, err := parseSchemaOutput(data, src)
-	if err == nil {
-		t.Fatal("expected error for empty provider_schemas, got nil")
-	}
+	require.Error(t, err, "expected error for empty provider_schemas, got nil")
 }
 
 func TestParseSchemaOutput_InvalidJSON(t *testing.T) {
 	src := Source{Namespace: "datadog", Name: "datadog"}
 	_, err := parseSchemaOutput([]byte(`{not json`), src)
-	if err == nil {
-		t.Fatal("expected error for invalid JSON, got nil")
-	}
+	require.Error(t, err, "expected error for invalid JSON, got nil")
 }
 
 // ---------------------------------------------------------------------------
@@ -409,28 +331,18 @@ func TestLoadSchemaFromJSON_WithAllSections(t *testing.T) {
 	}`
 
 	schema, err := LoadSchemaFromJSON([]byte(input))
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if schema.ConfigSchema == nil {
-		t.Error("ConfigSchema is nil")
-	}
-	if _, ok := schema.ResourceSchemas["r1"]; !ok {
-		t.Error("r1 resource not found")
-	}
-	if _, ok := schema.DataSourceSchemas["d1"]; !ok {
-		t.Error("d1 data source not found")
-	}
+	require.NoError(t, err, "unexpected error")
+	require.NotNil(t, schema.ConfigSchema, "ConfigSchema is nil")
+	_, ok := schema.ResourceSchemas["r1"]
+	require.True(t, ok, "r1 resource not found")
+	_, ok = schema.DataSourceSchemas["d1"]
+	require.True(t, ok, "d1 data source not found")
 }
 
 func TestLoadSchemaFromJSON_EmptyObject(t *testing.T) {
 	schema, err := LoadSchemaFromJSON([]byte(`{}`))
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if schema == nil {
-		t.Fatal("schema is nil")
-	}
+	require.NoError(t, err, "unexpected error")
+	require.NotNil(t, schema, "schema is nil")
 }
 
 // ---------------------------------------------------------------------------
@@ -494,13 +406,9 @@ func TestFilterEnv(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := filterEnv(tt.env, tt.keys...)
-			if len(got) != len(tt.want) {
-				t.Fatalf("filterEnv() returned %d entries, want %d\ngot:  %v\nwant: %v", len(got), len(tt.want), got, tt.want)
-			}
+			require.Len(t, got, len(tt.want), "filterEnv() returned %d entries, want %d\ngot:  %v\nwant: %v", len(got), len(tt.want), got, tt.want)
 			for i := range got {
-				if got[i] != tt.want[i] {
-					t.Errorf("filterEnv()[%d] = %q, want %q", i, got[i], tt.want[i])
-				}
+				require.Equal(t, tt.want[i], got[i], "filterEnv()[%d] = %q, want %q", i, got[i], tt.want[i])
 			}
 		})
 	}
@@ -513,23 +421,15 @@ func TestFilterEnv(t *testing.T) {
 func TestFindCLI_ForcedValid(t *testing.T) {
 	t.Setenv("TFORGE_CLI", "echo")
 	path, err := findCLI()
-	if err != nil {
-		t.Fatalf("findCLI() with TFORGE_CLI=echo returned error: %v", err)
-	}
-	if path == "" {
-		t.Error("findCLI() returned empty path")
-	}
+	require.NoError(t, err, "findCLI() with TFORGE_CLI=echo returned error")
+	require.NotEmpty(t, path, "findCLI() returned empty path")
 }
 
 func TestFindCLI_ForcedInvalid(t *testing.T) {
 	t.Setenv("TFORGE_CLI", "nonexistent_binary_xyz")
 	_, err := findCLI()
-	if err == nil {
-		t.Fatal("findCLI() with TFORGE_CLI=nonexistent_binary_xyz expected error, got nil")
-	}
-	if !strings.Contains(err.Error(), "TFORGE_CLI") {
-		t.Errorf("error = %q, want it to mention TFORGE_CLI", err.Error())
-	}
+	require.Error(t, err, "findCLI() with TFORGE_CLI=nonexistent_binary_xyz expected error, got nil")
+	require.Contains(t, err.Error(), "TFORGE_CLI", "error = %q, want it to mention TFORGE_CLI", err.Error())
 }
 
 // ---------------------------------------------------------------------------
@@ -541,13 +441,9 @@ func TestFetchSchema_InitFailure(t *testing.T) {
 
 	// Use a provider that does not exist in any registry so that init fails.
 	_, err := FetchSchema(context.Background(), "nonexistent-namespace/nonexistent-provider-xyz", "0.0.1")
-	if err == nil {
-		t.Fatal("expected error for nonexistent provider, got nil")
-	}
+	require.Error(t, err, "expected error for nonexistent provider, got nil")
 	// The error must mention "init failed" and include the CLI output.
-	if !strings.Contains(err.Error(), "init failed") {
-		t.Errorf("error = %q, want it to contain 'init failed'", err.Error())
-	}
+	require.Contains(t, err.Error(), "init failed", "error = %q, want it to contain 'init failed'", err.Error())
 }
 
 func TestFetchSchema_NoCLI(t *testing.T) {
@@ -556,23 +452,15 @@ func TestFetchSchema_NoCLI(t *testing.T) {
 	t.Setenv("TFORGE_CLI", "nonexistent_binary_xyz_tforge")
 
 	_, err := FetchSchema(context.Background(), "hashicorp/null", "3.2.1")
-	if err == nil {
-		t.Fatal("expected error when CLI is not found, got nil")
-	}
-	if !strings.Contains(err.Error(), "not found") {
-		t.Errorf("error = %q, want it to mention 'not found'", err.Error())
-	}
+	require.Error(t, err, "expected error when CLI is not found, got nil")
+	require.Contains(t, err.Error(), "not found", "error = %q, want it to mention 'not found'", err.Error())
 }
 
 func TestFetchSchema_InvalidSource(t *testing.T) {
 	// Invalid source should fail at parse stage before any CLI work.
 	_, err := FetchSchema(context.Background(), "no-slash", "1.0.0")
-	if err == nil {
-		t.Fatal("expected error for invalid source, got nil")
-	}
-	if !strings.Contains(err.Error(), "invalid provider source") {
-		t.Errorf("error = %q, want it to mention 'invalid provider source'", err.Error())
-	}
+	require.Error(t, err, "expected error for invalid source, got nil")
+	require.Contains(t, err.Error(), "invalid provider source", "error = %q, want it to mention 'invalid provider source'", err.Error())
 }
 
 func TestFetchSchema_CancelledContext(t *testing.T) {
@@ -585,18 +473,14 @@ func TestFetchSchema_CancelledContext(t *testing.T) {
 	_, err := FetchSchema(ctx, "hashicorp/null", "3.2.1")
 	elapsed := time.Since(start)
 
-	if err == nil {
-		t.Fatal("expected error for cancelled context, got nil")
-	}
+	require.Error(t, err, "expected error for cancelled context, got nil")
 	// The error should originate from the cancelled context propagating
 	// through exec.CommandContext. It should not hang.
-	if !strings.Contains(err.Error(), "context canceled") && !strings.Contains(err.Error(), "signal: killed") {
-		t.Errorf("expected context cancellation error, got: %v", err)
-	}
+	require.True(t,
+		strings.Contains(err.Error(), "context canceled") || strings.Contains(err.Error(), "signal: killed"),
+		"expected context cancellation error, got: %v", err)
 	// Should return quickly (well under 10 seconds), not hang waiting for init.
-	if elapsed > 10*time.Second {
-		t.Errorf("FetchSchema with cancelled context took %v, expected fast return", elapsed)
-	}
+	require.Less(t, elapsed, 10*time.Second, "FetchSchema with cancelled context took %v, expected fast return", elapsed)
 }
 
 func TestFetchSchema_DeadlineExceeded(t *testing.T) {
@@ -614,15 +498,11 @@ func TestFetchSchema_DeadlineExceeded(t *testing.T) {
 	_, err := FetchSchema(ctx, "hashicorp/null", "3.2.1")
 	elapsed := time.Since(start)
 
-	if err == nil {
-		t.Fatal("expected error for expired context, got nil")
-	}
-	if !strings.Contains(err.Error(), "context deadline exceeded") && !strings.Contains(err.Error(), "signal: killed") {
-		t.Errorf("expected deadline exceeded error, got: %v", err)
-	}
-	if elapsed > 10*time.Second {
-		t.Errorf("FetchSchema with expired context took %v, expected fast return", elapsed)
-	}
+	require.Error(t, err, "expected error for expired context, got nil")
+	require.True(t,
+		strings.Contains(err.Error(), "context deadline exceeded") || strings.Contains(err.Error(), "signal: killed"),
+		"expected deadline exceeded error, got: %v", err)
+	require.Less(t, elapsed, 10*time.Second, "FetchSchema with expired context took %v, expected fast return", elapsed)
 }
 
 func TestFetchSchema_InvalidSourceWithCancelledContext(t *testing.T) {
@@ -632,10 +512,6 @@ func TestFetchSchema_InvalidSourceWithCancelledContext(t *testing.T) {
 	cancel()
 
 	_, err := FetchSchema(ctx, "invalid", "1.0.0")
-	if err == nil {
-		t.Fatal("expected error for invalid source, got nil")
-	}
-	if !strings.Contains(err.Error(), "invalid provider source") {
-		t.Errorf("expected parse error, got: %v", err)
-	}
+	require.Error(t, err, "expected error for invalid source, got nil")
+	require.Contains(t, err.Error(), "invalid provider source", "expected parse error, got: %v", err)
 }
