@@ -8,8 +8,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/DataDog/tforge"
 	"github.com/DataDog/tforge/config"
 )
+
+// defaultVersion is the value tforge.Version compiles to without any link-time
+// override. Kept in tests so the version-stamping assertions don't accidentally
+// shadow drift in the default.
+const defaultVersion = "dev"
 
 // mustMap extracts a map[string]any value from a parent map by key.
 // It calls t.Fatal with a descriptive message instead of panicking on
@@ -52,13 +58,32 @@ func keys(m map[string]any) []string {
 }
 
 func TestToJSON_NilStack(t *testing.T) {
-	_, err := ToJSON(nil, "")
+	_, err := ToJSON(nil)
 	require.Error(t, err)
+}
+
+// TestToJSON_VersionStamp verifies the value of tforge.Version is what gets
+// stamped into the JSON metadata. Mirrors how consumers wire the package's
+// pinned version through the linker.
+func TestToJSON_VersionStamp(t *testing.T) {
+	original := tforge.Version
+	t.Cleanup(func() { tforge.Version = original })
+
+	const wantPinned = "v1.2.3-pinned"
+	tforge.Version = wantPinned
+
+	data, err := ToJSON(config.NewStack("test"))
+	require.NoError(t, err)
+	var obj map[string]any
+	require.NoError(t, json.Unmarshal(data, &obj))
+	meta := obj["//"].(map[string]any)["metadata"].(map[string]any)
+	require.Equal(t, wantPinned, meta["version"],
+		"tforge.Version should be stamped into //.metadata.version verbatim")
 }
 
 func TestToJSON_EmptyStack(t *testing.T) {
 	stack := config.NewStack("empty")
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 	require.True(t, json.Valid(data), "output is not valid JSON")
 	// An empty stack should produce only the "//" comment metadata block
@@ -79,7 +104,7 @@ func TestToJSON_EmptyStack(t *testing.T) {
 	metaMap, ok := metadata.(map[string]any)
 	require.True(t, ok, "'metadata' value: expected map[string]any, got %T", metadata)
 	require.Equal(t, "tforge", metaMap["tool"], "metadata.tool = %v, want %q", metaMap["tool"], "tforge")
-	require.Equal(t, DefaultVersion, metaMap["version"], "metadata.version = %v, want %q", metaMap["version"], DefaultVersion)
+	require.Equal(t, defaultVersion, metaMap["version"], "metadata.version = %v, want %q", metaMap["version"], defaultVersion)
 	require.Equal(t, "empty", metaMap["stackName"], "metadata.stackName = %v, want %q", metaMap["stackName"], "empty")
 
 	// Ensure no infrastructure keys are present
@@ -97,7 +122,7 @@ func TestToJSON_ProviderNoAlias(t *testing.T) {
 		Config: map[string]any{"region": "us-east-1"},
 	})
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 	require.True(t, json.Valid(data), "output is not valid JSON")
 
@@ -121,7 +146,7 @@ func TestToJSON_ProviderWithAlias(t *testing.T) {
 		Config: map[string]any{"region": "us-west-2"},
 	})
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -144,7 +169,7 @@ func TestToJSON_ProviderWithConfig(t *testing.T) {
 		},
 	})
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -164,7 +189,7 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-123", "instance_type": "t3.micro"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -241,7 +266,7 @@ func TestToJSON_ModuleMetadataComment(t *testing.T) {
 func metadataCommentFor(t *testing.T, stack *config.Stack, kind, typ, name string) map[string]any {
 	t.Helper()
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 	var obj map[string]any
 	require.NoError(t, json.Unmarshal(data, &obj))
@@ -264,7 +289,7 @@ func TestToJSON_ResourceProvider(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-123"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -281,7 +306,7 @@ func TestToJSON_ResourceProviderAbsentWhenEmpty(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-123"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -302,7 +327,7 @@ func TestToJSON_ResourceDependsOn(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -324,7 +349,7 @@ func TestToJSON_ResourceCount(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -345,7 +370,7 @@ func TestToJSON_ResourceForEach(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -369,7 +394,7 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 		Attributes: map[string]any{},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -395,7 +420,7 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 		Attributes: map[string]any{},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -424,7 +449,7 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 		Attributes: map[string]any{},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -451,7 +476,7 @@ func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-api"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -484,7 +509,7 @@ func TestToJSON_MultipleResourceTypes(t *testing.T) {
 		Attributes: map[string]any{"cidr_block": "10.0.1.0/24"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -512,7 +537,7 @@ func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 		Attributes: map[string]any{"most_recent": false},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -535,7 +560,7 @@ func TestToJSON_DataSource(t *testing.T) {
 		Attributes: map[string]any{"most_recent": true},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -553,7 +578,7 @@ func TestToJSON_DataSourceProvider(t *testing.T) {
 		Attributes: map[string]any{"most_recent": true},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -573,7 +598,7 @@ func TestToJSON_DataSourceDependsOn(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -595,7 +620,7 @@ func TestToJSON_DataSourceCount(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -616,7 +641,7 @@ func TestToJSON_DataSourceForEach(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -641,7 +666,7 @@ func TestToJSON_Variables(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -667,7 +692,7 @@ func TestToJSON_Outputs(t *testing.T) {
 		DependsOn:   []string{"aws_instance.web"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -686,7 +711,7 @@ func TestToJSON_Locals(t *testing.T) {
 	stack.SetLocal("env", "production")
 	stack.SetLocal("tags", map[string]string{"team": "platform"})
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -708,7 +733,7 @@ func TestToJSON_Backend(t *testing.T) {
 		},
 	})
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -727,7 +752,7 @@ func TestToJSON_RequiredProviders(t *testing.T) {
 		Version: "~> 5.0",
 	})
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -779,7 +804,7 @@ func TestToJSON_FullStack(t *testing.T) {
 
 	stack.SetLocal("name", "my-app")
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 	require.True(t, json.Valid(data), "output is not valid JSON")
 
@@ -803,12 +828,12 @@ func TestToFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "main.tf.json")
 
-	require.NoError(t, ToFile(stack, path, ""))
+	require.NoError(t, ToFile(stack, path))
 
 	fileData, err := os.ReadFile(path)
 	require.NoError(t, err, "reading file")
 
-	expected, err := ToJSON(stack, "")
+	expected, err := ToJSON(stack)
 	require.NoError(t, err, "ToJSON")
 
 	require.Equal(t, string(expected), string(fileData), "file contents do not match ToJSON output")
@@ -820,7 +845,7 @@ func TestToFile_CreatesDirectory(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "subdir", "nested", "main.tf.json")
 
-	require.NoError(t, ToFile(stack, path, ""))
+	require.NoError(t, ToFile(stack, path))
 
 	_, err := os.Stat(path)
 	require.False(t, os.IsNotExist(err), "file was not created")
@@ -841,7 +866,7 @@ func TestToJSON_ResourceConnection(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-123"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -872,7 +897,7 @@ func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
 		Attributes: map[string]any{},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -898,7 +923,7 @@ func TestToJSON_LifecyclePrecondition(t *testing.T) {
 		Attributes: map[string]any{},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -924,7 +949,7 @@ func TestToJSON_LifecyclePostcondition(t *testing.T) {
 		Attributes: map[string]any{},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -947,7 +972,7 @@ func TestToJSON_OutputPrecondition(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -978,7 +1003,7 @@ func TestToJSON_ProvisionerConnection(t *testing.T) {
 		Attributes: map[string]any{},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1005,7 +1030,7 @@ func TestToJSON_ModuleBasic(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1029,7 +1054,7 @@ func TestToJSON_ModuleWithProviders(t *testing.T) {
 		Variables: map[string]any{"cidr": "10.0.0.0/16"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1052,7 +1077,7 @@ func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1080,7 +1105,7 @@ func TestToJSON_ModuleForEach(t *testing.T) {
 		},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1107,7 +1132,7 @@ func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-123"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1131,7 +1156,7 @@ func TestConnectionJSON_NilExtra(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-123"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1156,7 +1181,7 @@ func TestConnectionJSON_EmptyExtra(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-123"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1184,7 +1209,7 @@ func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 		Attributes: map[string]any{"ami": "ami-123"},
 	}))
 
-	data, err := ToJSON(stack, "")
+	data, err := ToJSON(stack)
 	require.NoError(t, err)
 
 	var obj map[string]any
@@ -1310,7 +1335,7 @@ func TestToJSON_TypedAttributes(t *testing.T) {
 		t.Fatalf("AddResourcePtr error = %v", err)
 	}
 
-	data, err := ToJSON(stack, "test")
+	data, err := ToJSON(stack)
 	if err != nil {
 		t.Fatalf("ToJSON error = %v", err)
 	}
@@ -1341,7 +1366,7 @@ func TestToJSON_TypedAttributes_MutatesAfterAdd(t *testing.T) {
 	// Mutate the payload after adding — render must see the new value.
 	payload.Name = strPtr("updated")
 
-	data, err := ToJSON(stack, "test")
+	data, err := ToJSON(stack)
 	if err != nil {
 		t.Fatalf("ToJSON error = %v", err)
 	}
@@ -1366,7 +1391,7 @@ func TestToJSON_BothAttributesAndTypedAttributes_Error(t *testing.T) {
 		t.Fatalf("AddResourcePtr error = %v", err)
 	}
 
-	if _, err := ToJSON(stack, "test"); err == nil {
+	if _, err := ToJSON(stack); err == nil {
 		t.Fatal("ToJSON should error when both Attributes and TypedAttributes are set")
 	}
 }
@@ -1384,7 +1409,7 @@ func TestToJSON_EmptyAttributesAndTypedAttributes_Error(t *testing.T) {
 		t.Fatalf("AddResourcePtr error = %v", err)
 	}
 
-	if _, err := ToJSON(stack, "test"); err == nil {
+	if _, err := ToJSON(stack); err == nil {
 		t.Fatal("ToJSON should error even when Attributes is an empty (but non-nil) map")
 	}
 }

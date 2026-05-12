@@ -18,11 +18,10 @@ import (
 	"io"
 	"os"
 
+	"github.com/DataDog/tforge"
 	"github.com/DataDog/tforge/generate"
 	"github.com/DataDog/tforge/provider"
 )
-
-const version = "0.3.0"
 
 const (
 	dirPerm  = os.FileMode(0755)
@@ -42,7 +41,7 @@ var commands = map[string]command{
 	"schema":   {run: func(args []string, stdout, stderr io.Writer) error { return runSchema(args, stdout, stderr) }},
 	"migrate":  {run: func(args []string, stdout, stderr io.Writer) error { return runMigrate(args, stdout, stderr) }},
 	"version": {run: func(args []string, stdout, _ io.Writer) error {
-		fmt.Fprintf(stdout, "tforge version %s\n", version)
+		fmt.Fprintf(stdout, "tforge version %s\n", tforge.Version)
 		return nil
 	}},
 	"help": {run: func(args []string, stdout, _ io.Writer) error {
