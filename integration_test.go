@@ -575,9 +575,17 @@ func ensureInitCaches(t *testing.T, groups map[string]*providerGroup, tools []to
 			defer os.Remove(tmpConfig.Name())
 
 			// Create container, copy config, run init.
+			//
+			// `cp -aL` (vs. `cp -a`) dereferences symlinks. With
+			// TF_PLUGIN_CACHE_DIR set, init writes the per-platform provider
+			// directories as symlinks into /plugin-cache; -L copies the actual
+			// binaries into the volume so it remains usable after Docker
+			// Desktop drops the VM-side view of the plugin-cache bind mount
+			// (macOS only — the host's plugin-cache directory stays populated
+			// for host-tool versions like darwin_arm64 only).
 			script := fmt.Sprintf(
 				"mkdir /work && cd /work && cp /tmp/config.tf.json main.tf.json && %s init -backend=false && "+
-					"cp -a .terraform/providers /cache/providers && cp .terraform.lock.hcl /cache/lock.hcl && "+
+					"cp -aL .terraform/providers /cache/providers && cp .terraform.lock.hcl /cache/lock.hcl && "+
 					"echo '%s' > /cache/config.hash",
 				tool.cmd, configHash)
 
