@@ -28,6 +28,12 @@
   "data": {
     "aws_ami": {
       "per_region": {
+        "//": {
+          "metadata": {
+            "path": "data-source-meta-args-golden/per_region",
+            "uniqueId": "per_region"
+          }
+        },
         "for_each": {
           "us-east-1": "ami-east",
           "us-west-2": "ami-west"
@@ -37,12 +43,24 @@
     },
     "aws_availability_zones": {
       "counted": {
+        "//": {
+          "metadata": {
+            "path": "data-source-meta-args-golden/counted",
+            "uniqueId": "counted"
+          }
+        },
         "count": 3,
         "state": "available"
       }
     },
     "aws_caller_identity": {
       "current": {
+        "//": {
+          "metadata": {
+            "path": "data-source-meta-args-golden/current",
+            "uniqueId": "current"
+          }
+        },
         "depends_on": [
           "data.aws_availability_zones.counted"
         ]
@@ -50,6 +68,12 @@
     },
     "aws_subnet": {
       "all_meta": {
+        "//": {
+          "metadata": {
+            "path": "data-source-meta-args-golden/all_meta",
+            "uniqueId": "all_meta"
+          }
+        },
         "count": 2,
         "depends_on": [
           "data.aws_vpc.west_vpc"
@@ -60,6 +84,12 @@
     },
     "aws_vpc": {
       "west_vpc": {
+        "//": {
+          "metadata": {
+            "path": "data-source-meta-args-golden/west_vpc",
+            "uniqueId": "west_vpc"
+          }
+        },
         "default": true,
         "provider": "aws.west"
       }

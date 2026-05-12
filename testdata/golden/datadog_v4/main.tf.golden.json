@@ -24,6 +24,12 @@
   "resource": {
     "datadog_compliance_custom_framework": {
       "security": {
+        "//": {
+          "metadata": {
+            "path": "datadog-v4-golden/security",
+            "uniqueId": "security"
+          }
+        },
         "handle": "tforge-security",
         "icon_url": "https://example.com/icon.png",
         "name": "tforge Security Framework",
