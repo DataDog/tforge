@@ -218,12 +218,14 @@ func buildTerraformJSON(stack *config.Stack, version string) (*terraformJSON, er
 
 // needsTerraformBlock returns true if the terraform block is needed.
 func needsTerraformBlock(stack *config.Stack) bool {
-	return len(stack.RequiredProviders) > 0 || stack.Backend != nil
+	return len(stack.RequiredProviders) > 0 || stack.Backend != nil || stack.RequiredVersion != ""
 }
 
 // buildTerraformBlock builds the terraform {} block.
 func buildTerraformBlock(stack *config.Stack) *terraformBlock {
-	tb := &terraformBlock{}
+	tb := &terraformBlock{
+		RequiredVersion: stack.RequiredVersion,
+	}
 
 	// Required providers
 	if len(stack.RequiredProviders) > 0 {

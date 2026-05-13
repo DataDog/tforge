@@ -20,6 +20,11 @@ type Stack struct {
 	// Name is the stack identifier (used for naming output files).
 	Name string
 
+	// RequiredVersion is the Terraform version constraint emitted as
+	// `terraform.required_version` in the rendered JSON (e.g. ">= 1.3.7").
+	// Empty means no constraint is emitted.
+	RequiredVersion string
+
 	// Backend configures the Terraform backend for state storage.
 	Backend *Backend
 
