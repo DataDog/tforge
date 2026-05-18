@@ -24,7 +24,7 @@ func NewExampleCdktfGoAwsStack() *config.Stack {
 
 	inst, err := aws.NewInstance(stack, "Hello")
 	must(err)
-	inst.Apply(
+	inst.Configure(
 		aws.Instance_SetAmi("ami-2757f631"),
 		aws.Instance_SetInstanceType("t2.micro"),
 		aws.Instance_SetTags(map[string]string{"environment": "development"}),

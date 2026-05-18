@@ -42,7 +42,7 @@ func FromAPIKey(cfg APIKey) APIKeyOption {
 }
 
 // NewAPIKey creates a datadog_api_key resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewAPIKey(stack *config.Stack, name string) (*APIKey, error) {
 	h := &APIKey{}
 	h.resource = &config.Resource{
@@ -61,19 +61,19 @@ func (h *APIKey) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_api_key. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_api_key. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *APIKey) Apply(opts ...APIKeyOption) *APIKey {
+func (h *APIKey) Configure(opts ...APIKeyOption) *APIKey {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *APIKey) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *APIKey) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -164,7 +164,7 @@ func FromApmRetentionFilter(cfg ApmRetentionFilter) ApmRetentionFilterOption {
 }
 
 // NewApmRetentionFilter creates a datadog_apm_retention_filter resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewApmRetentionFilter(stack *config.Stack, name string) (*ApmRetentionFilter, error) {
 	h := &ApmRetentionFilter{}
 	h.resource = &config.Resource{
@@ -183,19 +183,19 @@ func (h *ApmRetentionFilter) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_apm_retention_filter. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_apm_retention_filter. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ApmRetentionFilter) Apply(opts ...ApmRetentionFilterOption) *ApmRetentionFilter {
+func (h *ApmRetentionFilter) Configure(opts ...ApmRetentionFilterOption) *ApmRetentionFilter {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *ApmRetentionFilter) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *ApmRetentionFilter) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -235,7 +235,7 @@ func FromApmRetentionFilterOrder(cfg ApmRetentionFilterOrder) ApmRetentionFilter
 }
 
 // NewApmRetentionFilterOrder creates a datadog_apm_retention_filter_order resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewApmRetentionFilterOrder(stack *config.Stack, name string) (*ApmRetentionFilterOrder, error) {
 	h := &ApmRetentionFilterOrder{}
 	h.resource = &config.Resource{
@@ -254,19 +254,19 @@ func (h *ApmRetentionFilterOrder) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_apm_retention_filter_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_apm_retention_filter_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ApmRetentionFilterOrder) Apply(opts ...ApmRetentionFilterOrderOption) *ApmRetentionFilterOrder {
+func (h *ApmRetentionFilterOrder) Configure(opts ...ApmRetentionFilterOrderOption) *ApmRetentionFilterOrder {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *ApmRetentionFilterOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *ApmRetentionFilterOrder) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -313,7 +313,7 @@ func FromApplicationKey(cfg ApplicationKey) ApplicationKeyOption {
 }
 
 // NewApplicationKey creates a datadog_application_key resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewApplicationKey(stack *config.Stack, name string) (*ApplicationKey, error) {
 	h := &ApplicationKey{}
 	h.resource = &config.Resource{
@@ -332,19 +332,19 @@ func (h *ApplicationKey) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_application_key. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_application_key. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ApplicationKey) Apply(opts ...ApplicationKeyOption) *ApplicationKey {
+func (h *ApplicationKey) Configure(opts ...ApplicationKeyOption) *ApplicationKey {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *ApplicationKey) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *ApplicationKey) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -405,7 +405,7 @@ func FromAuthnMapping(cfg AuthnMapping) AuthnMappingOption {
 }
 
 // NewAuthnMapping creates a datadog_authn_mapping resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewAuthnMapping(stack *config.Stack, name string) (*AuthnMapping, error) {
 	h := &AuthnMapping{}
 	h.resource = &config.Resource{
@@ -424,19 +424,19 @@ func (h *AuthnMapping) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_authn_mapping. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_authn_mapping. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *AuthnMapping) Apply(opts ...AuthnMappingOption) *AuthnMapping {
+func (h *AuthnMapping) Configure(opts ...AuthnMappingOption) *AuthnMapping {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *AuthnMapping) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *AuthnMapping) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -518,7 +518,7 @@ func FromChildOrganization(cfg ChildOrganization) ChildOrganizationOption {
 }
 
 // NewChildOrganization creates a datadog_child_organization resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewChildOrganization(stack *config.Stack, name string) (*ChildOrganization, error) {
 	h := &ChildOrganization{}
 	h.resource = &config.Resource{
@@ -537,19 +537,19 @@ func (h *ChildOrganization) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_child_organization. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_child_organization. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ChildOrganization) Apply(opts ...ChildOrganizationOption) *ChildOrganization {
+func (h *ChildOrganization) Configure(opts ...ChildOrganizationOption) *ChildOrganization {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *ChildOrganization) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *ChildOrganization) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -689,7 +689,7 @@ func FromCloudConfigurationRule(cfg CloudConfigurationRule) CloudConfigurationRu
 }
 
 // NewCloudConfigurationRule creates a datadog_cloud_configuration_rule resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewCloudConfigurationRule(stack *config.Stack, name string) (*CloudConfigurationRule, error) {
 	h := &CloudConfigurationRule{}
 	h.resource = &config.Resource{
@@ -708,19 +708,19 @@ func (h *CloudConfigurationRule) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_cloud_configuration_rule. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_cloud_configuration_rule. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *CloudConfigurationRule) Apply(opts ...CloudConfigurationRuleOption) *CloudConfigurationRule {
+func (h *CloudConfigurationRule) Configure(opts ...CloudConfigurationRuleOption) *CloudConfigurationRule {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *CloudConfigurationRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *CloudConfigurationRule) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -781,7 +781,7 @@ func FromCloudWorkloadSecurityAgentRule(cfg CloudWorkloadSecurityAgentRule) Clou
 }
 
 // NewCloudWorkloadSecurityAgentRule creates a datadog_cloud_workload_security_agent_rule resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewCloudWorkloadSecurityAgentRule(stack *config.Stack, name string) (*CloudWorkloadSecurityAgentRule, error) {
 	h := &CloudWorkloadSecurityAgentRule{}
 	h.resource = &config.Resource{
@@ -800,19 +800,19 @@ func (h *CloudWorkloadSecurityAgentRule) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_cloud_workload_security_agent_rule. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_cloud_workload_security_agent_rule. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *CloudWorkloadSecurityAgentRule) Apply(opts ...CloudWorkloadSecurityAgentRuleOption) *CloudWorkloadSecurityAgentRule {
+func (h *CloudWorkloadSecurityAgentRule) Configure(opts ...CloudWorkloadSecurityAgentRuleOption) *CloudWorkloadSecurityAgentRule {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *CloudWorkloadSecurityAgentRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *CloudWorkloadSecurityAgentRule) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -873,7 +873,7 @@ func FromCsmThreatsAgentRule(cfg CsmThreatsAgentRule) CsmThreatsAgentRuleOption 
 }
 
 // NewCsmThreatsAgentRule creates a datadog_csm_threats_agent_rule resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewCsmThreatsAgentRule(stack *config.Stack, name string) (*CsmThreatsAgentRule, error) {
 	h := &CsmThreatsAgentRule{}
 	h.resource = &config.Resource{
@@ -892,19 +892,19 @@ func (h *CsmThreatsAgentRule) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_csm_threats_agent_rule. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_csm_threats_agent_rule. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *CsmThreatsAgentRule) Apply(opts ...CsmThreatsAgentRuleOption) *CsmThreatsAgentRule {
+func (h *CsmThreatsAgentRule) Configure(opts ...CsmThreatsAgentRuleOption) *CsmThreatsAgentRule {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *CsmThreatsAgentRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *CsmThreatsAgentRule) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -91458,7 +91458,7 @@ func FromDashboard(cfg Dashboard) DashboardOption {
 }
 
 // NewDashboard creates a datadog_dashboard resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewDashboard(stack *config.Stack, name string) (*Dashboard, error) {
 	h := &Dashboard{}
 	h.resource = &config.Resource{
@@ -91477,19 +91477,19 @@ func (h *Dashboard) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_dashboard. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_dashboard. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *Dashboard) Apply(opts ...DashboardOption) *Dashboard {
+func (h *Dashboard) Configure(opts ...DashboardOption) *Dashboard {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *Dashboard) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *Dashboard) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -91550,7 +91550,7 @@ func FromDashboardJSON(cfg DashboardJSON) DashboardJSONOption {
 }
 
 // NewDashboardJSON creates a datadog_dashboard_json resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewDashboardJSON(stack *config.Stack, name string) (*DashboardJSON, error) {
 	h := &DashboardJSON{}
 	h.resource = &config.Resource{
@@ -91569,19 +91569,19 @@ func (h *DashboardJSON) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_dashboard_json. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_dashboard_json. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *DashboardJSON) Apply(opts ...DashboardJSONOption) *DashboardJSON {
+func (h *DashboardJSON) Configure(opts ...DashboardJSONOption) *DashboardJSON {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *DashboardJSON) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *DashboardJSON) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -91658,7 +91658,7 @@ func FromDashboardList(cfg DashboardList) DashboardListOption {
 }
 
 // NewDashboardList creates a datadog_dashboard_list resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewDashboardList(stack *config.Stack, name string) (*DashboardList, error) {
 	h := &DashboardList{}
 	h.resource = &config.Resource{
@@ -91677,19 +91677,19 @@ func (h *DashboardList) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_dashboard_list. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_dashboard_list. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *DashboardList) Apply(opts ...DashboardListOption) *DashboardList {
+func (h *DashboardList) Configure(opts ...DashboardListOption) *DashboardList {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *DashboardList) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *DashboardList) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -91878,7 +91878,7 @@ func FromDowntime(cfg Downtime) DowntimeOption {
 }
 
 // NewDowntime creates a datadog_downtime resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewDowntime(stack *config.Stack, name string) (*Downtime, error) {
 	h := &Downtime{}
 	h.resource = &config.Resource{
@@ -91897,19 +91897,19 @@ func (h *Downtime) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_downtime. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_downtime. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *Downtime) Apply(opts ...DowntimeOption) *Downtime {
+func (h *Downtime) Configure(opts ...DowntimeOption) *Downtime {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *Downtime) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *Downtime) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92128,7 +92128,7 @@ func FromDowntimeSchedule(cfg DowntimeSchedule) DowntimeScheduleOption {
 }
 
 // NewDowntimeSchedule creates a datadog_downtime_schedule resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewDowntimeSchedule(stack *config.Stack, name string) (*DowntimeSchedule, error) {
 	h := &DowntimeSchedule{}
 	h.resource = &config.Resource{
@@ -92147,19 +92147,19 @@ func (h *DowntimeSchedule) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_downtime_schedule. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_downtime_schedule. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *DowntimeSchedule) Apply(opts ...DowntimeScheduleOption) *DowntimeSchedule {
+func (h *DowntimeSchedule) Configure(opts ...DowntimeScheduleOption) *DowntimeSchedule {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *DowntimeSchedule) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *DowntimeSchedule) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92283,7 +92283,7 @@ func FromIntegrationAws(cfg IntegrationAws) IntegrationAwsOption {
 }
 
 // NewIntegrationAws creates a datadog_integration_aws resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationAws(stack *config.Stack, name string) (*IntegrationAws, error) {
 	h := &IntegrationAws{}
 	h.resource = &config.Resource{
@@ -92302,19 +92302,19 @@ func (h *IntegrationAws) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_aws. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_aws. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationAws) Apply(opts ...IntegrationAwsOption) *IntegrationAws {
+func (h *IntegrationAws) Configure(opts ...IntegrationAwsOption) *IntegrationAws {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationAws) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationAws) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92375,7 +92375,7 @@ func FromIntegrationAwsEventBridge(cfg IntegrationAwsEventBridge) IntegrationAws
 }
 
 // NewIntegrationAwsEventBridge creates a datadog_integration_aws_event_bridge resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationAwsEventBridge(stack *config.Stack, name string) (*IntegrationAwsEventBridge, error) {
 	h := &IntegrationAwsEventBridge{}
 	h.resource = &config.Resource{
@@ -92394,19 +92394,19 @@ func (h *IntegrationAwsEventBridge) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_aws_event_bridge. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_aws_event_bridge. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationAwsEventBridge) Apply(opts ...IntegrationAwsEventBridgeOption) *IntegrationAwsEventBridge {
+func (h *IntegrationAwsEventBridge) Configure(opts ...IntegrationAwsEventBridgeOption) *IntegrationAwsEventBridge {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationAwsEventBridge) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationAwsEventBridge) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92453,7 +92453,7 @@ func FromIntegrationAwsLambdaARN(cfg IntegrationAwsLambdaARN) IntegrationAwsLamb
 }
 
 // NewIntegrationAwsLambdaARN creates a datadog_integration_aws_lambda_arn resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationAwsLambdaARN(stack *config.Stack, name string) (*IntegrationAwsLambdaARN, error) {
 	h := &IntegrationAwsLambdaARN{}
 	h.resource = &config.Resource{
@@ -92472,19 +92472,19 @@ func (h *IntegrationAwsLambdaARN) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_aws_lambda_arn. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_aws_lambda_arn. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationAwsLambdaARN) Apply(opts ...IntegrationAwsLambdaARNOption) *IntegrationAwsLambdaARN {
+func (h *IntegrationAwsLambdaARN) Configure(opts ...IntegrationAwsLambdaARNOption) *IntegrationAwsLambdaARN {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationAwsLambdaARN) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationAwsLambdaARN) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92531,7 +92531,7 @@ func FromIntegrationAwsLogCollection(cfg IntegrationAwsLogCollection) Integratio
 }
 
 // NewIntegrationAwsLogCollection creates a datadog_integration_aws_log_collection resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationAwsLogCollection(stack *config.Stack, name string) (*IntegrationAwsLogCollection, error) {
 	h := &IntegrationAwsLogCollection{}
 	h.resource = &config.Resource{
@@ -92550,19 +92550,19 @@ func (h *IntegrationAwsLogCollection) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_aws_log_collection. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_aws_log_collection. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationAwsLogCollection) Apply(opts ...IntegrationAwsLogCollectionOption) *IntegrationAwsLogCollection {
+func (h *IntegrationAwsLogCollection) Configure(opts ...IntegrationAwsLogCollectionOption) *IntegrationAwsLogCollection {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationAwsLogCollection) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationAwsLogCollection) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92616,7 +92616,7 @@ func FromIntegrationAwsTagFilter(cfg IntegrationAwsTagFilter) IntegrationAwsTagF
 }
 
 // NewIntegrationAwsTagFilter creates a datadog_integration_aws_tag_filter resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationAwsTagFilter(stack *config.Stack, name string) (*IntegrationAwsTagFilter, error) {
 	h := &IntegrationAwsTagFilter{}
 	h.resource = &config.Resource{
@@ -92635,19 +92635,19 @@ func (h *IntegrationAwsTagFilter) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_aws_tag_filter. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_aws_tag_filter. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationAwsTagFilter) Apply(opts ...IntegrationAwsTagFilterOption) *IntegrationAwsTagFilter {
+func (h *IntegrationAwsTagFilter) Configure(opts ...IntegrationAwsTagFilterOption) *IntegrationAwsTagFilter {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationAwsTagFilter) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationAwsTagFilter) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92750,7 +92750,7 @@ func FromIntegrationAzure(cfg IntegrationAzure) IntegrationAzureOption {
 }
 
 // NewIntegrationAzure creates a datadog_integration_azure resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationAzure(stack *config.Stack, name string) (*IntegrationAzure, error) {
 	h := &IntegrationAzure{}
 	h.resource = &config.Resource{
@@ -92769,19 +92769,19 @@ func (h *IntegrationAzure) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_azure. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_azure. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationAzure) Apply(opts ...IntegrationAzureOption) *IntegrationAzure {
+func (h *IntegrationAzure) Configure(opts ...IntegrationAzureOption) *IntegrationAzure {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationAzure) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationAzure) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92835,7 +92835,7 @@ func FromIntegrationCloudflareAccount(cfg IntegrationCloudflareAccount) Integrat
 }
 
 // NewIntegrationCloudflareAccount creates a datadog_integration_cloudflare_account resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationCloudflareAccount(stack *config.Stack, name string) (*IntegrationCloudflareAccount, error) {
 	h := &IntegrationCloudflareAccount{}
 	h.resource = &config.Resource{
@@ -92854,19 +92854,19 @@ func (h *IntegrationCloudflareAccount) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_cloudflare_account. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_cloudflare_account. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationCloudflareAccount) Apply(opts ...IntegrationCloudflareAccountOption) *IntegrationCloudflareAccount {
+func (h *IntegrationCloudflareAccount) Configure(opts ...IntegrationCloudflareAccountOption) *IntegrationCloudflareAccount {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationCloudflareAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationCloudflareAccount) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -92920,7 +92920,7 @@ func FromIntegrationConfluentAccount(cfg IntegrationConfluentAccount) Integratio
 }
 
 // NewIntegrationConfluentAccount creates a datadog_integration_confluent_account resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationConfluentAccount(stack *config.Stack, name string) (*IntegrationConfluentAccount, error) {
 	h := &IntegrationConfluentAccount{}
 	h.resource = &config.Resource{
@@ -92939,19 +92939,19 @@ func (h *IntegrationConfluentAccount) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_confluent_account. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_confluent_account. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationConfluentAccount) Apply(opts ...IntegrationConfluentAccountOption) *IntegrationConfluentAccount {
+func (h *IntegrationConfluentAccount) Configure(opts ...IntegrationConfluentAccountOption) *IntegrationConfluentAccount {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationConfluentAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationConfluentAccount) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93019,7 +93019,7 @@ func FromIntegrationConfluentResource(cfg IntegrationConfluentResource) Integrat
 }
 
 // NewIntegrationConfluentResource creates a datadog_integration_confluent_resource resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationConfluentResource(stack *config.Stack, name string) (*IntegrationConfluentResource, error) {
 	h := &IntegrationConfluentResource{}
 	h.resource = &config.Resource{
@@ -93038,19 +93038,19 @@ func (h *IntegrationConfluentResource) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_confluent_resource. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_confluent_resource. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationConfluentResource) Apply(opts ...IntegrationConfluentResourceOption) *IntegrationConfluentResource {
+func (h *IntegrationConfluentResource) Configure(opts ...IntegrationConfluentResourceOption) *IntegrationConfluentResource {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationConfluentResource) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationConfluentResource) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93097,7 +93097,7 @@ func FromIntegrationFastlyAccount(cfg IntegrationFastlyAccount) IntegrationFastl
 }
 
 // NewIntegrationFastlyAccount creates a datadog_integration_fastly_account resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationFastlyAccount(stack *config.Stack, name string) (*IntegrationFastlyAccount, error) {
 	h := &IntegrationFastlyAccount{}
 	h.resource = &config.Resource{
@@ -93116,19 +93116,19 @@ func (h *IntegrationFastlyAccount) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_fastly_account. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_fastly_account. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationFastlyAccount) Apply(opts ...IntegrationFastlyAccountOption) *IntegrationFastlyAccount {
+func (h *IntegrationFastlyAccount) Configure(opts ...IntegrationFastlyAccountOption) *IntegrationFastlyAccount {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationFastlyAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationFastlyAccount) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93182,7 +93182,7 @@ func FromIntegrationFastlyService(cfg IntegrationFastlyService) IntegrationFastl
 }
 
 // NewIntegrationFastlyService creates a datadog_integration_fastly_service resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationFastlyService(stack *config.Stack, name string) (*IntegrationFastlyService, error) {
 	h := &IntegrationFastlyService{}
 	h.resource = &config.Resource{
@@ -93201,19 +93201,19 @@ func (h *IntegrationFastlyService) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_fastly_service. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_fastly_service. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationFastlyService) Apply(opts ...IntegrationFastlyServiceOption) *IntegrationFastlyService {
+func (h *IntegrationFastlyService) Configure(opts ...IntegrationFastlyServiceOption) *IntegrationFastlyService {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationFastlyService) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationFastlyService) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93316,7 +93316,7 @@ func FromIntegrationGcp(cfg IntegrationGcp) IntegrationGcpOption {
 }
 
 // NewIntegrationGcp creates a datadog_integration_gcp resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationGcp(stack *config.Stack, name string) (*IntegrationGcp, error) {
 	h := &IntegrationGcp{}
 	h.resource = &config.Resource{
@@ -93335,19 +93335,19 @@ func (h *IntegrationGcp) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_gcp. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_gcp. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationGcp) Apply(opts ...IntegrationGcpOption) *IntegrationGcp {
+func (h *IntegrationGcp) Configure(opts ...IntegrationGcpOption) *IntegrationGcp {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationGcp) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationGcp) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93436,7 +93436,7 @@ func FromIntegrationGcpSts(cfg IntegrationGcpSts) IntegrationGcpStsOption {
 }
 
 // NewIntegrationGcpSts creates a datadog_integration_gcp_sts resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationGcpSts(stack *config.Stack, name string) (*IntegrationGcpSts, error) {
 	h := &IntegrationGcpSts{}
 	h.resource = &config.Resource{
@@ -93455,19 +93455,19 @@ func (h *IntegrationGcpSts) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_gcp_sts. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_gcp_sts. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationGcpSts) Apply(opts ...IntegrationGcpStsOption) *IntegrationGcpSts {
+func (h *IntegrationGcpSts) Configure(opts ...IntegrationGcpStsOption) *IntegrationGcpSts {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationGcpSts) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationGcpSts) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93528,7 +93528,7 @@ func FromIntegrationOpsgenieServiceObject(cfg IntegrationOpsgenieServiceObject) 
 }
 
 // NewIntegrationOpsgenieServiceObject creates a datadog_integration_opsgenie_service_object resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationOpsgenieServiceObject(stack *config.Stack, name string) (*IntegrationOpsgenieServiceObject, error) {
 	h := &IntegrationOpsgenieServiceObject{}
 	h.resource = &config.Resource{
@@ -93547,19 +93547,19 @@ func (h *IntegrationOpsgenieServiceObject) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_opsgenie_service_object. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_opsgenie_service_object. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationOpsgenieServiceObject) Apply(opts ...IntegrationOpsgenieServiceObjectOption) *IntegrationOpsgenieServiceObject {
+func (h *IntegrationOpsgenieServiceObject) Configure(opts ...IntegrationOpsgenieServiceObjectOption) *IntegrationOpsgenieServiceObject {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationOpsgenieServiceObject) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationOpsgenieServiceObject) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93613,7 +93613,7 @@ func FromIntegrationPagerduty(cfg IntegrationPagerduty) IntegrationPagerdutyOpti
 }
 
 // NewIntegrationPagerduty creates a datadog_integration_pagerduty resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationPagerduty(stack *config.Stack, name string) (*IntegrationPagerduty, error) {
 	h := &IntegrationPagerduty{}
 	h.resource = &config.Resource{
@@ -93632,19 +93632,19 @@ func (h *IntegrationPagerduty) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_pagerduty. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_pagerduty. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationPagerduty) Apply(opts ...IntegrationPagerdutyOption) *IntegrationPagerduty {
+func (h *IntegrationPagerduty) Configure(opts ...IntegrationPagerdutyOption) *IntegrationPagerduty {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationPagerduty) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationPagerduty) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93691,7 +93691,7 @@ func FromIntegrationPagerdutyServiceObject(cfg IntegrationPagerdutyServiceObject
 }
 
 // NewIntegrationPagerdutyServiceObject creates a datadog_integration_pagerduty_service_object resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationPagerdutyServiceObject(stack *config.Stack, name string) (*IntegrationPagerdutyServiceObject, error) {
 	h := &IntegrationPagerdutyServiceObject{}
 	h.resource = &config.Resource{
@@ -93710,19 +93710,19 @@ func (h *IntegrationPagerdutyServiceObject) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_pagerduty_service_object. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_pagerduty_service_object. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationPagerdutyServiceObject) Apply(opts ...IntegrationPagerdutyServiceObjectOption) *IntegrationPagerdutyServiceObject {
+func (h *IntegrationPagerdutyServiceObject) Configure(opts ...IntegrationPagerdutyServiceObjectOption) *IntegrationPagerdutyServiceObject {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationPagerdutyServiceObject) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationPagerdutyServiceObject) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93820,7 +93820,7 @@ func FromIntegrationSlackChannel(cfg IntegrationSlackChannel) IntegrationSlackCh
 }
 
 // NewIntegrationSlackChannel creates a datadog_integration_slack_channel resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIntegrationSlackChannel(stack *config.Stack, name string) (*IntegrationSlackChannel, error) {
 	h := &IntegrationSlackChannel{}
 	h.resource = &config.Resource{
@@ -93839,19 +93839,19 @@ func (h *IntegrationSlackChannel) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_slack_channel. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_slack_channel. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationSlackChannel) Apply(opts ...IntegrationSlackChannelOption) *IntegrationSlackChannel {
+func (h *IntegrationSlackChannel) Configure(opts ...IntegrationSlackChannelOption) *IntegrationSlackChannel {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IntegrationSlackChannel) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IntegrationSlackChannel) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -93928,7 +93928,7 @@ func FromIPAllowlist(cfg IPAllowlist) IPAllowlistOption {
 }
 
 // NewIPAllowlist creates a datadog_ip_allowlist resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewIPAllowlist(stack *config.Stack, name string) (*IPAllowlist, error) {
 	h := &IPAllowlist{}
 	h.resource = &config.Resource{
@@ -93947,19 +93947,19 @@ func (h *IPAllowlist) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_ip_allowlist. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_ip_allowlist. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IPAllowlist) Apply(opts ...IPAllowlistOption) *IPAllowlist {
+func (h *IPAllowlist) Configure(opts ...IPAllowlistOption) *IPAllowlist {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *IPAllowlist) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *IPAllowlist) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -94187,7 +94187,7 @@ func FromLogsArchive(cfg LogsArchive) LogsArchiveOption {
 }
 
 // NewLogsArchive creates a datadog_logs_archive resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewLogsArchive(stack *config.Stack, name string) (*LogsArchive, error) {
 	h := &LogsArchive{}
 	h.resource = &config.Resource{
@@ -94206,19 +94206,19 @@ func (h *LogsArchive) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_archive. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_archive. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsArchive) Apply(opts ...LogsArchiveOption) *LogsArchive {
+func (h *LogsArchive) Configure(opts ...LogsArchiveOption) *LogsArchive {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *LogsArchive) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *LogsArchive) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -94258,7 +94258,7 @@ func FromLogsArchiveOrder(cfg LogsArchiveOrder) LogsArchiveOrderOption {
 }
 
 // NewLogsArchiveOrder creates a datadog_logs_archive_order resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewLogsArchiveOrder(stack *config.Stack, name string) (*LogsArchiveOrder, error) {
 	h := &LogsArchiveOrder{}
 	h.resource = &config.Resource{
@@ -94277,19 +94277,19 @@ func (h *LogsArchiveOrder) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_archive_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_archive_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsArchiveOrder) Apply(opts ...LogsArchiveOrderOption) *LogsArchiveOrder {
+func (h *LogsArchiveOrder) Configure(opts ...LogsArchiveOrderOption) *LogsArchiveOrder {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *LogsArchiveOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *LogsArchiveOrder) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -96278,7 +96278,7 @@ func FromLogsCustomPipeline(cfg LogsCustomPipeline) LogsCustomPipelineOption {
 }
 
 // NewLogsCustomPipeline creates a datadog_logs_custom_pipeline resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewLogsCustomPipeline(stack *config.Stack, name string) (*LogsCustomPipeline, error) {
 	h := &LogsCustomPipeline{}
 	h.resource = &config.Resource{
@@ -96297,19 +96297,19 @@ func (h *LogsCustomPipeline) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_custom_pipeline. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_custom_pipeline. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsCustomPipeline) Apply(opts ...LogsCustomPipelineOption) *LogsCustomPipeline {
+func (h *LogsCustomPipeline) Configure(opts ...LogsCustomPipelineOption) *LogsCustomPipeline {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *LogsCustomPipeline) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *LogsCustomPipeline) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -96517,7 +96517,7 @@ func FromLogsIndex(cfg LogsIndex) LogsIndexOption {
 }
 
 // NewLogsIndex creates a datadog_logs_index resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewLogsIndex(stack *config.Stack, name string) (*LogsIndex, error) {
 	h := &LogsIndex{}
 	h.resource = &config.Resource{
@@ -96536,19 +96536,19 @@ func (h *LogsIndex) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_index. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_index. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsIndex) Apply(opts ...LogsIndexOption) *LogsIndex {
+func (h *LogsIndex) Configure(opts ...LogsIndexOption) *LogsIndex {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *LogsIndex) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *LogsIndex) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -96595,7 +96595,7 @@ func FromLogsIndexOrder(cfg LogsIndexOrder) LogsIndexOrderOption {
 }
 
 // NewLogsIndexOrder creates a datadog_logs_index_order resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewLogsIndexOrder(stack *config.Stack, name string) (*LogsIndexOrder, error) {
 	h := &LogsIndexOrder{}
 	h.resource = &config.Resource{
@@ -96614,19 +96614,19 @@ func (h *LogsIndexOrder) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_index_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_index_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsIndexOrder) Apply(opts ...LogsIndexOrderOption) *LogsIndexOrder {
+func (h *LogsIndexOrder) Configure(opts ...LogsIndexOrderOption) *LogsIndexOrder {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *LogsIndexOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *LogsIndexOrder) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -96666,7 +96666,7 @@ func FromLogsIntegrationPipeline(cfg LogsIntegrationPipeline) LogsIntegrationPip
 }
 
 // NewLogsIntegrationPipeline creates a datadog_logs_integration_pipeline resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewLogsIntegrationPipeline(stack *config.Stack, name string) (*LogsIntegrationPipeline, error) {
 	h := &LogsIntegrationPipeline{}
 	h.resource = &config.Resource{
@@ -96685,19 +96685,19 @@ func (h *LogsIntegrationPipeline) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_integration_pipeline. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_integration_pipeline. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsIntegrationPipeline) Apply(opts ...LogsIntegrationPipelineOption) *LogsIntegrationPipeline {
+func (h *LogsIntegrationPipeline) Configure(opts ...LogsIntegrationPipelineOption) *LogsIntegrationPipeline {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *LogsIntegrationPipeline) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *LogsIntegrationPipeline) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -96848,7 +96848,7 @@ func FromLogsMetric(cfg LogsMetric) LogsMetricOption {
 }
 
 // NewLogsMetric creates a datadog_logs_metric resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewLogsMetric(stack *config.Stack, name string) (*LogsMetric, error) {
 	h := &LogsMetric{}
 	h.resource = &config.Resource{
@@ -96867,19 +96867,19 @@ func (h *LogsMetric) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_metric. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_metric. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsMetric) Apply(opts ...LogsMetricOption) *LogsMetric {
+func (h *LogsMetric) Configure(opts ...LogsMetricOption) *LogsMetric {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *LogsMetric) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *LogsMetric) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -96926,7 +96926,7 @@ func FromLogsPipelineOrder(cfg LogsPipelineOrder) LogsPipelineOrderOption {
 }
 
 // NewLogsPipelineOrder creates a datadog_logs_pipeline_order resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewLogsPipelineOrder(stack *config.Stack, name string) (*LogsPipelineOrder, error) {
 	h := &LogsPipelineOrder{}
 	h.resource = &config.Resource{
@@ -96945,19 +96945,19 @@ func (h *LogsPipelineOrder) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_pipeline_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_pipeline_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsPipelineOrder) Apply(opts ...LogsPipelineOrderOption) *LogsPipelineOrder {
+func (h *LogsPipelineOrder) Configure(opts ...LogsPipelineOrderOption) *LogsPipelineOrder {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *LogsPipelineOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *LogsPipelineOrder) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -97039,7 +97039,7 @@ func FromMetricMetadata(cfg MetricMetadata) MetricMetadataOption {
 }
 
 // NewMetricMetadata creates a datadog_metric_metadata resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewMetricMetadata(stack *config.Stack, name string) (*MetricMetadata, error) {
 	h := &MetricMetadata{}
 	h.resource = &config.Resource{
@@ -97058,19 +97058,19 @@ func (h *MetricMetadata) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_metric_metadata. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_metric_metadata. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *MetricMetadata) Apply(opts ...MetricMetadataOption) *MetricMetadata {
+func (h *MetricMetadata) Configure(opts ...MetricMetadataOption) *MetricMetadata {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *MetricMetadata) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *MetricMetadata) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -97175,7 +97175,7 @@ func FromMetricTagConfiguration(cfg MetricTagConfiguration) MetricTagConfigurati
 }
 
 // NewMetricTagConfiguration creates a datadog_metric_tag_configuration resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewMetricTagConfiguration(stack *config.Stack, name string) (*MetricTagConfiguration, error) {
 	h := &MetricTagConfiguration{}
 	h.resource = &config.Resource{
@@ -97194,19 +97194,19 @@ func (h *MetricTagConfiguration) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_metric_tag_configuration. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_metric_tag_configuration. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *MetricTagConfiguration) Apply(opts ...MetricTagConfigurationOption) *MetricTagConfiguration {
+func (h *MetricTagConfiguration) Configure(opts ...MetricTagConfigurationOption) *MetricTagConfiguration {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *MetricTagConfiguration) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *MetricTagConfiguration) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -97906,7 +97906,7 @@ func FromMonitor(cfg Monitor) MonitorOption {
 }
 
 // NewMonitor creates a datadog_monitor resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewMonitor(stack *config.Stack, name string) (*Monitor, error) {
 	h := &Monitor{}
 	h.resource = &config.Resource{
@@ -97925,19 +97925,19 @@ func (h *Monitor) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_monitor. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_monitor. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *Monitor) Apply(opts ...MonitorOption) *Monitor {
+func (h *Monitor) Configure(opts ...MonitorOption) *Monitor {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *Monitor) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *Monitor) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -98021,7 +98021,7 @@ func FromMonitorConfigPolicy(cfg MonitorConfigPolicy) MonitorConfigPolicyOption 
 }
 
 // NewMonitorConfigPolicy creates a datadog_monitor_config_policy resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewMonitorConfigPolicy(stack *config.Stack, name string) (*MonitorConfigPolicy, error) {
 	h := &MonitorConfigPolicy{}
 	h.resource = &config.Resource{
@@ -98040,19 +98040,19 @@ func (h *MonitorConfigPolicy) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_monitor_config_policy. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_monitor_config_policy. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *MonitorConfigPolicy) Apply(opts ...MonitorConfigPolicyOption) *MonitorConfigPolicy {
+func (h *MonitorConfigPolicy) Configure(opts ...MonitorConfigPolicyOption) *MonitorConfigPolicy {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *MonitorConfigPolicy) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *MonitorConfigPolicy) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -98099,7 +98099,7 @@ func FromMonitorJSON(cfg MonitorJSON) MonitorJSONOption {
 }
 
 // NewMonitorJSON creates a datadog_monitor_json resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewMonitorJSON(stack *config.Stack, name string) (*MonitorJSON, error) {
 	h := &MonitorJSON{}
 	h.resource = &config.Resource{
@@ -98118,19 +98118,19 @@ func (h *MonitorJSON) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_monitor_json. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_monitor_json. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *MonitorJSON) Apply(opts ...MonitorJSONOption) *MonitorJSON {
+func (h *MonitorJSON) Configure(opts ...MonitorJSONOption) *MonitorJSON {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *MonitorJSON) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *MonitorJSON) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -98170,7 +98170,7 @@ func FromOpenapiAPI(cfg OpenapiAPI) OpenapiAPIOption {
 }
 
 // NewOpenapiAPI creates a datadog_openapi_api resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewOpenapiAPI(stack *config.Stack, name string) (*OpenapiAPI, error) {
 	h := &OpenapiAPI{}
 	h.resource = &config.Resource{
@@ -98189,19 +98189,19 @@ func (h *OpenapiAPI) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_openapi_api. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_openapi_api. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *OpenapiAPI) Apply(opts ...OpenapiAPIOption) *OpenapiAPI {
+func (h *OpenapiAPI) Configure(opts ...OpenapiAPIOption) *OpenapiAPI {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *OpenapiAPI) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *OpenapiAPI) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -98447,7 +98447,7 @@ func FromOrganizationSettings(cfg OrganizationSettings) OrganizationSettingsOpti
 }
 
 // NewOrganizationSettings creates a datadog_organization_settings resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewOrganizationSettings(stack *config.Stack, name string) (*OrganizationSettings, error) {
 	h := &OrganizationSettings{}
 	h.resource = &config.Resource{
@@ -98466,19 +98466,19 @@ func (h *OrganizationSettings) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_organization_settings. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_organization_settings. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *OrganizationSettings) Apply(opts ...OrganizationSettingsOption) *OrganizationSettings {
+func (h *OrganizationSettings) Configure(opts ...OrganizationSettingsOption) *OrganizationSettings {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *OrganizationSettings) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *OrganizationSettings) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -124520,7 +124520,7 @@ func FromPowerpack(cfg Powerpack) PowerpackOption {
 }
 
 // NewPowerpack creates a datadog_powerpack resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewPowerpack(stack *config.Stack, name string) (*Powerpack, error) {
 	h := &Powerpack{}
 	h.resource = &config.Resource{
@@ -124539,19 +124539,19 @@ func (h *Powerpack) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_powerpack. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_powerpack. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *Powerpack) Apply(opts ...PowerpackOption) *Powerpack {
+func (h *Powerpack) Configure(opts ...PowerpackOption) *Powerpack {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *Powerpack) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *Powerpack) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -124627,7 +124627,7 @@ func FromRestrictionPolicy(cfg RestrictionPolicy) RestrictionPolicyOption {
 }
 
 // NewRestrictionPolicy creates a datadog_restriction_policy resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewRestrictionPolicy(stack *config.Stack, name string) (*RestrictionPolicy, error) {
 	h := &RestrictionPolicy{}
 	h.resource = &config.Resource{
@@ -124646,19 +124646,19 @@ func (h *RestrictionPolicy) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_restriction_policy. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_restriction_policy. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *RestrictionPolicy) Apply(opts ...RestrictionPolicyOption) *RestrictionPolicy {
+func (h *RestrictionPolicy) Configure(opts ...RestrictionPolicyOption) *RestrictionPolicy {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *RestrictionPolicy) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *RestrictionPolicy) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -124749,7 +124749,7 @@ func FromRole(cfg Role) RoleOption {
 }
 
 // NewRole creates a datadog_role resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewRole(stack *config.Stack, name string) (*Role, error) {
 	h := &Role{}
 	h.resource = &config.Resource{
@@ -124768,19 +124768,19 @@ func (h *Role) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_role. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_role. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *Role) Apply(opts ...RoleOption) *Role {
+func (h *Role) Configure(opts ...RoleOption) *Role {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *Role) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *Role) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -124834,7 +124834,7 @@ func FromRumApplication(cfg RumApplication) RumApplicationOption {
 }
 
 // NewRumApplication creates a datadog_rum_application resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewRumApplication(stack *config.Stack, name string) (*RumApplication, error) {
 	h := &RumApplication{}
 	h.resource = &config.Resource{
@@ -124853,19 +124853,19 @@ func (h *RumApplication) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_rum_application. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_rum_application. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *RumApplication) Apply(opts ...RumApplicationOption) *RumApplication {
+func (h *RumApplication) Configure(opts ...RumApplicationOption) *RumApplication {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *RumApplication) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *RumApplication) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -125016,7 +125016,7 @@ func FromSecurityMonitoringDefaultRule(cfg SecurityMonitoringDefaultRule) Securi
 }
 
 // NewSecurityMonitoringDefaultRule creates a datadog_security_monitoring_default_rule resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSecurityMonitoringDefaultRule(stack *config.Stack, name string) (*SecurityMonitoringDefaultRule, error) {
 	h := &SecurityMonitoringDefaultRule{}
 	h.resource = &config.Resource{
@@ -125035,19 +125035,19 @@ func (h *SecurityMonitoringDefaultRule) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_security_monitoring_default_rule. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_security_monitoring_default_rule. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SecurityMonitoringDefaultRule) Apply(opts ...SecurityMonitoringDefaultRuleOption) *SecurityMonitoringDefaultRule {
+func (h *SecurityMonitoringDefaultRule) Configure(opts ...SecurityMonitoringDefaultRuleOption) *SecurityMonitoringDefaultRule {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SecurityMonitoringDefaultRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SecurityMonitoringDefaultRule) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -125152,7 +125152,7 @@ func FromSecurityMonitoringFilter(cfg SecurityMonitoringFilter) SecurityMonitori
 }
 
 // NewSecurityMonitoringFilter creates a datadog_security_monitoring_filter resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSecurityMonitoringFilter(stack *config.Stack, name string) (*SecurityMonitoringFilter, error) {
 	h := &SecurityMonitoringFilter{}
 	h.resource = &config.Resource{
@@ -125171,19 +125171,19 @@ func (h *SecurityMonitoringFilter) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_security_monitoring_filter. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_security_monitoring_filter. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SecurityMonitoringFilter) Apply(opts ...SecurityMonitoringFilterOption) *SecurityMonitoringFilter {
+func (h *SecurityMonitoringFilter) Configure(opts ...SecurityMonitoringFilterOption) *SecurityMonitoringFilter {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SecurityMonitoringFilter) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SecurityMonitoringFilter) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -125791,7 +125791,7 @@ func FromSecurityMonitoringRule(cfg SecurityMonitoringRule) SecurityMonitoringRu
 }
 
 // NewSecurityMonitoringRule creates a datadog_security_monitoring_rule resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSecurityMonitoringRule(stack *config.Stack, name string) (*SecurityMonitoringRule, error) {
 	h := &SecurityMonitoringRule{}
 	h.resource = &config.Resource{
@@ -125810,19 +125810,19 @@ func (h *SecurityMonitoringRule) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_security_monitoring_rule. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_security_monitoring_rule. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SecurityMonitoringRule) Apply(opts ...SecurityMonitoringRuleOption) *SecurityMonitoringRule {
+func (h *SecurityMonitoringRule) Configure(opts ...SecurityMonitoringRuleOption) *SecurityMonitoringRule {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SecurityMonitoringRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SecurityMonitoringRule) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -125904,7 +125904,7 @@ func FromSecurityMonitoringSuppression(cfg SecurityMonitoringSuppression) Securi
 }
 
 // NewSecurityMonitoringSuppression creates a datadog_security_monitoring_suppression resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSecurityMonitoringSuppression(stack *config.Stack, name string) (*SecurityMonitoringSuppression, error) {
 	h := &SecurityMonitoringSuppression{}
 	h.resource = &config.Resource{
@@ -125923,19 +125923,19 @@ func (h *SecurityMonitoringSuppression) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_security_monitoring_suppression. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_security_monitoring_suppression. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SecurityMonitoringSuppression) Apply(opts ...SecurityMonitoringSuppressionOption) *SecurityMonitoringSuppression {
+func (h *SecurityMonitoringSuppression) Configure(opts ...SecurityMonitoringSuppressionOption) *SecurityMonitoringSuppression {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SecurityMonitoringSuppression) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SecurityMonitoringSuppression) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -126026,7 +126026,7 @@ func FromSensitiveDataScannerGroup(cfg SensitiveDataScannerGroup) SensitiveDataS
 }
 
 // NewSensitiveDataScannerGroup creates a datadog_sensitive_data_scanner_group resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSensitiveDataScannerGroup(stack *config.Stack, name string) (*SensitiveDataScannerGroup, error) {
 	h := &SensitiveDataScannerGroup{}
 	h.resource = &config.Resource{
@@ -126045,19 +126045,19 @@ func (h *SensitiveDataScannerGroup) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_sensitive_data_scanner_group. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_sensitive_data_scanner_group. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SensitiveDataScannerGroup) Apply(opts ...SensitiveDataScannerGroupOption) *SensitiveDataScannerGroup {
+func (h *SensitiveDataScannerGroup) Configure(opts ...SensitiveDataScannerGroupOption) *SensitiveDataScannerGroup {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SensitiveDataScannerGroup) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SensitiveDataScannerGroup) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -126097,7 +126097,7 @@ func FromSensitiveDataScannerGroupOrder(cfg SensitiveDataScannerGroupOrder) Sens
 }
 
 // NewSensitiveDataScannerGroupOrder creates a datadog_sensitive_data_scanner_group_order resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSensitiveDataScannerGroupOrder(stack *config.Stack, name string) (*SensitiveDataScannerGroupOrder, error) {
 	h := &SensitiveDataScannerGroupOrder{}
 	h.resource = &config.Resource{
@@ -126116,19 +126116,19 @@ func (h *SensitiveDataScannerGroupOrder) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_sensitive_data_scanner_group_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_sensitive_data_scanner_group_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SensitiveDataScannerGroupOrder) Apply(opts ...SensitiveDataScannerGroupOrderOption) *SensitiveDataScannerGroupOrder {
+func (h *SensitiveDataScannerGroupOrder) Configure(opts ...SensitiveDataScannerGroupOrderOption) *SensitiveDataScannerGroupOrder {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SensitiveDataScannerGroupOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SensitiveDataScannerGroupOrder) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -126305,7 +126305,7 @@ func FromSensitiveDataScannerRule(cfg SensitiveDataScannerRule) SensitiveDataSca
 }
 
 // NewSensitiveDataScannerRule creates a datadog_sensitive_data_scanner_rule resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSensitiveDataScannerRule(stack *config.Stack, name string) (*SensitiveDataScannerRule, error) {
 	h := &SensitiveDataScannerRule{}
 	h.resource = &config.Resource{
@@ -126324,19 +126324,19 @@ func (h *SensitiveDataScannerRule) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_sensitive_data_scanner_rule. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_sensitive_data_scanner_rule. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SensitiveDataScannerRule) Apply(opts ...SensitiveDataScannerRuleOption) *SensitiveDataScannerRule {
+func (h *SensitiveDataScannerRule) Configure(opts ...SensitiveDataScannerRuleOption) *SensitiveDataScannerRule {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SensitiveDataScannerRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SensitiveDataScannerRule) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -126397,7 +126397,7 @@ func FromServiceAccount(cfg ServiceAccount) ServiceAccountOption {
 }
 
 // NewServiceAccount creates a datadog_service_account resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewServiceAccount(stack *config.Stack, name string) (*ServiceAccount, error) {
 	h := &ServiceAccount{}
 	h.resource = &config.Resource{
@@ -126416,19 +126416,19 @@ func (h *ServiceAccount) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_service_account. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_service_account. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ServiceAccount) Apply(opts ...ServiceAccountOption) *ServiceAccount {
+func (h *ServiceAccount) Configure(opts ...ServiceAccountOption) *ServiceAccount {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *ServiceAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *ServiceAccount) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -126496,7 +126496,7 @@ func FromServiceAccountApplicationKey(cfg ServiceAccountApplicationKey) ServiceA
 }
 
 // NewServiceAccountApplicationKey creates a datadog_service_account_application_key resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewServiceAccountApplicationKey(stack *config.Stack, name string) (*ServiceAccountApplicationKey, error) {
 	h := &ServiceAccountApplicationKey{}
 	h.resource = &config.Resource{
@@ -126515,19 +126515,19 @@ func (h *ServiceAccountApplicationKey) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_service_account_application_key. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_service_account_application_key. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ServiceAccountApplicationKey) Apply(opts ...ServiceAccountApplicationKeyOption) *ServiceAccountApplicationKey {
+func (h *ServiceAccountApplicationKey) Configure(opts ...ServiceAccountApplicationKeyOption) *ServiceAccountApplicationKey {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *ServiceAccountApplicationKey) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *ServiceAccountApplicationKey) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -126567,7 +126567,7 @@ func FromServiceDefinitionYaml(cfg ServiceDefinitionYaml) ServiceDefinitionYamlO
 }
 
 // NewServiceDefinitionYaml creates a datadog_service_definition_yaml resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewServiceDefinitionYaml(stack *config.Stack, name string) (*ServiceDefinitionYaml, error) {
 	h := &ServiceDefinitionYaml{}
 	h.resource = &config.Resource{
@@ -126586,19 +126586,19 @@ func (h *ServiceDefinitionYaml) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_service_definition_yaml. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_service_definition_yaml. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ServiceDefinitionYaml) Apply(opts ...ServiceDefinitionYamlOption) *ServiceDefinitionYaml {
+func (h *ServiceDefinitionYaml) Configure(opts ...ServiceDefinitionYamlOption) *ServiceDefinitionYaml {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *ServiceDefinitionYaml) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *ServiceDefinitionYaml) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -126990,7 +126990,7 @@ func FromServiceLevelObjective(cfg ServiceLevelObjective) ServiceLevelObjectiveO
 }
 
 // NewServiceLevelObjective creates a datadog_service_level_objective resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewServiceLevelObjective(stack *config.Stack, name string) (*ServiceLevelObjective, error) {
 	h := &ServiceLevelObjective{}
 	h.resource = &config.Resource{
@@ -127009,19 +127009,19 @@ func (h *ServiceLevelObjective) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_service_level_objective. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_service_level_objective. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ServiceLevelObjective) Apply(opts ...ServiceLevelObjectiveOption) *ServiceLevelObjective {
+func (h *ServiceLevelObjective) Configure(opts ...ServiceLevelObjectiveOption) *ServiceLevelObjective {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *ServiceLevelObjective) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *ServiceLevelObjective) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -127110,7 +127110,7 @@ func FromSloCorrection(cfg SloCorrection) SloCorrectionOption {
 }
 
 // NewSloCorrection creates a datadog_slo_correction resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSloCorrection(stack *config.Stack, name string) (*SloCorrection, error) {
 	h := &SloCorrection{}
 	h.resource = &config.Resource{
@@ -127129,19 +127129,19 @@ func (h *SloCorrection) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_slo_correction. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_slo_correction. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SloCorrection) Apply(opts ...SloCorrectionOption) *SloCorrection {
+func (h *SloCorrection) Configure(opts ...SloCorrectionOption) *SloCorrection {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SloCorrection) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SloCorrection) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -127289,7 +127289,7 @@ func FromSpansMetric(cfg SpansMetric) SpansMetricOption {
 }
 
 // NewSpansMetric creates a datadog_spans_metric resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSpansMetric(stack *config.Stack, name string) (*SpansMetric, error) {
 	h := &SpansMetric{}
 	h.resource = &config.Resource{
@@ -127308,19 +127308,19 @@ func (h *SpansMetric) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_spans_metric. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_spans_metric. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SpansMetric) Apply(opts ...SpansMetricOption) *SpansMetric {
+func (h *SpansMetric) Configure(opts ...SpansMetricOption) *SpansMetric {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SpansMetric) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SpansMetric) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -127360,7 +127360,7 @@ func FromSyntheticsConcurrencyCap(cfg SyntheticsConcurrencyCap) SyntheticsConcur
 }
 
 // NewSyntheticsConcurrencyCap creates a datadog_synthetics_concurrency_cap resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSyntheticsConcurrencyCap(stack *config.Stack, name string) (*SyntheticsConcurrencyCap, error) {
 	h := &SyntheticsConcurrencyCap{}
 	h.resource = &config.Resource{
@@ -127379,19 +127379,19 @@ func (h *SyntheticsConcurrencyCap) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_synthetics_concurrency_cap. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_synthetics_concurrency_cap. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SyntheticsConcurrencyCap) Apply(opts ...SyntheticsConcurrencyCapOption) *SyntheticsConcurrencyCap {
+func (h *SyntheticsConcurrencyCap) Configure(opts ...SyntheticsConcurrencyCapOption) *SyntheticsConcurrencyCap {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SyntheticsConcurrencyCap) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SyntheticsConcurrencyCap) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -127613,7 +127613,7 @@ func FromSyntheticsGlobalVariable(cfg SyntheticsGlobalVariable) SyntheticsGlobal
 }
 
 // NewSyntheticsGlobalVariable creates a datadog_synthetics_global_variable resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSyntheticsGlobalVariable(stack *config.Stack, name string) (*SyntheticsGlobalVariable, error) {
 	h := &SyntheticsGlobalVariable{}
 	h.resource = &config.Resource{
@@ -127632,19 +127632,19 @@ func (h *SyntheticsGlobalVariable) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_synthetics_global_variable. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_synthetics_global_variable. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SyntheticsGlobalVariable) Apply(opts ...SyntheticsGlobalVariableOption) *SyntheticsGlobalVariable {
+func (h *SyntheticsGlobalVariable) Configure(opts ...SyntheticsGlobalVariableOption) *SyntheticsGlobalVariable {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SyntheticsGlobalVariable) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SyntheticsGlobalVariable) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -127735,7 +127735,7 @@ func FromSyntheticsPrivateLocation(cfg SyntheticsPrivateLocation) SyntheticsPriv
 }
 
 // NewSyntheticsPrivateLocation creates a datadog_synthetics_private_location resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSyntheticsPrivateLocation(stack *config.Stack, name string) (*SyntheticsPrivateLocation, error) {
 	h := &SyntheticsPrivateLocation{}
 	h.resource = &config.Resource{
@@ -127754,19 +127754,19 @@ func (h *SyntheticsPrivateLocation) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_synthetics_private_location. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_synthetics_private_location. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SyntheticsPrivateLocation) Apply(opts ...SyntheticsPrivateLocationOption) *SyntheticsPrivateLocation {
+func (h *SyntheticsPrivateLocation) Configure(opts ...SyntheticsPrivateLocationOption) *SyntheticsPrivateLocation {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SyntheticsPrivateLocation) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SyntheticsPrivateLocation) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130066,7 +130066,7 @@ func FromSyntheticsTest(cfg SyntheticsTest) SyntheticsTestOption {
 }
 
 // NewSyntheticsTest creates a datadog_synthetics_test resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewSyntheticsTest(stack *config.Stack, name string) (*SyntheticsTest, error) {
 	h := &SyntheticsTest{}
 	h.resource = &config.Resource{
@@ -130085,19 +130085,19 @@ func (h *SyntheticsTest) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_synthetics_test. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_synthetics_test. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SyntheticsTest) Apply(opts ...SyntheticsTestOption) *SyntheticsTest {
+func (h *SyntheticsTest) Configure(opts ...SyntheticsTestOption) *SyntheticsTest {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *SyntheticsTest) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *SyntheticsTest) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130172,7 +130172,7 @@ func FromTeam(cfg Team) TeamOption {
 }
 
 // NewTeam creates a datadog_team resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewTeam(stack *config.Stack, name string) (*Team, error) {
 	h := &Team{}
 	h.resource = &config.Resource{
@@ -130191,19 +130191,19 @@ func (h *Team) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_team. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_team. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *Team) Apply(opts ...TeamOption) *Team {
+func (h *Team) Configure(opts ...TeamOption) *Team {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *Team) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *Team) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130264,7 +130264,7 @@ func FromTeamLink(cfg TeamLink) TeamLinkOption {
 }
 
 // NewTeamLink creates a datadog_team_link resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewTeamLink(stack *config.Stack, name string) (*TeamLink, error) {
 	h := &TeamLink{}
 	h.resource = &config.Resource{
@@ -130283,19 +130283,19 @@ func (h *TeamLink) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_team_link. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_team_link. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *TeamLink) Apply(opts ...TeamLinkOption) *TeamLink {
+func (h *TeamLink) Configure(opts ...TeamLinkOption) *TeamLink {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *TeamLink) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *TeamLink) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130349,7 +130349,7 @@ func FromTeamMembership(cfg TeamMembership) TeamMembershipOption {
 }
 
 // NewTeamMembership creates a datadog_team_membership resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewTeamMembership(stack *config.Stack, name string) (*TeamMembership, error) {
 	h := &TeamMembership{}
 	h.resource = &config.Resource{
@@ -130368,19 +130368,19 @@ func (h *TeamMembership) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_team_membership. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_team_membership. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *TeamMembership) Apply(opts ...TeamMembershipOption) *TeamMembership {
+func (h *TeamMembership) Configure(opts ...TeamMembershipOption) *TeamMembership {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *TeamMembership) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *TeamMembership) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130434,7 +130434,7 @@ func FromTeamPermissionSetting(cfg TeamPermissionSetting) TeamPermissionSettingO
 }
 
 // NewTeamPermissionSetting creates a datadog_team_permission_setting resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewTeamPermissionSetting(stack *config.Stack, name string) (*TeamPermissionSetting, error) {
 	h := &TeamPermissionSetting{}
 	h.resource = &config.Resource{
@@ -130453,19 +130453,19 @@ func (h *TeamPermissionSetting) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_team_permission_setting. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_team_permission_setting. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *TeamPermissionSetting) Apply(opts ...TeamPermissionSettingOption) *TeamPermissionSetting {
+func (h *TeamPermissionSetting) Configure(opts ...TeamPermissionSettingOption) *TeamPermissionSetting {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *TeamPermissionSetting) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *TeamPermissionSetting) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130547,7 +130547,7 @@ func FromUser(cfg User) UserOption {
 }
 
 // NewUser creates a datadog_user resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewUser(stack *config.Stack, name string) (*User, error) {
 	h := &User{}
 	h.resource = &config.Resource{
@@ -130566,19 +130566,19 @@ func (h *User) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_user. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_user. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *User) Apply(opts ...UserOption) *User {
+func (h *User) Configure(opts ...UserOption) *User {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *User) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *User) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130625,7 +130625,7 @@ func FromUserRole(cfg UserRole) UserRoleOption {
 }
 
 // NewUserRole creates a datadog_user_role resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewUserRole(stack *config.Stack, name string) (*UserRole, error) {
 	h := &UserRole{}
 	h.resource = &config.Resource{
@@ -130644,19 +130644,19 @@ func (h *UserRole) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_user_role. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_user_role. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *UserRole) Apply(opts ...UserRoleOption) *UserRole {
+func (h *UserRole) Configure(opts ...UserRoleOption) *UserRole {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *UserRole) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *UserRole) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130724,7 +130724,7 @@ func FromWebhook(cfg Webhook) WebhookOption {
 }
 
 // NewWebhook creates a datadog_webhook resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewWebhook(stack *config.Stack, name string) (*Webhook, error) {
 	h := &Webhook{}
 	h.resource = &config.Resource{
@@ -130743,19 +130743,19 @@ func (h *Webhook) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_webhook. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_webhook. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *Webhook) Apply(opts ...WebhookOption) *Webhook {
+func (h *Webhook) Configure(opts ...WebhookOption) *Webhook {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *Webhook) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *Webhook) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}
@@ -130809,7 +130809,7 @@ func FromWebhookCustomVariable(cfg WebhookCustomVariable) WebhookCustomVariableO
 }
 
 // NewWebhookCustomVariable creates a datadog_webhook_custom_variable resource, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Configure method sets the resource's attributes.
 func NewWebhookCustomVariable(stack *config.Stack, name string) (*WebhookCustomVariable, error) {
 	h := &WebhookCustomVariable{}
 	h.resource = &config.Resource{
@@ -130828,19 +130828,19 @@ func (h *WebhookCustomVariable) AsResource() *config.Resource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_webhook_custom_variable. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_webhook_custom_variable. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *WebhookCustomVariable) Apply(opts ...WebhookCustomVariableOption) *WebhookCustomVariable {
+func (h *WebhookCustomVariable) Configure(opts ...WebhookCustomVariableOption) *WebhookCustomVariable {
 	for _, opt := range opts {
 		opt(h)
 	}
 	return h
 }
 
-// ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
+// ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
 // Has no effect if the handle was not created by the New constructor.
-func (h *WebhookCustomVariable) ApplyResourceOptions(opts ...config.ResourceOption) {
+func (h *WebhookCustomVariable) ConfigureResourceOptions(opts ...config.ResourceOption) {
 	if h.resource == nil {
 		return
 	}

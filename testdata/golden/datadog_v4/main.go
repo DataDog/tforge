@@ -58,7 +58,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cf.Apply(datadog.FromComplianceCustomFramework(framework))
+	cf.Configure(datadog.FromComplianceCustomFramework(framework))
 
 	data, err := render.ToJSON(stack, "")
 	if err != nil {

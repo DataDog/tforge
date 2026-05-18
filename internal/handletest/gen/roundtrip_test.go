@@ -3,7 +3,7 @@
 // Package gen hosts a tiny generated SDK used to exercise the generator end
 // to end: a synthetic schema (../schema.json) is fed through `tforge generate`
 // at build time, and these tests call the resulting constructors to verify
-// the marshal/unmarshal round-trip preserves field values.
+// the handle/Configure API preserves field values.
 //
 // The *_gen.go files are not committed; `make handletest` (or
 // `make update-snapshots`) runs `go generate` first to produce them and then
@@ -19,25 +19,40 @@ import (
 	"github.com/DataDog/tforge/config"
 )
 
-// TestResourceConstructor_RequiredString verifies that a required string
-// attribute round-trips through the constructor into Resource.Attributes.
-func TestResourceConstructor_RequiredString(t *testing.T) {
-	stack := config.NewStack("rt")
-	if err := NewWidget(stack, "basic", Widget_SetName("hello")); err != nil {
-		t.Fatalf("NewWidget: %v", err)
-	}
+// widgetAttrs fetches the typed Widget payload from the first resource in the
+// stack. Centralizes the AsResource + type-assert boilerplate.
+func widgetAttrs(t *testing.T, stack *config.Stack) *Widget {
+	t.Helper()
 	if len(stack.Resources) != 1 {
 		t.Fatalf("expected 1 resource, got %d", len(stack.Resources))
 	}
-	r := stack.Resources[0]
+	r := stack.Resources[0].AsResource()
+	w, ok := r.TypedAttributes.(*Widget)
+	if !ok {
+		t.Fatalf("TypedAttributes is %T, want *Widget", r.TypedAttributes)
+	}
+	return w
+}
+
+// TestResourceConstructor_RequiredString verifies that a required string
+// attribute set via Configure round-trips through the typed payload.
+func TestResourceConstructor_RequiredString(t *testing.T) {
+	stack := config.NewStack("rt")
+	w, err := NewWidget(stack, "basic")
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	w.Configure(Widget_SetName("hello"))
+
+	r := stack.Resources[0].AsResource()
 	if r.Type != "test_widget" {
-		t.Errorf("type = %q, want test_widget", r.Type)
+		t.Errorf("Type = %q, want test_widget", r.Type)
 	}
 	if r.Name != "basic" {
-		t.Errorf("name = %q, want basic", r.Name)
+		t.Errorf("Name = %q, want basic", r.Name)
 	}
-	if r.Attributes["name"] != "hello" {
-		t.Errorf("config[name] = %v, want hello", r.Attributes["name"])
+	if got := widgetAttrs(t, stack).Name; got != "hello" {
+		t.Errorf("Widget.Name = %q, want hello", got)
 	}
 }
 
@@ -47,103 +62,110 @@ func TestResourceConstructor_RequiredString(t *testing.T) {
 // and must round-trip distinctly from unset.
 func TestResourceConstructor_OptionalBoolFalse(t *testing.T) {
 	stack := config.NewStack("rt")
-	if err := NewWidget(stack, "booltest",
-		Widget_SetName("x"),
-		Widget_SetEnabled(false),
-	); err != nil {
+	w, err := NewWidget(stack, "booltest")
+	if err != nil {
 		t.Fatalf("NewWidget: %v", err)
 	}
-	r := stack.Resources[0]
-	if _, exists := r.Attributes["enabled"]; !exists {
-		t.Error("config[enabled] should be present when explicitly set to false")
-	} else if r.Attributes["enabled"] != false {
-		t.Errorf("config[enabled] = %v, want false", r.Attributes["enabled"])
+	w.Configure(Widget_SetName("x"), Widget_SetEnabled(false))
+
+	got := widgetAttrs(t, stack).Enabled
+	if got == nil {
+		t.Fatal("Widget.Enabled is nil, want pointer to false")
+	}
+	if *got != false {
+		t.Errorf("Widget.Enabled = %v, want false", *got)
 	}
 }
 
 // TestResourceConstructor_OptionalNumberZero is the float64 sibling of
-// OptionalBoolFalse: count=0 differs from unset and must appear in the output.
+// OptionalBoolFalse: count=0 differs from unset and must survive as &0.
 func TestResourceConstructor_OptionalNumberZero(t *testing.T) {
 	stack := config.NewStack("rt")
-	if err := NewWidget(stack, "zerocount",
-		Widget_SetName("x"),
-		Widget_SetCount(0),
-	); err != nil {
+	w, err := NewWidget(stack, "zerocount")
+	if err != nil {
 		t.Fatalf("NewWidget: %v", err)
 	}
-	r := stack.Resources[0]
-	if _, exists := r.Attributes["count"]; !exists {
-		t.Error("config[count] should be present when explicitly set to 0")
-	} else if r.Attributes["count"] != float64(0) {
-		t.Errorf("config[count] = %v, want 0", r.Attributes["count"])
+	w.Configure(Widget_SetName("x"), Widget_SetCount(0))
+
+	got := widgetAttrs(t, stack).Count
+	if got == nil {
+		t.Fatal("Widget.Count is nil, want pointer to 0")
+	}
+	if *got != 0 {
+		t.Errorf("Widget.Count = %v, want 0", *got)
 	}
 }
 
 // TestResourceConstructor_OptionalBoolTrue is the positive case for OptionalBoolFalse.
 func TestResourceConstructor_OptionalBoolTrue(t *testing.T) {
 	stack := config.NewStack("rt")
-	if err := NewWidget(stack, "truebool",
-		Widget_SetName("y"),
-		Widget_SetEnabled(true),
-	); err != nil {
+	w, err := NewWidget(stack, "truebool")
+	if err != nil {
 		t.Fatalf("NewWidget: %v", err)
 	}
-	r := stack.Resources[0]
-	if r.Attributes["enabled"] != true {
-		t.Errorf("config[enabled] = %v, want true", r.Attributes["enabled"])
+	w.Configure(Widget_SetName("y"), Widget_SetEnabled(true))
+
+	got := widgetAttrs(t, stack).Enabled
+	if got == nil {
+		t.Fatal("Widget.Enabled is nil, want pointer to true")
+	}
+	if *got != true {
+		t.Errorf("Widget.Enabled = %v, want true", *got)
 	}
 }
 
 // TestResourceConstructor_NestedBlock verifies that a list-nesting nested
-// block populated via NewWidgetSetting + Widget_SetSetting round-trips
-// through Attributes as []any of map[string]any.
+// block populated via NewWidgetSetting + Widget_SetSetting lands on the
+// typed payload as a properly populated slice.
 func TestResourceConstructor_NestedBlock(t *testing.T) {
 	stack := config.NewStack("rt")
-	if err := NewWidget(stack, "nested",
+	w, err := NewWidget(stack, "nested")
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
+	w.Configure(
 		Widget_SetName("z"),
 		Widget_SetSetting(NewWidgetSetting(
 			WidgetSetting_SetKey("k1"),
 			WidgetSetting_SetValue("v1"),
 		)),
-	); err != nil {
-		t.Fatalf("NewWidget: %v", err)
+	)
+
+	settings := widgetAttrs(t, stack).Setting
+	if len(settings) != 1 {
+		t.Fatalf("len(Setting) = %d, want 1", len(settings))
 	}
-	r := stack.Resources[0]
-	settingRaw, ok := r.Attributes["setting"]
-	if !ok {
-		t.Fatal("config[setting] missing")
+	if settings[0].Key != "k1" {
+		t.Errorf("Setting[0].Key = %q, want k1", settings[0].Key)
 	}
-	settingSlice, ok := settingRaw.([]any)
-	if !ok {
-		t.Fatalf("config[setting] is %T, want []any", settingRaw)
-	}
-	if len(settingSlice) != 1 {
-		t.Fatalf("len(setting) = %d, want 1", len(settingSlice))
-	}
-	settingMap, ok := settingSlice[0].(map[string]any)
-	if !ok {
-		t.Fatalf("setting[0] is %T, want map[string]any", settingSlice[0])
-	}
-	if settingMap["key"] != "k1" {
-		t.Errorf("setting[0].key = %v, want k1", settingMap["key"])
-	}
-	if settingMap["value"] != "v1" {
-		t.Errorf("setting[0].value = %v, want v1", settingMap["value"])
+	if settings[0].Value != "v1" {
+		t.Errorf("Setting[0].Value = %q, want v1", settings[0].Value)
 	}
 }
 
-// TestResourceConstructor_OptionalUnset confirms that unset optionals do not
-// leak into the rendered config — the `omitempty` tags pull their weight.
+// TestResourceConstructor_OptionalUnset confirms that unset optionals stay
+// at their zero value on the typed payload — the renderer's omitempty tags
+// drop them at marshal time.
 func TestResourceConstructor_OptionalUnset(t *testing.T) {
 	stack := config.NewStack("rt")
-	if err := NewWidget(stack, "minimal", Widget_SetName("only-name")); err != nil {
+	w, err := NewWidget(stack, "minimal")
+	if err != nil {
 		t.Fatalf("NewWidget: %v", err)
 	}
-	r := stack.Resources[0]
-	for _, key := range []string{"tags", "count", "enabled", "setting"} {
-		if _, exists := r.Attributes[key]; exists {
-			t.Errorf("config[%s] should be absent for unset optional, got %v", key, r.Attributes[key])
-		}
+	w.Configure(Widget_SetName("only-name"))
+
+	got := widgetAttrs(t, stack)
+	if got.Enabled != nil {
+		t.Errorf("Widget.Enabled = %v, want nil", *got.Enabled)
+	}
+	if got.Count != nil {
+		t.Errorf("Widget.Count = %v, want nil", *got.Count)
+	}
+	if got.Tags != nil {
+		t.Errorf("Widget.Tags = %v, want nil", got.Tags)
+	}
+	if got.Setting != nil {
+		t.Errorf("Widget.Setting = %v, want nil", got.Setting)
 	}
 }
 
@@ -151,48 +173,55 @@ func TestResourceConstructor_OptionalUnset(t *testing.T) {
 // (which differs from the resource path in the generator).
 func TestDataSourceConstructor(t *testing.T) {
 	stack := config.NewStack("ds")
-	if err := NewLookupData(stack, "myds", LookupData_SetFilter("active")); err != nil {
+	ld, err := NewLookupData(stack, "myds")
+	if err != nil {
 		t.Fatalf("NewLookupData: %v", err)
 	}
+	ld.Configure(LookupData_SetFilter("active"))
+
 	if len(stack.DataSources) != 1 {
 		t.Fatalf("expected 1 data source, got %d", len(stack.DataSources))
 	}
-	ds := stack.DataSources[0]
-	if ds.Type != "test_lookup" {
-		t.Errorf("type = %q, want test_lookup", ds.Type)
+	d := stack.DataSources[0].AsDataSource()
+	if d.Type != "test_lookup" {
+		t.Errorf("Type = %q, want test_lookup", d.Type)
 	}
-	if ds.Name != "myds" {
-		t.Errorf("name = %q, want myds", ds.Name)
+	if d.Name != "myds" {
+		t.Errorf("Name = %q, want myds", d.Name)
 	}
-	if ds.Attributes["filter"] != "active" {
-		t.Errorf("config[filter] = %v, want active", ds.Attributes["filter"])
+	got, ok := d.TypedAttributes.(*LookupData)
+	if !ok {
+		t.Fatalf("TypedAttributes is %T, want *LookupData", d.TypedAttributes)
+	}
+	if got.Filter != "active" {
+		t.Errorf("Filter = %q, want active", got.Filter)
 	}
 }
 
 // TestFromBridge verifies the FromWidget(cfg) bridge: a populated Widget value
-// is applied as an option, copying all set fields into the constructed resource.
+// is applied as an option, copying all set fields onto the typed payload while
+// preserving the back-pointer to the stack-owned Resource.
 func TestFromBridge(t *testing.T) {
 	stack := config.NewStack("bridge")
+	w, err := NewWidget(stack, "bridged")
+	if err != nil {
+		t.Fatalf("NewWidget: %v", err)
+	}
 	cfg := Widget{
 		Name:    "direct",
 		Enabled: Ptr(true),
 		Tags:    []string{"a", "b"},
 	}
-	if err := NewWidget(stack, "bridged", FromWidget(cfg)); err != nil {
-		t.Fatalf("NewWidget with FromWidget: %v", err)
+	w.Configure(FromWidget(cfg))
+
+	got := widgetAttrs(t, stack)
+	if got.Name != "direct" {
+		t.Errorf("Widget.Name = %q, want direct", got.Name)
 	}
-	r := stack.Resources[0]
-	if r.Attributes["name"] != "direct" {
-		t.Errorf("config[name] = %v, want direct", r.Attributes["name"])
+	if got.Enabled == nil || *got.Enabled != true {
+		t.Errorf("Widget.Enabled = %v, want pointer to true", got.Enabled)
 	}
-	if r.Attributes["enabled"] != true {
-		t.Errorf("config[enabled] = %v, want true", r.Attributes["enabled"])
-	}
-	tagsRaw, ok := r.Attributes["tags"].([]any)
-	if !ok {
-		t.Fatalf("config[tags] is %T, want []any", r.Attributes["tags"])
-	}
-	if len(tagsRaw) != 2 || tagsRaw[0] != "a" || tagsRaw[1] != "b" {
-		t.Errorf("config[tags] = %v, want [a b]", tagsRaw)
+	if len(got.Tags) != 2 || got.Tags[0] != "a" || got.Tags[1] != "b" {
+		t.Errorf("Widget.Tags = %v, want [a b]", got.Tags)
 	}
 }

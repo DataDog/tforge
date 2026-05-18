@@ -49,7 +49,7 @@ func FromAPIKeyData(cfg APIKeyData) APIKeyDataOption {
 }
 
 // NewAPIKeyData creates a datadog_api_key data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewAPIKeyData(stack *config.Stack, name string) (*APIKeyData, error) {
 	h := &APIKeyData{}
 	h.resource = &config.DataSource{
@@ -68,9 +68,9 @@ func (h *APIKeyData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_api_key. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_api_key. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *APIKeyData) Apply(opts ...APIKeyDataOption) *APIKeyData {
+func (h *APIKeyData) Configure(opts ...APIKeyDataOption) *APIKeyData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -108,7 +108,7 @@ func FromApmRetentionFiltersOrderData(cfg ApmRetentionFiltersOrderData) ApmReten
 }
 
 // NewApmRetentionFiltersOrderData creates a datadog_apm_retention_filters_order data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewApmRetentionFiltersOrderData(stack *config.Stack, name string) (*ApmRetentionFiltersOrderData, error) {
 	h := &ApmRetentionFiltersOrderData{}
 	h.resource = &config.DataSource{
@@ -127,9 +127,9 @@ func (h *ApmRetentionFiltersOrderData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_apm_retention_filters_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_apm_retention_filters_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ApmRetentionFiltersOrderData) Apply(opts ...ApmRetentionFiltersOrderDataOption) *ApmRetentionFiltersOrderData {
+func (h *ApmRetentionFiltersOrderData) Configure(opts ...ApmRetentionFiltersOrderDataOption) *ApmRetentionFiltersOrderData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -181,7 +181,7 @@ func FromApplicationKeyData(cfg ApplicationKeyData) ApplicationKeyDataOption {
 }
 
 // NewApplicationKeyData creates a datadog_application_key data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewApplicationKeyData(stack *config.Stack, name string) (*ApplicationKeyData, error) {
 	h := &ApplicationKeyData{}
 	h.resource = &config.DataSource{
@@ -200,9 +200,9 @@ func (h *ApplicationKeyData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_application_key. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_application_key. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ApplicationKeyData) Apply(opts ...ApplicationKeyDataOption) *ApplicationKeyData {
+func (h *ApplicationKeyData) Configure(opts ...ApplicationKeyDataOption) *ApplicationKeyData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -240,7 +240,7 @@ func FromCloudWorkloadSecurityAgentRulesData(cfg CloudWorkloadSecurityAgentRules
 }
 
 // NewCloudWorkloadSecurityAgentRulesData creates a datadog_cloud_workload_security_agent_rules data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewCloudWorkloadSecurityAgentRulesData(stack *config.Stack, name string) (*CloudWorkloadSecurityAgentRulesData, error) {
 	h := &CloudWorkloadSecurityAgentRulesData{}
 	h.resource = &config.DataSource{
@@ -259,9 +259,9 @@ func (h *CloudWorkloadSecurityAgentRulesData) AsDataSource() *config.DataSource 
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_cloud_workload_security_agent_rules. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_cloud_workload_security_agent_rules. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *CloudWorkloadSecurityAgentRulesData) Apply(opts ...CloudWorkloadSecurityAgentRulesDataOption) *CloudWorkloadSecurityAgentRulesData {
+func (h *CloudWorkloadSecurityAgentRulesData) Configure(opts ...CloudWorkloadSecurityAgentRulesDataOption) *CloudWorkloadSecurityAgentRulesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -306,7 +306,7 @@ func FromCsmThreatsAgentRulesData(cfg CsmThreatsAgentRulesData) CsmThreatsAgentR
 }
 
 // NewCsmThreatsAgentRulesData creates a datadog_csm_threats_agent_rules data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewCsmThreatsAgentRulesData(stack *config.Stack, name string) (*CsmThreatsAgentRulesData, error) {
 	h := &CsmThreatsAgentRulesData{}
 	h.resource = &config.DataSource{
@@ -325,9 +325,9 @@ func (h *CsmThreatsAgentRulesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_csm_threats_agent_rules. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_csm_threats_agent_rules. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *CsmThreatsAgentRulesData) Apply(opts ...CsmThreatsAgentRulesDataOption) *CsmThreatsAgentRulesData {
+func (h *CsmThreatsAgentRulesData) Configure(opts ...CsmThreatsAgentRulesDataOption) *CsmThreatsAgentRulesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -379,7 +379,7 @@ func FromDashboardData(cfg DashboardData) DashboardDataOption {
 }
 
 // NewDashboardData creates a datadog_dashboard data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewDashboardData(stack *config.Stack, name string) (*DashboardData, error) {
 	h := &DashboardData{}
 	h.resource = &config.DataSource{
@@ -398,9 +398,9 @@ func (h *DashboardData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_dashboard. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_dashboard. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *DashboardData) Apply(opts ...DashboardDataOption) *DashboardData {
+func (h *DashboardData) Configure(opts ...DashboardDataOption) *DashboardData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -438,7 +438,7 @@ func FromDashboardListData(cfg DashboardListData) DashboardListDataOption {
 }
 
 // NewDashboardListData creates a datadog_dashboard_list data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewDashboardListData(stack *config.Stack, name string) (*DashboardListData, error) {
 	h := &DashboardListData{}
 	h.resource = &config.DataSource{
@@ -457,9 +457,9 @@ func (h *DashboardListData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_dashboard_list. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_dashboard_list. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *DashboardListData) Apply(opts ...DashboardListDataOption) *DashboardListData {
+func (h *DashboardListData) Configure(opts ...DashboardListDataOption) *DashboardListData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -546,7 +546,7 @@ func FromHostsData(cfg HostsData) HostsDataOption {
 }
 
 // NewHostsData creates a datadog_hosts data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewHostsData(stack *config.Stack, name string) (*HostsData, error) {
 	h := &HostsData{}
 	h.resource = &config.DataSource{
@@ -565,9 +565,9 @@ func (h *HostsData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_hosts. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_hosts. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *HostsData) Apply(opts ...HostsDataOption) *HostsData {
+func (h *HostsData) Configure(opts ...HostsDataOption) *HostsData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -605,7 +605,7 @@ func FromIntegrationAwsLogsServicesData(cfg IntegrationAwsLogsServicesData) Inte
 }
 
 // NewIntegrationAwsLogsServicesData creates a datadog_integration_aws_logs_services data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewIntegrationAwsLogsServicesData(stack *config.Stack, name string) (*IntegrationAwsLogsServicesData, error) {
 	h := &IntegrationAwsLogsServicesData{}
 	h.resource = &config.DataSource{
@@ -624,9 +624,9 @@ func (h *IntegrationAwsLogsServicesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_aws_logs_services. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_aws_logs_services. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationAwsLogsServicesData) Apply(opts ...IntegrationAwsLogsServicesDataOption) *IntegrationAwsLogsServicesData {
+func (h *IntegrationAwsLogsServicesData) Configure(opts ...IntegrationAwsLogsServicesDataOption) *IntegrationAwsLogsServicesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -664,7 +664,7 @@ func FromIntegrationAwsNamespaceRulesData(cfg IntegrationAwsNamespaceRulesData) 
 }
 
 // NewIntegrationAwsNamespaceRulesData creates a datadog_integration_aws_namespace_rules data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewIntegrationAwsNamespaceRulesData(stack *config.Stack, name string) (*IntegrationAwsNamespaceRulesData, error) {
 	h := &IntegrationAwsNamespaceRulesData{}
 	h.resource = &config.DataSource{
@@ -683,9 +683,9 @@ func (h *IntegrationAwsNamespaceRulesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_integration_aws_namespace_rules. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_integration_aws_namespace_rules. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IntegrationAwsNamespaceRulesData) Apply(opts ...IntegrationAwsNamespaceRulesDataOption) *IntegrationAwsNamespaceRulesData {
+func (h *IntegrationAwsNamespaceRulesData) Configure(opts ...IntegrationAwsNamespaceRulesDataOption) *IntegrationAwsNamespaceRulesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -856,7 +856,7 @@ func FromIPRangesData(cfg IPRangesData) IPRangesDataOption {
 }
 
 // NewIPRangesData creates a datadog_ip_ranges data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewIPRangesData(stack *config.Stack, name string) (*IPRangesData, error) {
 	h := &IPRangesData{}
 	h.resource = &config.DataSource{
@@ -875,9 +875,9 @@ func (h *IPRangesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_ip_ranges. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_ip_ranges. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *IPRangesData) Apply(opts ...IPRangesDataOption) *IPRangesData {
+func (h *IPRangesData) Configure(opts ...IPRangesDataOption) *IPRangesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -915,7 +915,7 @@ func FromLogsArchivesOrderData(cfg LogsArchivesOrderData) LogsArchivesOrderDataO
 }
 
 // NewLogsArchivesOrderData creates a datadog_logs_archives_order data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewLogsArchivesOrderData(stack *config.Stack, name string) (*LogsArchivesOrderData, error) {
 	h := &LogsArchivesOrderData{}
 	h.resource = &config.DataSource{
@@ -934,9 +934,9 @@ func (h *LogsArchivesOrderData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_archives_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_archives_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsArchivesOrderData) Apply(opts ...LogsArchivesOrderDataOption) *LogsArchivesOrderData {
+func (h *LogsArchivesOrderData) Configure(opts ...LogsArchivesOrderDataOption) *LogsArchivesOrderData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -974,7 +974,7 @@ func FromLogsIndexesData(cfg LogsIndexesData) LogsIndexesDataOption {
 }
 
 // NewLogsIndexesData creates a datadog_logs_indexes data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewLogsIndexesData(stack *config.Stack, name string) (*LogsIndexesData, error) {
 	h := &LogsIndexesData{}
 	h.resource = &config.DataSource{
@@ -993,9 +993,9 @@ func (h *LogsIndexesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_indexes. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_indexes. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsIndexesData) Apply(opts ...LogsIndexesDataOption) *LogsIndexesData {
+func (h *LogsIndexesData) Configure(opts ...LogsIndexesDataOption) *LogsIndexesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1033,7 +1033,7 @@ func FromLogsIndexesOrderData(cfg LogsIndexesOrderData) LogsIndexesOrderDataOpti
 }
 
 // NewLogsIndexesOrderData creates a datadog_logs_indexes_order data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewLogsIndexesOrderData(stack *config.Stack, name string) (*LogsIndexesOrderData, error) {
 	h := &LogsIndexesOrderData{}
 	h.resource = &config.DataSource{
@@ -1052,9 +1052,9 @@ func (h *LogsIndexesOrderData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_indexes_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_indexes_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsIndexesOrderData) Apply(opts ...LogsIndexesOrderDataOption) *LogsIndexesOrderData {
+func (h *LogsIndexesOrderData) Configure(opts ...LogsIndexesOrderDataOption) *LogsIndexesOrderData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1099,7 +1099,7 @@ func FromLogsPipelinesData(cfg LogsPipelinesData) LogsPipelinesDataOption {
 }
 
 // NewLogsPipelinesData creates a datadog_logs_pipelines data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewLogsPipelinesData(stack *config.Stack, name string) (*LogsPipelinesData, error) {
 	h := &LogsPipelinesData{}
 	h.resource = &config.DataSource{
@@ -1118,9 +1118,9 @@ func (h *LogsPipelinesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_logs_pipelines. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_logs_pipelines. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *LogsPipelinesData) Apply(opts ...LogsPipelinesDataOption) *LogsPipelinesData {
+func (h *LogsPipelinesData) Configure(opts ...LogsPipelinesDataOption) *LogsPipelinesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1382,7 +1382,7 @@ func FromMonitorData(cfg MonitorData) MonitorDataOption {
 }
 
 // NewMonitorData creates a datadog_monitor data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewMonitorData(stack *config.Stack, name string) (*MonitorData, error) {
 	h := &MonitorData{}
 	h.resource = &config.DataSource{
@@ -1401,9 +1401,9 @@ func (h *MonitorData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_monitor. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_monitor. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *MonitorData) Apply(opts ...MonitorDataOption) *MonitorData {
+func (h *MonitorData) Configure(opts ...MonitorDataOption) *MonitorData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1441,7 +1441,7 @@ func FromMonitorConfigPoliciesData(cfg MonitorConfigPoliciesData) MonitorConfigP
 }
 
 // NewMonitorConfigPoliciesData creates a datadog_monitor_config_policies data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewMonitorConfigPoliciesData(stack *config.Stack, name string) (*MonitorConfigPoliciesData, error) {
 	h := &MonitorConfigPoliciesData{}
 	h.resource = &config.DataSource{
@@ -1460,9 +1460,9 @@ func (h *MonitorConfigPoliciesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_monitor_config_policies. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_monitor_config_policies. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *MonitorConfigPoliciesData) Apply(opts ...MonitorConfigPoliciesDataOption) *MonitorConfigPoliciesData {
+func (h *MonitorConfigPoliciesData) Configure(opts ...MonitorConfigPoliciesDataOption) *MonitorConfigPoliciesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1521,7 +1521,7 @@ func FromMonitorsData(cfg MonitorsData) MonitorsDataOption {
 }
 
 // NewMonitorsData creates a datadog_monitors data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewMonitorsData(stack *config.Stack, name string) (*MonitorsData, error) {
 	h := &MonitorsData{}
 	h.resource = &config.DataSource{
@@ -1540,9 +1540,9 @@ func (h *MonitorsData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_monitors. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_monitors. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *MonitorsData) Apply(opts ...MonitorsDataOption) *MonitorsData {
+func (h *MonitorsData) Configure(opts ...MonitorsDataOption) *MonitorsData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1587,7 +1587,7 @@ func FromPermissionsData(cfg PermissionsData) PermissionsDataOption {
 }
 
 // NewPermissionsData creates a datadog_permissions data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewPermissionsData(stack *config.Stack, name string) (*PermissionsData, error) {
 	h := &PermissionsData{}
 	h.resource = &config.DataSource{
@@ -1606,9 +1606,9 @@ func (h *PermissionsData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_permissions. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_permissions. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *PermissionsData) Apply(opts ...PermissionsDataOption) *PermissionsData {
+func (h *PermissionsData) Configure(opts ...PermissionsDataOption) *PermissionsData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1660,7 +1660,7 @@ func FromRoleData(cfg RoleData) RoleDataOption {
 }
 
 // NewRoleData creates a datadog_role data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewRoleData(stack *config.Stack, name string) (*RoleData, error) {
 	h := &RoleData{}
 	h.resource = &config.DataSource{
@@ -1679,9 +1679,9 @@ func (h *RoleData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_role. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_role. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *RoleData) Apply(opts ...RoleDataOption) *RoleData {
+func (h *RoleData) Configure(opts ...RoleDataOption) *RoleData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1740,7 +1740,7 @@ func FromRoleUsersData(cfg RoleUsersData) RoleUsersDataOption {
 }
 
 // NewRoleUsersData creates a datadog_role_users data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewRoleUsersData(stack *config.Stack, name string) (*RoleUsersData, error) {
 	h := &RoleUsersData{}
 	h.resource = &config.DataSource{
@@ -1759,9 +1759,9 @@ func (h *RoleUsersData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_role_users. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_role_users. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *RoleUsersData) Apply(opts ...RoleUsersDataOption) *RoleUsersData {
+func (h *RoleUsersData) Configure(opts ...RoleUsersDataOption) *RoleUsersData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1806,7 +1806,7 @@ func FromRolesData(cfg RolesData) RolesDataOption {
 }
 
 // NewRolesData creates a datadog_roles data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewRolesData(stack *config.Stack, name string) (*RolesData, error) {
 	h := &RolesData{}
 	h.resource = &config.DataSource{
@@ -1825,9 +1825,9 @@ func (h *RolesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_roles. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_roles. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *RolesData) Apply(opts ...RolesDataOption) *RolesData {
+func (h *RolesData) Configure(opts ...RolesDataOption) *RolesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1893,7 +1893,7 @@ func FromRumApplicationData(cfg RumApplicationData) RumApplicationDataOption {
 }
 
 // NewRumApplicationData creates a datadog_rum_application data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewRumApplicationData(stack *config.Stack, name string) (*RumApplicationData, error) {
 	h := &RumApplicationData{}
 	h.resource = &config.DataSource{
@@ -1912,9 +1912,9 @@ func (h *RumApplicationData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_rum_application. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_rum_application. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *RumApplicationData) Apply(opts ...RumApplicationDataOption) *RumApplicationData {
+func (h *RumApplicationData) Configure(opts ...RumApplicationDataOption) *RumApplicationData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -1959,7 +1959,7 @@ func FromSecurityMonitoringFiltersData(cfg SecurityMonitoringFiltersData) Securi
 }
 
 // NewSecurityMonitoringFiltersData creates a datadog_security_monitoring_filters data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewSecurityMonitoringFiltersData(stack *config.Stack, name string) (*SecurityMonitoringFiltersData, error) {
 	h := &SecurityMonitoringFiltersData{}
 	h.resource = &config.DataSource{
@@ -1978,9 +1978,9 @@ func (h *SecurityMonitoringFiltersData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_security_monitoring_filters. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_security_monitoring_filters. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SecurityMonitoringFiltersData) Apply(opts ...SecurityMonitoringFiltersDataOption) *SecurityMonitoringFiltersData {
+func (h *SecurityMonitoringFiltersData) Configure(opts ...SecurityMonitoringFiltersDataOption) *SecurityMonitoringFiltersData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2053,7 +2053,7 @@ func FromSecurityMonitoringRulesData(cfg SecurityMonitoringRulesData) SecurityMo
 }
 
 // NewSecurityMonitoringRulesData creates a datadog_security_monitoring_rules data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewSecurityMonitoringRulesData(stack *config.Stack, name string) (*SecurityMonitoringRulesData, error) {
 	h := &SecurityMonitoringRulesData{}
 	h.resource = &config.DataSource{
@@ -2072,9 +2072,9 @@ func (h *SecurityMonitoringRulesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_security_monitoring_rules. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_security_monitoring_rules. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SecurityMonitoringRulesData) Apply(opts ...SecurityMonitoringRulesDataOption) *SecurityMonitoringRulesData {
+func (h *SecurityMonitoringRulesData) Configure(opts ...SecurityMonitoringRulesDataOption) *SecurityMonitoringRulesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2119,7 +2119,7 @@ func FromSecurityMonitoringSuppressionsData(cfg SecurityMonitoringSuppressionsDa
 }
 
 // NewSecurityMonitoringSuppressionsData creates a datadog_security_monitoring_suppressions data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewSecurityMonitoringSuppressionsData(stack *config.Stack, name string) (*SecurityMonitoringSuppressionsData, error) {
 	h := &SecurityMonitoringSuppressionsData{}
 	h.resource = &config.DataSource{
@@ -2138,9 +2138,9 @@ func (h *SecurityMonitoringSuppressionsData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_security_monitoring_suppressions. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_security_monitoring_suppressions. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SecurityMonitoringSuppressionsData) Apply(opts ...SecurityMonitoringSuppressionsDataOption) *SecurityMonitoringSuppressionsData {
+func (h *SecurityMonitoringSuppressionsData) Configure(opts ...SecurityMonitoringSuppressionsDataOption) *SecurityMonitoringSuppressionsData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2178,7 +2178,7 @@ func FromSensitiveDataScannerGroupOrderData(cfg SensitiveDataScannerGroupOrderDa
 }
 
 // NewSensitiveDataScannerGroupOrderData creates a datadog_sensitive_data_scanner_group_order data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewSensitiveDataScannerGroupOrderData(stack *config.Stack, name string) (*SensitiveDataScannerGroupOrderData, error) {
 	h := &SensitiveDataScannerGroupOrderData{}
 	h.resource = &config.DataSource{
@@ -2197,9 +2197,9 @@ func (h *SensitiveDataScannerGroupOrderData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_sensitive_data_scanner_group_order. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_sensitive_data_scanner_group_order. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SensitiveDataScannerGroupOrderData) Apply(opts ...SensitiveDataScannerGroupOrderDataOption) *SensitiveDataScannerGroupOrderData {
+func (h *SensitiveDataScannerGroupOrderData) Configure(opts ...SensitiveDataScannerGroupOrderDataOption) *SensitiveDataScannerGroupOrderData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2265,7 +2265,7 @@ func FromSensitiveDataScannerStandardPatternData(cfg SensitiveDataScannerStandar
 }
 
 // NewSensitiveDataScannerStandardPatternData creates a datadog_sensitive_data_scanner_standard_pattern data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewSensitiveDataScannerStandardPatternData(stack *config.Stack, name string) (*SensitiveDataScannerStandardPatternData, error) {
 	h := &SensitiveDataScannerStandardPatternData{}
 	h.resource = &config.DataSource{
@@ -2284,9 +2284,9 @@ func (h *SensitiveDataScannerStandardPatternData) AsDataSource() *config.DataSou
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_sensitive_data_scanner_standard_pattern. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_sensitive_data_scanner_standard_pattern. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SensitiveDataScannerStandardPatternData) Apply(opts ...SensitiveDataScannerStandardPatternDataOption) *SensitiveDataScannerStandardPatternData {
+func (h *SensitiveDataScannerStandardPatternData) Configure(opts ...SensitiveDataScannerStandardPatternDataOption) *SensitiveDataScannerStandardPatternData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2394,7 +2394,7 @@ func FromServiceAccountData(cfg ServiceAccountData) ServiceAccountDataOption {
 }
 
 // NewServiceAccountData creates a datadog_service_account data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewServiceAccountData(stack *config.Stack, name string) (*ServiceAccountData, error) {
 	h := &ServiceAccountData{}
 	h.resource = &config.DataSource{
@@ -2413,9 +2413,9 @@ func (h *ServiceAccountData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_service_account. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_service_account. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ServiceAccountData) Apply(opts ...ServiceAccountDataOption) *ServiceAccountData {
+func (h *ServiceAccountData) Configure(opts ...ServiceAccountDataOption) *ServiceAccountData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2516,7 +2516,7 @@ func FromServiceLevelObjectiveData(cfg ServiceLevelObjectiveData) ServiceLevelOb
 }
 
 // NewServiceLevelObjectiveData creates a datadog_service_level_objective data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewServiceLevelObjectiveData(stack *config.Stack, name string) (*ServiceLevelObjectiveData, error) {
 	h := &ServiceLevelObjectiveData{}
 	h.resource = &config.DataSource{
@@ -2535,9 +2535,9 @@ func (h *ServiceLevelObjectiveData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_service_level_objective. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_service_level_objective. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ServiceLevelObjectiveData) Apply(opts ...ServiceLevelObjectiveDataOption) *ServiceLevelObjectiveData {
+func (h *ServiceLevelObjectiveData) Configure(opts ...ServiceLevelObjectiveDataOption) *ServiceLevelObjectiveData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2617,7 +2617,7 @@ func FromServiceLevelObjectivesData(cfg ServiceLevelObjectivesData) ServiceLevel
 }
 
 // NewServiceLevelObjectivesData creates a datadog_service_level_objectives data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewServiceLevelObjectivesData(stack *config.Stack, name string) (*ServiceLevelObjectivesData, error) {
 	h := &ServiceLevelObjectivesData{}
 	h.resource = &config.DataSource{
@@ -2636,9 +2636,9 @@ func (h *ServiceLevelObjectivesData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_service_level_objectives. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_service_level_objectives. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *ServiceLevelObjectivesData) Apply(opts ...ServiceLevelObjectivesDataOption) *ServiceLevelObjectivesData {
+func (h *ServiceLevelObjectivesData) Configure(opts ...ServiceLevelObjectivesDataOption) *ServiceLevelObjectivesData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2683,7 +2683,7 @@ func FromSyntheticsGlobalVariableData(cfg SyntheticsGlobalVariableData) Syntheti
 }
 
 // NewSyntheticsGlobalVariableData creates a datadog_synthetics_global_variable data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewSyntheticsGlobalVariableData(stack *config.Stack, name string) (*SyntheticsGlobalVariableData, error) {
 	h := &SyntheticsGlobalVariableData{}
 	h.resource = &config.DataSource{
@@ -2702,9 +2702,9 @@ func (h *SyntheticsGlobalVariableData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_synthetics_global_variable. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_synthetics_global_variable. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SyntheticsGlobalVariableData) Apply(opts ...SyntheticsGlobalVariableDataOption) *SyntheticsGlobalVariableData {
+func (h *SyntheticsGlobalVariableData) Configure(opts ...SyntheticsGlobalVariableDataOption) *SyntheticsGlobalVariableData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2742,7 +2742,7 @@ func FromSyntheticsLocationsData(cfg SyntheticsLocationsData) SyntheticsLocation
 }
 
 // NewSyntheticsLocationsData creates a datadog_synthetics_locations data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewSyntheticsLocationsData(stack *config.Stack, name string) (*SyntheticsLocationsData, error) {
 	h := &SyntheticsLocationsData{}
 	h.resource = &config.DataSource{
@@ -2761,9 +2761,9 @@ func (h *SyntheticsLocationsData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_synthetics_locations. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_synthetics_locations. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SyntheticsLocationsData) Apply(opts ...SyntheticsLocationsDataOption) *SyntheticsLocationsData {
+func (h *SyntheticsLocationsData) Configure(opts ...SyntheticsLocationsDataOption) *SyntheticsLocationsData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2822,7 +2822,7 @@ func FromSyntheticsTestData(cfg SyntheticsTestData) SyntheticsTestDataOption {
 }
 
 // NewSyntheticsTestData creates a datadog_synthetics_test data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewSyntheticsTestData(stack *config.Stack, name string) (*SyntheticsTestData, error) {
 	h := &SyntheticsTestData{}
 	h.resource = &config.DataSource{
@@ -2841,9 +2841,9 @@ func (h *SyntheticsTestData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_synthetics_test. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_synthetics_test. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *SyntheticsTestData) Apply(opts ...SyntheticsTestDataOption) *SyntheticsTestData {
+func (h *SyntheticsTestData) Configure(opts ...SyntheticsTestDataOption) *SyntheticsTestData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -2930,7 +2930,7 @@ func FromTeamData(cfg TeamData) TeamDataOption {
 }
 
 // NewTeamData creates a datadog_team data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewTeamData(stack *config.Stack, name string) (*TeamData, error) {
 	h := &TeamData{}
 	h.resource = &config.DataSource{
@@ -2949,9 +2949,9 @@ func (h *TeamData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_team. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_team. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *TeamData) Apply(opts ...TeamDataOption) *TeamData {
+func (h *TeamData) Configure(opts ...TeamDataOption) *TeamData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -3010,7 +3010,7 @@ func FromTeamMembershipsData(cfg TeamMembershipsData) TeamMembershipsDataOption 
 }
 
 // NewTeamMembershipsData creates a datadog_team_memberships data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewTeamMembershipsData(stack *config.Stack, name string) (*TeamMembershipsData, error) {
 	h := &TeamMembershipsData{}
 	h.resource = &config.DataSource{
@@ -3029,9 +3029,9 @@ func (h *TeamMembershipsData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_team_memberships. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_team_memberships. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *TeamMembershipsData) Apply(opts ...TeamMembershipsDataOption) *TeamMembershipsData {
+func (h *TeamMembershipsData) Configure(opts ...TeamMembershipsDataOption) *TeamMembershipsData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -3090,7 +3090,7 @@ func FromUserData(cfg UserData) UserDataOption {
 }
 
 // NewUserData creates a datadog_user data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewUserData(stack *config.Stack, name string) (*UserData, error) {
 	h := &UserData{}
 	h.resource = &config.DataSource{
@@ -3109,9 +3109,9 @@ func (h *UserData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_user. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_user. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *UserData) Apply(opts ...UserDataOption) *UserData {
+func (h *UserData) Configure(opts ...UserDataOption) *UserData {
 	for _, opt := range opts {
 		opt(h)
 	}
@@ -3163,7 +3163,7 @@ func FromUsersData(cfg UsersData) UsersDataOption {
 }
 
 // NewUsersData creates a datadog_users data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the data source's attributes.
+// handle whose Configure method sets the data source's attributes.
 func NewUsersData(stack *config.Stack, name string) (*UsersData, error) {
 	h := &UsersData{}
 	h.resource = &config.DataSource{
@@ -3182,9 +3182,9 @@ func (h *UsersData) AsDataSource() *config.DataSource {
 	return h.resource
 }
 
-// Apply sets attribute fields on the datadog_users. Safe to call multiple times;
+// Configure sets attribute fields on the datadog_users. Safe to call multiple times;
 // each call mutates the typed payload in place. Returns the receiver for chaining.
-func (h *UsersData) Apply(opts ...UsersDataOption) *UsersData {
+func (h *UsersData) Configure(opts ...UsersDataOption) *UsersData {
 	for _, opt := range opts {
 		opt(h)
 	}

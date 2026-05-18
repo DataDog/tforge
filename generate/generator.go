@@ -216,7 +216,7 @@ func (g *Generator) generateProvider() error {
 //  4. Set* option functions → func Monitor_SetName(v string) MonitorOption { ... }
 //  5. A From* bridge        → func FromMonitor(cfg Monitor) MonitorOption { ... }
 //  6. A New* constructor    → func NewMonitor(stack, name) (*Monitor, error) { ... }
-//  7. Apply / ApplyResourceOptions methods on *Monitor.
+//  7. Configure / ConfigureResourceOptions methods on *Monitor.
 func (g *Generator) generateResources() error {
 	resources := sortedSchemas(g.schema.ResourceSchemas)
 	if len(resources) == 0 {
@@ -598,9 +598,9 @@ func (g *Generator) generateConfigBridge(f *jen.File, structName string) {
 	f.Line()
 }
 
-// generateConstructor generates a typed constructor, Apply method(s), and the
-// AsResource / AsDataSource adapter method for a top-level resource or data
-// source. The adapter is what makes the handle satisfy config.Resourcer /
+// generateConstructor generates a typed constructor, Configure method(s), and
+// the AsResource / AsDataSource adapter method for a top-level resource or
+// data source. The adapter is what makes the handle satisfy config.Resourcer /
 // config.DataSourcer so it can be passed directly to stack.AddResource /
 // stack.AddDataSource.
 //
@@ -613,11 +613,11 @@ func (g *Generator) generateConfigBridge(f *jen.File, structName string) {
 //	    return h, nil
 //	}
 //	func (m *Monitor) AsResource() *config.Resource { return m.resource }
-//	func (m *Monitor) Apply(opts ...MonitorOption) *Monitor { ... }
-//	func (m *Monitor) ApplyResourceOptions(opts ...config.ResourceOption) { ... }
+//	func (m *Monitor) Configure(opts ...MonitorOption) *Monitor { ... }
+//	func (m *Monitor) ConfigureResourceOptions(opts ...config.ResourceOption) { ... }
 //
 // For data sources (isResource=false): same shape, AsDataSource instead of
-// AsResource, no ApplyResourceOptions.
+// AsResource, no ConfigureResourceOptions.
 func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName string, isResource bool) {
 	funcName := "New" + structName
 	short := g.shortName(structName)
@@ -638,7 +638,7 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName stri
 	// The handle satisfies config.Resourcer/DataSourcer via the As* method
 	// emitted below, so it can be passed directly to stack.AddResource.
 	f.Commentf("%s creates a %s %s, attaches it to the stack, and returns a", funcName, tfTypeName, kind)
-	f.Commentf("handle whose Apply method configures the %s's attributes.", kind)
+	f.Commentf("handle whose Configure method sets the %s's attributes.", kind)
 	f.Func().Id(funcName).Params(
 		jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
 		jen.Id("name").String(),
@@ -667,10 +667,10 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName stri
 	)
 	f.Line()
 
-	// Apply method.
-	f.Commentf("Apply sets attribute fields on the %s. Safe to call multiple times;", tfTypeName)
+	// Configure method.
+	f.Commentf("Configure sets attribute fields on the %s. Safe to call multiple times;", tfTypeName)
 	f.Comment("each call mutates the typed payload in place. Returns the receiver for chaining.")
-	f.Func().Params(jen.Id("h").Op("*").Id(structName)).Id("Apply").Params(
+	f.Func().Params(jen.Id("h").Op("*").Id(structName)).Id("Configure").Params(
 		jen.Id("opts").Op("...").Id(optionType),
 	).Op("*").Id(structName).Block(
 		jen.For(jen.List(jen.Id("_"), jen.Id("opt")).Op(":=").Range().Id("opts")).Block(
@@ -681,14 +681,14 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName stri
 	f.Line()
 
 	if isResource {
-		// ApplyResourceOptions method (meta-arguments).
+		// ConfigureResourceOptions method (meta-arguments).
 		// The nil guard makes the method a no-op when the handle was
 		// constructed outside New<T> (e.g., &<T>{}), avoiding a confusing
-		// nil-deref panic. Direct stack mutation via Apply is unaffected.
-		f.Commentf("ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,")
+		// nil-deref panic. Direct stack mutation via Configure is unaffected.
+		f.Commentf("ConfigureResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,")
 		f.Comment("Timeouts) on the underlying resource. Safe to call multiple times.")
 		f.Comment("Has no effect if the handle was not created by the New constructor.")
-		f.Func().Params(jen.Id("h").Op("*").Id(structName)).Id("ApplyResourceOptions").Params(
+		f.Func().Params(jen.Id("h").Op("*").Id(structName)).Id("ConfigureResourceOptions").Params(
 			jen.Id("opts").Op("...").Qual("github.com/DataDog/tforge/config", "ResourceOption"),
 		).Block(
 			jen.If(jen.Id("h").Dot("resource").Op("==").Nil()).Block(jen.Return()),
