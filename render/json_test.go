@@ -1799,3 +1799,21 @@ func TestToJSON_BothAttributesAndTypedAttributes_Error(t *testing.T) {
 		t.Fatal("ToJSON should error when both Attributes and TypedAttributes are set")
 	}
 }
+
+// An empty (but non-nil) Attributes map alongside TypedAttributes is still
+// an explicit double-assignment by the caller and must be flagged.
+func TestToJSON_EmptyAttributesAndTypedAttributes_Error(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResourcePtr(&config.Resource{
+		Type:            "datadog_monitor",
+		Name:            "cpu",
+		Attributes:      map[string]any{},
+		TypedAttributes: &typedMonitor{Name: strPtr("typed")},
+	}); err != nil {
+		t.Fatalf("AddResourcePtr error = %v", err)
+	}
+
+	if _, err := ToJSON(stack, "test"); err == nil {
+		t.Fatal("ToJSON should error even when Attributes is an empty (but non-nil) map")
+	}
+}

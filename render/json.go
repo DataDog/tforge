@@ -481,11 +481,13 @@ func buildResourceConfig(r *config.Resource) (resourceConfigJSON, error) {
 }
 
 // resolveAttributes returns the attribute map for a resource or data source.
-// It enforces that Attributes and TypedAttributes are mutually exclusive,
+// It enforces that Attributes and TypedAttributes are mutually exclusive
+// (a non-nil Attributes map alongside TypedAttributes is an error, even if
+// the map is empty — that's still an explicit assignment by the caller),
 // and marshals the typed payload to a map when present.
 func resolveAttributes(untyped map[string]any, typed any, kindType, kindName string) (map[string]any, error) {
 	hasTyped := typed != nil
-	hasUntyped := len(untyped) > 0
+	hasUntyped := untyped != nil
 	if hasTyped && hasUntyped {
 		return nil, fmt.Errorf("%s.%s: Attributes and TypedAttributes are mutually exclusive", kindType, kindName)
 	}

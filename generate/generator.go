@@ -254,7 +254,7 @@ func (g *Generator) generateResources() error {
 		if res.Schema != nil && res.Schema.Block != nil {
 			g.generateOptionFunctions(f, structName, res.Schema.Block)
 		}
-		g.generateConfigBridge(f, structName, true /* hasBackPointer */)
+		g.generateConfigBridge(f, structName)
 
 		// Generate typed constructor and Apply* methods.
 		g.generateConstructor(f, structName, res.Name, true /* isResource */)
@@ -302,7 +302,7 @@ func (g *Generator) generateDataSources() error {
 		if ds.Schema != nil && ds.Schema.Block != nil {
 			g.generateOptionFunctions(f, structName, ds.Schema.Block)
 		}
-		g.generateConfigBridge(f, structName, true /* hasBackPointer */)
+		g.generateConfigBridge(f, structName)
 
 		// Generate typed constructor and Apply method.
 		g.generateConstructor(f, structName, ds.Name, false /* isResource */)
@@ -571,9 +571,8 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 
 // generateConfigBridge generates the FromXxx bridge function for struct-based migration.
 // The "From" prefix avoids collisions with field option functions (which use "Set").
-//
-// When hasBackPointer is true, the closure preserves the unexported `resource`
-// field across the struct assignment so the handle stays attached to the stack:
+// The closure preserves the unexported `resource` back-pointer across the
+// struct assignment so the handle stays attached to the stack:
 //
 //	func FromMonitor(cfg Monitor) MonitorOption {
 //	    return func(o *Monitor) {
@@ -582,26 +581,19 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 //	        o.resource = save
 //	    }
 //	}
-func (g *Generator) generateConfigBridge(f *jen.File, structName string, hasBackPointer bool) {
+func (g *Generator) generateConfigBridge(f *jen.File, structName string) {
 	short := g.shortName(structName)
 	optionType := short + "Option"
 	funcName := "From" + short
 
-	var body []jen.Code
-	if hasBackPointer {
-		body = []jen.Code{
-			jen.Id("save").Op(":=").Id("o").Dot("resource"),
-			jen.Op("*").Id("o").Op("=").Id("cfg"),
-			jen.Id("o").Dot("resource").Op("=").Id("save"),
-		}
-	} else {
-		body = []jen.Code{jen.Op("*").Id("o").Op("=").Id("cfg")}
-	}
-
 	f.Func().Id(funcName).Params(
 		jen.Id("cfg").Id(structName),
 	).Id(optionType).Block(
-		jen.Return(jen.Func().Params(jen.Id("o").Op("*").Id(structName)).Block(body...)),
+		jen.Return(jen.Func().Params(jen.Id("o").Op("*").Id(structName)).Block(
+			jen.Id("save").Op(":=").Id("o").Dot("resource"),
+			jen.Op("*").Id("o").Op("=").Id("cfg"),
+			jen.Id("o").Dot("resource").Op("=").Id("save"),
+		)),
 	)
 	f.Line()
 }
@@ -639,7 +631,7 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName stri
 
 	// Constructor: build the handle, attach the typed payload, add to stack.
 	f.Commentf("%s creates a %s %s, attaches it to the stack, and returns a", funcName, tfTypeName, kind)
-	f.Comment("handle whose Apply method configures the resource's attributes.")
+	f.Commentf("handle whose Apply method configures the %s's attributes.", kind)
 	f.Func().Id(funcName).Params(
 		jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
 		jen.Id("name").String(),
@@ -676,11 +668,16 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName stri
 
 	if isResource {
 		// ApplyResourceOptions method (meta-arguments).
+		// The nil guard makes the method a no-op when the handle was
+		// constructed outside New<T> (e.g., &<T>{}), avoiding a confusing
+		// nil-deref panic. Direct stack mutation via Apply is unaffected.
 		f.Commentf("ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,")
 		f.Comment("Timeouts) on the underlying resource. Safe to call multiple times.")
+		f.Comment("Has no effect if the handle was not created by the New constructor.")
 		f.Func().Params(jen.Id("h").Op("*").Id(structName)).Id("ApplyResourceOptions").Params(
 			jen.Id("opts").Op("...").Qual("github.com/DataDog/tforge/config", "ResourceOption"),
 		).Block(
+			jen.If(jen.Id("h").Dot("resource").Op("==").Nil()).Block(jen.Return()),
 			jen.For(jen.List(jen.Id("_"), jen.Id("opt")).Op(":=").Range().Id("opts")).Block(
 				jen.Id("opt").Call(jen.Id("h").Dot("resource")),
 			),

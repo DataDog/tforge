@@ -343,7 +343,11 @@ func (h *ActionConnection) Apply(opts ...ActionConnectionOption) *ActionConnecti
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ActionConnection) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -434,7 +438,11 @@ func (h *AgentlessScanningAwsScanOptions) Apply(opts ...AgentlessScanningAwsScan
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AgentlessScanningAwsScanOptions) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -511,7 +519,11 @@ func (h *AgentlessScanningGcpScanOptions) Apply(opts ...AgentlessScanningGcpScan
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AgentlessScanningGcpScanOptions) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -588,7 +600,11 @@ func (h *APIKey) Apply(opts ...APIKeyOption) *APIKey {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *APIKey) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -709,7 +725,11 @@ func (h *ApmRetentionFilter) Apply(opts ...ApmRetentionFilterOption) *ApmRetenti
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ApmRetentionFilter) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -772,7 +792,11 @@ func (h *ApmRetentionFilterOrder) Apply(opts ...ApmRetentionFilterOrderOption) *
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ApmRetentionFilterOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -870,7 +894,11 @@ func (h *AppBuilderApp) Apply(opts ...AppBuilderAppOption) *AppBuilderApp {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AppBuilderApp) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -926,7 +954,11 @@ func (h *AppKeyRegistration) Apply(opts ...AppKeyRegistrationOption) *AppKeyRegi
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AppKeyRegistration) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -1003,7 +1035,11 @@ func (h *ApplicationKey) Apply(opts ...ApplicationKeyOption) *ApplicationKey {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ApplicationKey) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -1346,7 +1382,11 @@ func (h *AppsecWafCustomRule) Apply(opts ...AppsecWafCustomRuleOption) *AppsecWa
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AppsecWafCustomRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -1552,7 +1592,11 @@ func (h *AppsecWafExclusionFilter) Apply(opts ...AppsecWafExclusionFilterOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AppsecWafExclusionFilter) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -1636,7 +1680,11 @@ func (h *AuthnMapping) Apply(opts ...AuthnMappingOption) *AuthnMapping {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AuthnMapping) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -1805,7 +1853,11 @@ func (h *AwsCurConfig) Apply(opts ...AwsCurConfigOption) *AwsCurConfig {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AwsCurConfig) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -2019,7 +2071,11 @@ func (h *AzureUcConfig) Apply(opts ...AzureUcConfigOption) *AzureUcConfig {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *AzureUcConfig) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -2124,7 +2180,11 @@ func (h *ChildOrganization) Apply(opts ...ChildOrganizationOption) *ChildOrganiz
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ChildOrganization) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -2287,7 +2347,11 @@ func (h *CloudConfigurationRule) Apply(opts ...CloudConfigurationRuleOption) *Cl
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *CloudConfigurationRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -2517,7 +2581,11 @@ func (h *CloudInventorySyncConfig) Apply(opts ...CloudInventorySyncConfigOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *CloudInventorySyncConfig) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -2601,7 +2669,11 @@ func (h *CloudWorkloadSecurityAgentRule) Apply(opts ...CloudWorkloadSecurityAgen
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *CloudWorkloadSecurityAgentRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -2752,7 +2824,11 @@ func (h *ComplianceCustomFramework) Apply(opts ...ComplianceCustomFrameworkOptio
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ComplianceCustomFramework) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -2829,7 +2905,11 @@ func (h *ComplianceResourceEvaluationFilter) Apply(opts ...ComplianceResourceEva
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ComplianceResourceEvaluationFilter) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -3134,7 +3214,11 @@ func (h *CostBudget) Apply(opts ...CostBudgetOption) *CostBudget {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *CostBudget) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -3385,7 +3469,11 @@ func (h *CsmThreatsAgentRule) Apply(opts ...CsmThreatsAgentRuleOption) *CsmThrea
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *CsmThreatsAgentRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -3476,7 +3564,11 @@ func (h *CsmThreatsPolicy) Apply(opts ...CsmThreatsPolicyOption) *CsmThreatsPoli
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *CsmThreatsPolicy) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -3931,7 +4023,11 @@ func (h *CustomAllocationRule) Apply(opts ...CustomAllocationRuleOption) *Custom
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *CustomAllocationRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -4001,7 +4097,11 @@ func (h *CustomAllocationRules) Apply(opts ...CustomAllocationRulesOption) *Cust
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *CustomAllocationRules) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -106580,7 +106680,11 @@ func (h *Dashboard) Apply(opts ...DashboardOption) *Dashboard {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Dashboard) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -106664,7 +106768,11 @@ func (h *DashboardJSON) Apply(opts ...DashboardJSONOption) *DashboardJSON {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *DashboardJSON) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -106764,7 +106872,11 @@ func (h *DashboardList) Apply(opts ...DashboardListOption) *DashboardList {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *DashboardList) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -106884,7 +106996,11 @@ func (h *Dataset) Apply(opts ...DatasetOption) *Dataset {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Dataset) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -107010,7 +107126,11 @@ func (h *Datastore) Apply(opts ...DatastoreOption) *Datastore {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Datastore) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -107087,7 +107207,11 @@ func (h *DatastoreItem) Apply(opts ...DatastoreItemOption) *DatastoreItem {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *DatastoreItem) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -107280,7 +107404,11 @@ func (h *DeploymentGate) Apply(opts ...DeploymentGateOption) *DeploymentGate {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *DeploymentGate) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -107350,7 +107478,11 @@ func (h *DomainAllowlist) Apply(opts ...DomainAllowlistOption) *DomainAllowlist 
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *DomainAllowlist) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -107562,7 +107694,11 @@ func (h *Downtime) Apply(opts ...DowntimeOption) *Downtime {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Downtime) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -107804,7 +107940,11 @@ func (h *DowntimeSchedule) Apply(opts ...DowntimeScheduleOption) *DowntimeSchedu
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *DowntimeSchedule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -107951,7 +108091,11 @@ func (h *GcpUcConfig) Apply(opts ...GcpUcConfigOption) *GcpUcConfig {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *GcpUcConfig) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -108107,7 +108251,11 @@ func (h *IncidentNotificationRule) Apply(opts ...IncidentNotificationRuleOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IncidentNotificationRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -108212,7 +108360,11 @@ func (h *IncidentNotificationTemplate) Apply(opts ...IncidentNotificationTemplat
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IncidentNotificationTemplate) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -108289,7 +108441,11 @@ func (h *IncidentType) Apply(opts ...IncidentTypeOption) *IncidentType {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IncidentType) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -108840,7 +108996,11 @@ func (h *IntegrationAwsAccount) Apply(opts ...IntegrationAwsAccountOption) *Inte
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationAwsAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -108924,7 +109084,11 @@ func (h *IntegrationAwsEventBridge) Apply(opts ...IntegrationAwsEventBridgeOptio
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationAwsEventBridge) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -108980,7 +109144,11 @@ func (h *IntegrationAwsExternalID) Apply(opts ...IntegrationAwsExternalIDOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationAwsExternalID) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109134,7 +109302,11 @@ func (h *IntegrationAzure) Apply(opts ...IntegrationAzureOption) *IntegrationAzu
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationAzure) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109218,7 +109390,11 @@ func (h *IntegrationCloudflareAccount) Apply(opts ...IntegrationCloudflareAccoun
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationCloudflareAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109295,7 +109471,11 @@ func (h *IntegrationConfluentAccount) Apply(opts ...IntegrationConfluentAccountO
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationConfluentAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109386,7 +109566,11 @@ func (h *IntegrationConfluentResource) Apply(opts ...IntegrationConfluentResourc
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationConfluentResource) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109456,7 +109640,11 @@ func (h *IntegrationFastlyAccount) Apply(opts ...IntegrationFastlyAccountOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationFastlyAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109533,7 +109721,11 @@ func (h *IntegrationFastlyService) Apply(opts ...IntegrationFastlyServiceOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationFastlyService) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109680,7 +109872,11 @@ func (h *IntegrationGcp) Apply(opts ...IntegrationGcpOption) *IntegrationGcp {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationGcp) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109841,7 +110037,11 @@ func (h *IntegrationGcpSts) Apply(opts ...IntegrationGcpStsOption) *IntegrationG
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationGcpSts) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109925,7 +110125,11 @@ func (h *IntegrationMsTeamsTenantBasedHandle) Apply(opts ...IntegrationMsTeamsTe
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationMsTeamsTenantBasedHandle) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -109995,7 +110199,11 @@ func (h *IntegrationMsTeamsWorkflowsWebhookHandle) Apply(opts ...IntegrationMsTe
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationMsTeamsWorkflowsWebhookHandle) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -110079,7 +110287,11 @@ func (h *IntegrationOpsgenieServiceObject) Apply(opts ...IntegrationOpsgenieServ
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationOpsgenieServiceObject) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -110156,7 +110368,11 @@ func (h *IntegrationPagerduty) Apply(opts ...IntegrationPagerdutyOption) *Integr
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationPagerduty) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -110226,7 +110442,11 @@ func (h *IntegrationPagerdutyServiceObject) Apply(opts ...IntegrationPagerdutySe
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationPagerdutyServiceObject) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -110354,7 +110574,11 @@ func (h *IntegrationSlackChannel) Apply(opts ...IntegrationSlackChannelOption) *
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IntegrationSlackChannel) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -110454,7 +110678,11 @@ func (h *IPAllowlist) Apply(opts ...IPAllowlistOption) *IPAllowlist {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *IPAllowlist) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -110726,7 +110954,11 @@ func (h *LogsArchive) Apply(opts ...LogsArchiveOption) *LogsArchive {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsArchive) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -110789,7 +111021,11 @@ func (h *LogsArchiveOrder) Apply(opts ...LogsArchiveOrderOption) *LogsArchiveOrd
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsArchiveOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -111167,7 +111403,11 @@ func (h *LogsCustomDestination) Apply(opts ...LogsCustomDestinationOption) *Logs
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsCustomDestination) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -114529,7 +114769,11 @@ func (h *LogsCustomPipeline) Apply(opts ...LogsCustomPipelineOption) *LogsCustom
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsCustomPipeline) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -114774,7 +115018,11 @@ func (h *LogsIndex) Apply(opts ...LogsIndexOption) *LogsIndex {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsIndex) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -114844,7 +115092,11 @@ func (h *LogsIndexOrder) Apply(opts ...LogsIndexOrderOption) *LogsIndexOrder {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsIndexOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -114907,7 +115159,11 @@ func (h *LogsIntegrationPipeline) Apply(opts ...LogsIntegrationPipelineOption) *
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsIntegrationPipeline) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -115081,7 +115337,11 @@ func (h *LogsMetric) Apply(opts ...LogsMetricOption) *LogsMetric {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsMetric) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -115151,7 +115411,11 @@ func (h *LogsPipelineOrder) Apply(opts ...LogsPipelineOrderOption) *LogsPipeline
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsPipelineOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -115235,7 +115499,11 @@ func (h *LogsRestrictionQuery) Apply(opts ...LogsRestrictionQueryOption) *LogsRe
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *LogsRestrictionQuery) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -115340,7 +115608,11 @@ func (h *MetricMetadata) Apply(opts ...MetricMetadataOption) *MetricMetadata {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *MetricMetadata) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -115468,7 +115740,11 @@ func (h *MetricTagConfiguration) Apply(opts ...MetricTagConfigurationOption) *Me
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *MetricTagConfiguration) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -116437,7 +116713,11 @@ func (h *Monitor) Apply(opts ...MonitorOption) *Monitor {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Monitor) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -116544,7 +116824,11 @@ func (h *MonitorConfigPolicy) Apply(opts ...MonitorConfigPolicyOption) *MonitorC
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *MonitorConfigPolicy) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -116614,7 +116898,11 @@ func (h *MonitorJSON) Apply(opts ...MonitorJSONOption) *MonitorJSON {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *MonitorJSON) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -116788,7 +117076,11 @@ func (h *MonitorNotificationRule) Apply(opts ...MonitorNotificationRuleOption) *
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *MonitorNotificationRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -125430,7 +125722,11 @@ func (h *ObservabilityPipeline) Apply(opts ...ObservabilityPipelineOption) *Obse
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ObservabilityPipeline) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -125609,7 +125905,11 @@ func (h *OnCallEscalationPolicy) Apply(opts ...OnCallEscalationPolicyOption) *On
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *OnCallEscalationPolicy) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -125845,7 +126145,11 @@ func (h *OnCallSchedule) Apply(opts ...OnCallScheduleOption) *OnCallSchedule {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *OnCallSchedule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -126135,7 +126439,11 @@ func (h *OnCallTeamRoutingRules) Apply(opts ...OnCallTeamRoutingRulesOption) *On
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *OnCallTeamRoutingRules) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -126263,7 +126571,11 @@ func (h *OnCallUserNotificationChannel) Apply(opts ...OnCallUserNotificationChan
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *OnCallUserNotificationChannel) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -126376,7 +126688,11 @@ func (h *OnCallUserNotificationRule) Apply(opts ...OnCallUserNotificationRuleOpt
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *OnCallUserNotificationRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -126439,7 +126755,11 @@ func (h *OpenapiAPI) Apply(opts ...OpenapiAPIOption) *OpenapiAPI {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *OpenapiAPI) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -126544,7 +126864,11 @@ func (h *OrgConnection) Apply(opts ...OrgConnectionOption) *OrgConnection {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *OrgConnection) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -126820,7 +127144,11 @@ func (h *OrganizationSettings) Apply(opts ...OrganizationSettingsOption) *Organi
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *OrganizationSettings) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -156115,7 +156443,11 @@ func (h *Powerpack) Apply(opts ...PowerpackOption) *Powerpack {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Powerpack) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -156528,7 +156860,11 @@ func (h *ReferenceTable) Apply(opts ...ReferenceTableOption) *ReferenceTable {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ReferenceTable) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -156627,7 +156963,11 @@ func (h *RestrictionPolicy) Apply(opts ...RestrictionPolicyOption) *RestrictionP
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *RestrictionPolicy) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -156748,7 +157088,11 @@ func (h *Role) Apply(opts ...RoleOption) *Role {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Role) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -156846,7 +157190,11 @@ func (h *RumApplication) Apply(opts ...RumApplicationOption) *RumApplication {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *RumApplication) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -157053,7 +157401,11 @@ func (h *RumMetric) Apply(opts ...RumMetricOption) *RumMetric {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *RumMetric) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -157151,7 +157503,11 @@ func (h *RumRetentionFilter) Apply(opts ...RumRetentionFilterOption) *RumRetenti
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *RumRetentionFilter) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -157221,7 +157577,11 @@ func (h *RumRetentionFiltersOrder) Apply(opts ...RumRetentionFiltersOrderOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *RumRetentionFiltersOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -157405,7 +157765,11 @@ func (h *SecureEmbedDashboard) Apply(opts ...SecureEmbedDashboardOption) *Secure
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SecureEmbedDashboard) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -157496,7 +157860,11 @@ func (h *SecurityMonitoringCriticalAsset) Apply(opts ...SecurityMonitoringCritic
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SecurityMonitoringCriticalAsset) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -157828,7 +158196,11 @@ func (h *SecurityMonitoringDefaultRule) Apply(opts ...SecurityMonitoringDefaultR
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SecurityMonitoringDefaultRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -157956,7 +158328,11 @@ func (h *SecurityMonitoringFilter) Apply(opts ...SecurityMonitoringFilterOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SecurityMonitoringFilter) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -158997,7 +159373,11 @@ func (h *SecurityMonitoringRule) Apply(opts ...SecurityMonitoringRuleOption) *Se
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SecurityMonitoringRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -159060,7 +159440,11 @@ func (h *SecurityMonitoringRuleJSON) Apply(opts ...SecurityMonitoringRuleJSONOpt
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SecurityMonitoringRuleJSON) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -159186,7 +159570,11 @@ func (h *SecurityMonitoringSuppression) Apply(opts ...SecurityMonitoringSuppress
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SecurityMonitoringSuppression) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -159370,7 +159758,11 @@ func (h *SecurityNotificationRule) Apply(opts ...SecurityNotificationRuleOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SecurityNotificationRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -159521,7 +159913,11 @@ func (h *SensitiveDataScannerGroup) Apply(opts ...SensitiveDataScannerGroupOptio
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SensitiveDataScannerGroup) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -159584,7 +159980,11 @@ func (h *SensitiveDataScannerGroupOrder) Apply(opts ...SensitiveDataScannerGroup
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SensitiveDataScannerGroupOrder) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -159798,7 +160198,11 @@ func (h *SensitiveDataScannerRule) Apply(opts ...SensitiveDataScannerRuleOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SensitiveDataScannerRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -159882,7 +160286,11 @@ func (h *ServiceAccount) Apply(opts ...ServiceAccountOption) *ServiceAccount {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ServiceAccount) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -159980,7 +160388,11 @@ func (h *ServiceAccountApplicationKey) Apply(opts ...ServiceAccountApplicationKe
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ServiceAccountApplicationKey) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -160043,7 +160455,11 @@ func (h *ServiceDefinitionYaml) Apply(opts ...ServiceDefinitionYamlOption) *Serv
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ServiceDefinitionYaml) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -160569,7 +160985,11 @@ func (h *ServiceLevelObjective) Apply(opts ...ServiceLevelObjectiveOption) *Serv
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *ServiceLevelObjective) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -160681,7 +161101,11 @@ func (h *SloCorrection) Apply(opts ...SloCorrectionOption) *SloCorrection {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SloCorrection) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -160744,7 +161168,11 @@ func (h *SoftwareCatalog) Apply(opts ...SoftwareCatalogOption) *SoftwareCatalog 
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SoftwareCatalog) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -160915,7 +161343,11 @@ func (h *SpansMetric) Apply(opts ...SpansMetricOption) *SpansMetric {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SpansMetric) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -160978,7 +161410,11 @@ func (h *SyntheticsConcurrencyCap) Apply(opts ...SyntheticsConcurrencyCapOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SyntheticsConcurrencyCap) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -161251,7 +161687,11 @@ func (h *SyntheticsGlobalVariable) Apply(opts ...SyntheticsGlobalVariableOption)
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SyntheticsGlobalVariable) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -161379,7 +161819,11 @@ func (h *SyntheticsPrivateLocation) Apply(opts ...SyntheticsPrivateLocationOptio
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SyntheticsPrivateLocation) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -161523,7 +161967,11 @@ func (h *SyntheticsSuite) Apply(opts ...SyntheticsSuiteOption) *SyntheticsSuite 
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SyntheticsSuite) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -165196,7 +165644,11 @@ func (h *SyntheticsTest) Apply(opts ...SyntheticsTestOption) *SyntheticsTest {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *SyntheticsTest) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -165558,7 +166010,11 @@ func (h *TagPipelineRuleset) Apply(opts ...TagPipelineRulesetOption) *TagPipelin
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *TagPipelineRuleset) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -165628,7 +166084,11 @@ func (h *TagPipelineRulesets) Apply(opts ...TagPipelineRulesetsOption) *TagPipel
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *TagPipelineRulesets) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -165726,7 +166186,11 @@ func (h *Team) Apply(opts ...TeamOption) *Team {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Team) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -165810,7 +166274,11 @@ func (h *TeamHierarchyLinks) Apply(opts ...TeamHierarchyLinksOption) *TeamHierar
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *TeamHierarchyLinks) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -165894,7 +166362,11 @@ func (h *TeamLink) Apply(opts ...TeamLinkOption) *TeamLink {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *TeamLink) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -165971,7 +166443,11 @@ func (h *TeamMembership) Apply(opts ...TeamMembershipOption) *TeamMembership {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *TeamMembership) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -166161,7 +166637,11 @@ func (h *TeamNotificationRule) Apply(opts ...TeamNotificationRuleOption) *TeamNo
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *TeamNotificationRule) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -166238,7 +166718,11 @@ func (h *TeamPermissionSetting) Apply(opts ...TeamPermissionSettingOption) *Team
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *TeamPermissionSetting) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -166343,7 +166827,11 @@ func (h *User) Apply(opts ...UserOption) *User {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *User) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -166413,7 +166901,11 @@ func (h *UserRole) Apply(opts ...UserRoleOption) *UserRole {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *UserRole) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -166504,7 +166996,11 @@ func (h *Webhook) Apply(opts ...WebhookOption) *Webhook {
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *Webhook) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -166581,7 +167077,11 @@ func (h *WebhookCustomVariable) Apply(opts ...WebhookCustomVariableOption) *Webh
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *WebhookCustomVariable) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}
@@ -166679,7 +167179,11 @@ func (h *WorkflowAutomation) Apply(opts ...WorkflowAutomationOption) *WorkflowAu
 
 // ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,
 // Timeouts) on the underlying resource. Safe to call multiple times.
+// Has no effect if the handle was not created by the New constructor.
 func (h *WorkflowAutomation) ApplyResourceOptions(opts ...config.ResourceOption) {
+	if h.resource == nil {
+		return
+	}
 	for _, opt := range opts {
 		opt(h.resource)
 	}

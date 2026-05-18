@@ -49,7 +49,7 @@ func FromAPIKeyData(cfg APIKeyData) APIKeyDataOption {
 }
 
 // NewAPIKeyData creates a datadog_api_key data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewAPIKeyData(stack *config.Stack, name string) (*APIKeyData, error) {
 	h := &APIKeyData{}
 	r := &config.DataSource{
@@ -104,7 +104,7 @@ func FromApmRetentionFiltersOrderData(cfg ApmRetentionFiltersOrderData) ApmReten
 }
 
 // NewApmRetentionFiltersOrderData creates a datadog_apm_retention_filters_order data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewApmRetentionFiltersOrderData(stack *config.Stack, name string) (*ApmRetentionFiltersOrderData, error) {
 	h := &ApmRetentionFiltersOrderData{}
 	r := &config.DataSource{
@@ -173,7 +173,7 @@ func FromApplicationKeyData(cfg ApplicationKeyData) ApplicationKeyDataOption {
 }
 
 // NewApplicationKeyData creates a datadog_application_key data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewApplicationKeyData(stack *config.Stack, name string) (*ApplicationKeyData, error) {
 	h := &ApplicationKeyData{}
 	r := &config.DataSource{
@@ -228,7 +228,7 @@ func FromCloudWorkloadSecurityAgentRulesData(cfg CloudWorkloadSecurityAgentRules
 }
 
 // NewCloudWorkloadSecurityAgentRulesData creates a datadog_cloud_workload_security_agent_rules data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewCloudWorkloadSecurityAgentRulesData(stack *config.Stack, name string) (*CloudWorkloadSecurityAgentRulesData, error) {
 	h := &CloudWorkloadSecurityAgentRulesData{}
 	r := &config.DataSource{
@@ -290,7 +290,7 @@ func FromCsmThreatsAgentRulesData(cfg CsmThreatsAgentRulesData) CsmThreatsAgentR
 }
 
 // NewCsmThreatsAgentRulesData creates a datadog_csm_threats_agent_rules data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewCsmThreatsAgentRulesData(stack *config.Stack, name string) (*CsmThreatsAgentRulesData, error) {
 	h := &CsmThreatsAgentRulesData{}
 	r := &config.DataSource{
@@ -359,7 +359,7 @@ func FromDashboardData(cfg DashboardData) DashboardDataOption {
 }
 
 // NewDashboardData creates a datadog_dashboard data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewDashboardData(stack *config.Stack, name string) (*DashboardData, error) {
 	h := &DashboardData{}
 	r := &config.DataSource{
@@ -414,7 +414,7 @@ func FromDashboardListData(cfg DashboardListData) DashboardListDataOption {
 }
 
 // NewDashboardListData creates a datadog_dashboard_list data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewDashboardListData(stack *config.Stack, name string) (*DashboardListData, error) {
 	h := &DashboardListData{}
 	r := &config.DataSource{
@@ -518,7 +518,7 @@ func FromHostsData(cfg HostsData) HostsDataOption {
 }
 
 // NewHostsData creates a datadog_hosts data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewHostsData(stack *config.Stack, name string) (*HostsData, error) {
 	h := &HostsData{}
 	r := &config.DataSource{
@@ -573,7 +573,7 @@ func FromIntegrationAwsLogsServicesData(cfg IntegrationAwsLogsServicesData) Inte
 }
 
 // NewIntegrationAwsLogsServicesData creates a datadog_integration_aws_logs_services data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsLogsServicesData(stack *config.Stack, name string) (*IntegrationAwsLogsServicesData, error) {
 	h := &IntegrationAwsLogsServicesData{}
 	r := &config.DataSource{
@@ -628,7 +628,7 @@ func FromIntegrationAwsNamespaceRulesData(cfg IntegrationAwsNamespaceRulesData) 
 }
 
 // NewIntegrationAwsNamespaceRulesData creates a datadog_integration_aws_namespace_rules data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsNamespaceRulesData(stack *config.Stack, name string) (*IntegrationAwsNamespaceRulesData, error) {
 	h := &IntegrationAwsNamespaceRulesData{}
 	r := &config.DataSource{
@@ -816,7 +816,7 @@ func FromIPRangesData(cfg IPRangesData) IPRangesDataOption {
 }
 
 // NewIPRangesData creates a datadog_ip_ranges data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewIPRangesData(stack *config.Stack, name string) (*IPRangesData, error) {
 	h := &IPRangesData{}
 	r := &config.DataSource{
@@ -871,7 +871,7 @@ func FromLogsArchivesOrderData(cfg LogsArchivesOrderData) LogsArchivesOrderDataO
 }
 
 // NewLogsArchivesOrderData creates a datadog_logs_archives_order data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewLogsArchivesOrderData(stack *config.Stack, name string) (*LogsArchivesOrderData, error) {
 	h := &LogsArchivesOrderData{}
 	r := &config.DataSource{
@@ -926,7 +926,7 @@ func FromLogsIndexesData(cfg LogsIndexesData) LogsIndexesDataOption {
 }
 
 // NewLogsIndexesData creates a datadog_logs_indexes data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewLogsIndexesData(stack *config.Stack, name string) (*LogsIndexesData, error) {
 	h := &LogsIndexesData{}
 	r := &config.DataSource{
@@ -981,7 +981,7 @@ func FromLogsIndexesOrderData(cfg LogsIndexesOrderData) LogsIndexesOrderDataOpti
 }
 
 // NewLogsIndexesOrderData creates a datadog_logs_indexes_order data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewLogsIndexesOrderData(stack *config.Stack, name string) (*LogsIndexesOrderData, error) {
 	h := &LogsIndexesOrderData{}
 	r := &config.DataSource{
@@ -1043,7 +1043,7 @@ func FromLogsPipelinesData(cfg LogsPipelinesData) LogsPipelinesDataOption {
 }
 
 // NewLogsPipelinesData creates a datadog_logs_pipelines data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewLogsPipelinesData(stack *config.Stack, name string) (*LogsPipelinesData, error) {
 	h := &LogsPipelinesData{}
 	r := &config.DataSource{
@@ -1322,7 +1322,7 @@ func FromMonitorData(cfg MonitorData) MonitorDataOption {
 }
 
 // NewMonitorData creates a datadog_monitor data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewMonitorData(stack *config.Stack, name string) (*MonitorData, error) {
 	h := &MonitorData{}
 	r := &config.DataSource{
@@ -1377,7 +1377,7 @@ func FromMonitorConfigPoliciesData(cfg MonitorConfigPoliciesData) MonitorConfigP
 }
 
 // NewMonitorConfigPoliciesData creates a datadog_monitor_config_policies data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewMonitorConfigPoliciesData(stack *config.Stack, name string) (*MonitorConfigPoliciesData, error) {
 	h := &MonitorConfigPoliciesData{}
 	r := &config.DataSource{
@@ -1453,7 +1453,7 @@ func FromMonitorsData(cfg MonitorsData) MonitorsDataOption {
 }
 
 // NewMonitorsData creates a datadog_monitors data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewMonitorsData(stack *config.Stack, name string) (*MonitorsData, error) {
 	h := &MonitorsData{}
 	r := &config.DataSource{
@@ -1515,7 +1515,7 @@ func FromPermissionsData(cfg PermissionsData) PermissionsDataOption {
 }
 
 // NewPermissionsData creates a datadog_permissions data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewPermissionsData(stack *config.Stack, name string) (*PermissionsData, error) {
 	h := &PermissionsData{}
 	r := &config.DataSource{
@@ -1584,7 +1584,7 @@ func FromRoleData(cfg RoleData) RoleDataOption {
 }
 
 // NewRoleData creates a datadog_role data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewRoleData(stack *config.Stack, name string) (*RoleData, error) {
 	h := &RoleData{}
 	r := &config.DataSource{
@@ -1660,7 +1660,7 @@ func FromRoleUsersData(cfg RoleUsersData) RoleUsersDataOption {
 }
 
 // NewRoleUsersData creates a datadog_role_users data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewRoleUsersData(stack *config.Stack, name string) (*RoleUsersData, error) {
 	h := &RoleUsersData{}
 	r := &config.DataSource{
@@ -1722,7 +1722,7 @@ func FromRolesData(cfg RolesData) RolesDataOption {
 }
 
 // NewRolesData creates a datadog_roles data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewRolesData(stack *config.Stack, name string) (*RolesData, error) {
 	h := &RolesData{}
 	r := &config.DataSource{
@@ -1805,7 +1805,7 @@ func FromRumApplicationData(cfg RumApplicationData) RumApplicationDataOption {
 }
 
 // NewRumApplicationData creates a datadog_rum_application data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewRumApplicationData(stack *config.Stack, name string) (*RumApplicationData, error) {
 	h := &RumApplicationData{}
 	r := &config.DataSource{
@@ -1867,7 +1867,7 @@ func FromSecurityMonitoringFiltersData(cfg SecurityMonitoringFiltersData) Securi
 }
 
 // NewSecurityMonitoringFiltersData creates a datadog_security_monitoring_filters data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewSecurityMonitoringFiltersData(stack *config.Stack, name string) (*SecurityMonitoringFiltersData, error) {
 	h := &SecurityMonitoringFiltersData{}
 	r := &config.DataSource{
@@ -1957,7 +1957,7 @@ func FromSecurityMonitoringRulesData(cfg SecurityMonitoringRulesData) SecurityMo
 }
 
 // NewSecurityMonitoringRulesData creates a datadog_security_monitoring_rules data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewSecurityMonitoringRulesData(stack *config.Stack, name string) (*SecurityMonitoringRulesData, error) {
 	h := &SecurityMonitoringRulesData{}
 	r := &config.DataSource{
@@ -2019,7 +2019,7 @@ func FromSecurityMonitoringSuppressionsData(cfg SecurityMonitoringSuppressionsDa
 }
 
 // NewSecurityMonitoringSuppressionsData creates a datadog_security_monitoring_suppressions data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewSecurityMonitoringSuppressionsData(stack *config.Stack, name string) (*SecurityMonitoringSuppressionsData, error) {
 	h := &SecurityMonitoringSuppressionsData{}
 	r := &config.DataSource{
@@ -2074,7 +2074,7 @@ func FromSensitiveDataScannerGroupOrderData(cfg SensitiveDataScannerGroupOrderDa
 }
 
 // NewSensitiveDataScannerGroupOrderData creates a datadog_sensitive_data_scanner_group_order data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewSensitiveDataScannerGroupOrderData(stack *config.Stack, name string) (*SensitiveDataScannerGroupOrderData, error) {
 	h := &SensitiveDataScannerGroupOrderData{}
 	r := &config.DataSource{
@@ -2157,7 +2157,7 @@ func FromSensitiveDataScannerStandardPatternData(cfg SensitiveDataScannerStandar
 }
 
 // NewSensitiveDataScannerStandardPatternData creates a datadog_sensitive_data_scanner_standard_pattern data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewSensitiveDataScannerStandardPatternData(stack *config.Stack, name string) (*SensitiveDataScannerStandardPatternData, error) {
 	h := &SensitiveDataScannerStandardPatternData{}
 	r := &config.DataSource{
@@ -2282,7 +2282,7 @@ func FromServiceAccountData(cfg ServiceAccountData) ServiceAccountDataOption {
 }
 
 // NewServiceAccountData creates a datadog_service_account data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewServiceAccountData(stack *config.Stack, name string) (*ServiceAccountData, error) {
 	h := &ServiceAccountData{}
 	r := &config.DataSource{
@@ -2400,7 +2400,7 @@ func FromServiceLevelObjectiveData(cfg ServiceLevelObjectiveData) ServiceLevelOb
 }
 
 // NewServiceLevelObjectiveData creates a datadog_service_level_objective data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewServiceLevelObjectiveData(stack *config.Stack, name string) (*ServiceLevelObjectiveData, error) {
 	h := &ServiceLevelObjectiveData{}
 	r := &config.DataSource{
@@ -2497,7 +2497,7 @@ func FromServiceLevelObjectivesData(cfg ServiceLevelObjectivesData) ServiceLevel
 }
 
 // NewServiceLevelObjectivesData creates a datadog_service_level_objectives data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewServiceLevelObjectivesData(stack *config.Stack, name string) (*ServiceLevelObjectivesData, error) {
 	h := &ServiceLevelObjectivesData{}
 	r := &config.DataSource{
@@ -2559,7 +2559,7 @@ func FromSyntheticsGlobalVariableData(cfg SyntheticsGlobalVariableData) Syntheti
 }
 
 // NewSyntheticsGlobalVariableData creates a datadog_synthetics_global_variable data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewSyntheticsGlobalVariableData(stack *config.Stack, name string) (*SyntheticsGlobalVariableData, error) {
 	h := &SyntheticsGlobalVariableData{}
 	r := &config.DataSource{
@@ -2614,7 +2614,7 @@ func FromSyntheticsLocationsData(cfg SyntheticsLocationsData) SyntheticsLocation
 }
 
 // NewSyntheticsLocationsData creates a datadog_synthetics_locations data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewSyntheticsLocationsData(stack *config.Stack, name string) (*SyntheticsLocationsData, error) {
 	h := &SyntheticsLocationsData{}
 	r := &config.DataSource{
@@ -2690,7 +2690,7 @@ func FromSyntheticsTestData(cfg SyntheticsTestData) SyntheticsTestDataOption {
 }
 
 // NewSyntheticsTestData creates a datadog_synthetics_test data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewSyntheticsTestData(stack *config.Stack, name string) (*SyntheticsTestData, error) {
 	h := &SyntheticsTestData{}
 	r := &config.DataSource{
@@ -2794,7 +2794,7 @@ func FromTeamData(cfg TeamData) TeamDataOption {
 }
 
 // NewTeamData creates a datadog_team data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewTeamData(stack *config.Stack, name string) (*TeamData, error) {
 	h := &TeamData{}
 	r := &config.DataSource{
@@ -2870,7 +2870,7 @@ func FromTeamMembershipsData(cfg TeamMembershipsData) TeamMembershipsDataOption 
 }
 
 // NewTeamMembershipsData creates a datadog_team_memberships data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewTeamMembershipsData(stack *config.Stack, name string) (*TeamMembershipsData, error) {
 	h := &TeamMembershipsData{}
 	r := &config.DataSource{
@@ -2946,7 +2946,7 @@ func FromUserData(cfg UserData) UserDataOption {
 }
 
 // NewUserData creates a datadog_user data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewUserData(stack *config.Stack, name string) (*UserData, error) {
 	h := &UserData{}
 	r := &config.DataSource{
@@ -3015,7 +3015,7 @@ func FromUsersData(cfg UsersData) UsersDataOption {
 }
 
 // NewUsersData creates a datadog_users data source, attaches it to the stack, and returns a
-// handle whose Apply method configures the resource's attributes.
+// handle whose Apply method configures the data source's attributes.
 func NewUsersData(stack *config.Stack, name string) (*UsersData, error) {
 	h := &UsersData{}
 	r := &config.DataSource{
