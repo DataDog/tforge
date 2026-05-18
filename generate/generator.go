@@ -598,38 +598,45 @@ func (g *Generator) generateConfigBridge(f *jen.File, structName string) {
 	f.Line()
 }
 
-// generateConstructor generates a typed constructor + Apply method(s) for a
-// top-level resource or data source.
+// generateConstructor generates a typed constructor, Apply method(s), and the
+// AsResource / AsDataSource adapter method for a top-level resource or data
+// source. The adapter is what makes the handle satisfy config.Resourcer /
+// config.DataSourcer so it can be passed directly to stack.AddResource /
+// stack.AddDataSource.
 //
 // For resources (isResource=true), it emits:
 //
 //	func NewMonitor(stack *config.Stack, name string) (*Monitor, error) {
-//	    m := &Monitor{}
-//	    r := &config.Resource{Type: "datadog_monitor", Name: name, TypedAttributes: m}
-//	    if err := stack.AddResourcePtr(r); err != nil { return nil, err }
-//	    m.resource = r
-//	    return m, nil
+//	    h := &Monitor{}
+//	    h.resource = &config.Resource{Type: "datadog_monitor", Name: name, TypedAttributes: h}
+//	    if err := stack.AddResource(h); err != nil { return nil, err }
+//	    return h, nil
 //	}
+//	func (m *Monitor) AsResource() *config.Resource { return m.resource }
 //	func (m *Monitor) Apply(opts ...MonitorOption) *Monitor { ... }
 //	func (m *Monitor) ApplyResourceOptions(opts ...config.ResourceOption) { ... }
 //
-// For data sources (isResource=false), it emits the same New + Apply pair
-// minus ApplyResourceOptions (DataSource has no meta-option helpers today).
+// For data sources (isResource=false): same shape, AsDataSource instead of
+// AsResource, no ApplyResourceOptions.
 func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName string, isResource bool) {
 	funcName := "New" + structName
 	short := g.shortName(structName)
 	optionType := short + "Option"
 
 	configType := "Resource"
-	addMethod := "AddResourcePtr"
+	asMethod := "AsResource"
+	addMethod := "AddResource"
 	kind := "resource"
 	if !isResource {
 		configType = "DataSource"
-		addMethod = "AddDataSourcePtr"
+		asMethod = "AsDataSource"
+		addMethod = "AddDataSource"
 		kind = "data source"
 	}
 
 	// Constructor: build the handle, attach the typed payload, add to stack.
+	// The handle satisfies config.Resourcer/DataSourcer via the As* method
+	// emitted below, so it can be passed directly to stack.AddResource.
 	f.Commentf("%s creates a %s %s, attaches it to the stack, and returns a", funcName, tfTypeName, kind)
 	f.Commentf("handle whose Apply method configures the %s's attributes.", kind)
 	f.Func().Id(funcName).Params(
@@ -637,19 +644,26 @@ func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName stri
 		jen.Id("name").String(),
 	).Params(jen.Op("*").Id(structName), jen.Error()).Block(
 		jen.Id("h").Op(":=").Op("&").Id(structName).Values(),
-		jen.Id("r").Op(":=").Op("&").Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
+		jen.Id("h").Dot("resource").Op("=").Op("&").Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
 			jen.Id("Type"):            jen.Lit(tfTypeName),
 			jen.Id("Name"):            jen.Id("name"),
 			jen.Id("TypedAttributes"): jen.Id("h"),
 		}),
 		jen.If(
-			jen.Id("err").Op(":=").Id("stack").Dot(addMethod).Call(jen.Id("r")),
+			jen.Id("err").Op(":=").Id("stack").Dot(addMethod).Call(jen.Id("h")),
 			jen.Id("err").Op("!=").Nil(),
 		).Block(
 			jen.Return(jen.Nil(), jen.Id("err")),
 		),
-		jen.Id("h").Dot("resource").Op("=").Id("r"),
 		jen.Return(jen.Id("h"), jen.Nil()),
+	)
+	f.Line()
+
+	// AsResource / AsDataSource: satisfies the Resourcer / DataSourcer interface
+	// so the handle can be passed directly to stack.AddResource / AddDataSource.
+	f.Commentf("%s returns the underlying %s, implementing config.%sr.", asMethod, kind, configType)
+	f.Func().Params(jen.Id("h").Op("*").Id(structName)).Id(asMethod).Params().Op("*").Qual("github.com/DataDog/tforge/config", configType).Block(
+		jen.Return(jen.Id("h").Dot("resource")),
 	)
 	f.Line()
 

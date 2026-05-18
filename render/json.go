@@ -261,10 +261,11 @@ func buildProviders(providers []config.Provider) map[string][]any {
 }
 
 // buildResources builds the resource configurations.
-func buildResources(resources []*config.Resource) (map[string]map[string]any, error) {
+func buildResources(resources []config.Resourcer) (map[string]map[string]any, error) {
 	result := make(map[string]map[string]any)
 
-	for _, r := range resources {
+	for _, rr := range resources {
+		r := rr.AsResource()
 		if result[r.Type] == nil {
 			result[r.Type] = make(map[string]any)
 		}
@@ -506,10 +507,11 @@ func resolveAttributes(untyped map[string]any, typed any, kindType, kindName str
 }
 
 // buildDataSources builds the data source configurations.
-func buildDataSources(dataSources []*config.DataSource) (map[string]map[string]any, error) {
+func buildDataSources(dataSources []config.DataSourcer) (map[string]map[string]any, error) {
 	result := make(map[string]map[string]any)
 
-	for _, d := range dataSources {
+	for _, dd := range dataSources {
+		d := dd.AsDataSource()
 		if result[d.Type] == nil {
 			result[d.Type] = make(map[string]any)
 		}

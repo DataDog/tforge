@@ -27,7 +27,7 @@ func main() {
 	})
 
 	// Data source with count
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:   "aws_availability_zones",
 		Name:   "counted",
 		Attributes: map[string]any{"state": "available"},
@@ -39,7 +39,7 @@ func main() {
 	}
 
 	// Data source with for_each
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:   "aws_ami",
 		Name:   "per_region",
 		Attributes: map[string]any{"most_recent": true},
@@ -54,7 +54,7 @@ func main() {
 	}
 
 	// Data source with depends_on
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:   "aws_caller_identity",
 		Name:   "current",
 		Attributes: map[string]any{},
@@ -66,7 +66,7 @@ func main() {
 	}
 
 	// Data source with non-default provider
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:     "aws_vpc",
 		Name:     "west_vpc",
 		Provider: "aws.west",
@@ -76,7 +76,7 @@ func main() {
 	}
 
 	// Data source with all four meta-arguments
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:     "aws_subnet",
 		Name:     "all_meta",
 		Provider: "aws.west",

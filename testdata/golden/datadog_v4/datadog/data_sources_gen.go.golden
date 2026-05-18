@@ -320,16 +320,20 @@ func FromActionConnectionData(cfg ActionConnectionData) ActionConnectionDataOpti
 // handle whose Apply method configures the data source's attributes.
 func NewActionConnectionData(stack *config.Stack, name string) (*ActionConnectionData, error) {
 	h := &ActionConnectionData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_action_connection",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *ActionConnectionData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_action_connection. Safe to call multiple times;
@@ -396,16 +400,20 @@ func FromAPIKeyData(cfg APIKeyData) APIKeyDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewAPIKeyData(stack *config.Stack, name string) (*APIKeyData, error) {
 	h := &APIKeyData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_api_key",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *APIKeyData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_api_key. Safe to call multiple times;
@@ -451,16 +459,20 @@ func FromApmRetentionFiltersOrderData(cfg ApmRetentionFiltersOrderData) ApmReten
 // handle whose Apply method configures the data source's attributes.
 func NewApmRetentionFiltersOrderData(stack *config.Stack, name string) (*ApmRetentionFiltersOrderData, error) {
 	h := &ApmRetentionFiltersOrderData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_apm_retention_filters_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *ApmRetentionFiltersOrderData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_apm_retention_filters_order. Safe to call multiple times;
@@ -541,16 +553,20 @@ func FromAppBuilderAppData(cfg AppBuilderAppData) AppBuilderAppDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewAppBuilderAppData(stack *config.Stack, name string) (*AppBuilderAppData, error) {
 	h := &AppBuilderAppData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_app_builder_app",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *AppBuilderAppData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_app_builder_app. Safe to call multiple times;
@@ -709,16 +725,20 @@ func FromAwsCurConfigData(cfg AwsCurConfigData) AwsCurConfigDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewAwsCurConfigData(stack *config.Stack, name string) (*AwsCurConfigData, error) {
 	h := &AwsCurConfigData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_aws_cur_config",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *AwsCurConfigData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_aws_cur_config. Safe to call multiple times;
@@ -922,16 +942,20 @@ func FromAzureUcConfigData(cfg AzureUcConfigData) AzureUcConfigDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewAzureUcConfigData(stack *config.Stack, name string) (*AzureUcConfigData, error) {
 	h := &AzureUcConfigData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_azure_uc_config",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *AzureUcConfigData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_azure_uc_config. Safe to call multiple times;
@@ -977,16 +1001,20 @@ func FromCloudWorkloadSecurityAgentRulesData(cfg CloudWorkloadSecurityAgentRules
 // handle whose Apply method configures the data source's attributes.
 func NewCloudWorkloadSecurityAgentRulesData(stack *config.Stack, name string) (*CloudWorkloadSecurityAgentRulesData, error) {
 	h := &CloudWorkloadSecurityAgentRulesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_cloud_workload_security_agent_rules",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *CloudWorkloadSecurityAgentRulesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_cloud_workload_security_agent_rules. Safe to call multiple times;
@@ -1274,16 +1302,20 @@ func FromCostBudgetData(cfg CostBudgetData) CostBudgetDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewCostBudgetData(stack *config.Stack, name string) (*CostBudgetData, error) {
 	h := &CostBudgetData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_cost_budget",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *CostBudgetData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_cost_budget. Safe to call multiple times;
@@ -1343,16 +1375,20 @@ func FromCsmThreatsAgentRulesData(cfg CsmThreatsAgentRulesData) CsmThreatsAgentR
 // handle whose Apply method configures the data source's attributes.
 func NewCsmThreatsAgentRulesData(stack *config.Stack, name string) (*CsmThreatsAgentRulesData, error) {
 	h := &CsmThreatsAgentRulesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_csm_threats_agent_rules",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *CsmThreatsAgentRulesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_csm_threats_agent_rules. Safe to call multiple times;
@@ -1405,16 +1441,20 @@ func FromCsmThreatsPoliciesData(cfg CsmThreatsPoliciesData) CsmThreatsPoliciesDa
 // handle whose Apply method configures the data source's attributes.
 func NewCsmThreatsPoliciesData(stack *config.Stack, name string) (*CsmThreatsPoliciesData, error) {
 	h := &CsmThreatsPoliciesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_csm_threats_policies",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *CsmThreatsPoliciesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_csm_threats_policies. Safe to call multiple times;
@@ -1866,16 +1906,20 @@ func FromCustomAllocationRuleData(cfg CustomAllocationRuleData) CustomAllocation
 // handle whose Apply method configures the data source's attributes.
 func NewCustomAllocationRuleData(stack *config.Stack, name string) (*CustomAllocationRuleData, error) {
 	h := &CustomAllocationRuleData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_custom_allocation_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *CustomAllocationRuleData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_custom_allocation_rule. Safe to call multiple times;
@@ -1935,16 +1979,20 @@ func FromDashboardData(cfg DashboardData) DashboardDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewDashboardData(stack *config.Stack, name string) (*DashboardData, error) {
 	h := &DashboardData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_dashboard",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *DashboardData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_dashboard. Safe to call multiple times;
@@ -1990,16 +2038,20 @@ func FromDashboardListData(cfg DashboardListData) DashboardListDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewDashboardListData(stack *config.Stack, name string) (*DashboardListData, error) {
 	h := &DashboardListData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_dashboard_list",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *DashboardListData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_dashboard_list. Safe to call multiple times;
@@ -2108,16 +2160,20 @@ func FromDatastoreData(cfg DatastoreData) DatastoreDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewDatastoreData(stack *config.Stack, name string) (*DatastoreData, error) {
 	h := &DatastoreData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_datastore",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *DatastoreData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_datastore. Safe to call multiple times;
@@ -2212,16 +2268,20 @@ func FromDatastoreItemData(cfg DatastoreItemData) DatastoreItemDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewDatastoreItemData(stack *config.Stack, name string) (*DatastoreItemData, error) {
 	h := &DatastoreItemData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_datastore_item",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *DatastoreItemData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_datastore_item. Safe to call multiple times;
@@ -2351,16 +2411,20 @@ func FromGcpUcConfigData(cfg GcpUcConfigData) GcpUcConfigDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewGcpUcConfigData(stack *config.Stack, name string) (*GcpUcConfigData, error) {
 	h := &GcpUcConfigData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_gcp_uc_config",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *GcpUcConfigData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_gcp_uc_config. Safe to call multiple times;
@@ -2455,16 +2519,20 @@ func FromHostsData(cfg HostsData) HostsDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewHostsData(stack *config.Stack, name string) (*HostsData, error) {
 	h := &HostsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_hosts",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *HostsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_hosts. Safe to call multiple times;
@@ -2603,16 +2671,20 @@ func FromIncidentNotificationRuleData(cfg IncidentNotificationRuleData) Incident
 // handle whose Apply method configures the data source's attributes.
 func NewIncidentNotificationRuleData(stack *config.Stack, name string) (*IncidentNotificationRuleData, error) {
 	h := &IncidentNotificationRuleData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_incident_notification_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IncidentNotificationRuleData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_incident_notification_rule. Safe to call multiple times;
@@ -2700,16 +2772,20 @@ func FromIncidentNotificationTemplateData(cfg IncidentNotificationTemplateData) 
 // handle whose Apply method configures the data source's attributes.
 func NewIncidentNotificationTemplateData(stack *config.Stack, name string) (*IncidentNotificationTemplateData, error) {
 	h := &IncidentNotificationTemplateData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_incident_notification_template",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IncidentNotificationTemplateData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_incident_notification_template. Safe to call multiple times;
@@ -2769,16 +2845,20 @@ func FromIncidentTypeData(cfg IncidentTypeData) IncidentTypeDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewIncidentTypeData(stack *config.Stack, name string) (*IncidentTypeData, error) {
 	h := &IncidentTypeData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_incident_type",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IncidentTypeData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_incident_type. Safe to call multiple times;
@@ -2824,16 +2904,20 @@ func FromIntegrationAwsAvailableLogsServicesData(cfg IntegrationAwsAvailableLogs
 // handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsAvailableLogsServicesData(stack *config.Stack, name string) (*IntegrationAwsAvailableLogsServicesData, error) {
 	h := &IntegrationAwsAvailableLogsServicesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_integration_aws_available_logs_services",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IntegrationAwsAvailableLogsServicesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_available_logs_services. Safe to call multiple times;
@@ -2879,16 +2963,20 @@ func FromIntegrationAwsAvailableNamespacesData(cfg IntegrationAwsAvailableNamesp
 // handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsAvailableNamespacesData(stack *config.Stack, name string) (*IntegrationAwsAvailableNamespacesData, error) {
 	h := &IntegrationAwsAvailableNamespacesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_integration_aws_available_namespaces",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IntegrationAwsAvailableNamespacesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_available_namespaces. Safe to call multiple times;
@@ -2941,16 +3029,20 @@ func FromIntegrationAwsExternalIDData(cfg IntegrationAwsExternalIDData) Integrat
 // handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsExternalIDData(stack *config.Stack, name string) (*IntegrationAwsExternalIDData, error) {
 	h := &IntegrationAwsExternalIDData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_integration_aws_external_id",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IntegrationAwsExternalIDData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_external_id. Safe to call multiple times;
@@ -2996,16 +3088,20 @@ func FromIntegrationAwsIAMPermissionsData(cfg IntegrationAwsIAMPermissionsData) 
 // handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsIAMPermissionsData(stack *config.Stack, name string) (*IntegrationAwsIAMPermissionsData, error) {
 	h := &IntegrationAwsIAMPermissionsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_integration_aws_iam_permissions",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IntegrationAwsIAMPermissionsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_iam_permissions. Safe to call multiple times;
@@ -3051,16 +3147,20 @@ func FromIntegrationAwsIAMPermissionsResourceCollectionData(cfg IntegrationAwsIA
 // handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsIAMPermissionsResourceCollectionData(stack *config.Stack, name string) (*IntegrationAwsIAMPermissionsResourceCollectionData, error) {
 	h := &IntegrationAwsIAMPermissionsResourceCollectionData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_integration_aws_iam_permissions_resource_collection",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IntegrationAwsIAMPermissionsResourceCollectionData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_iam_permissions_resource_collection. Safe to call multiple times;
@@ -3106,16 +3206,20 @@ func FromIntegrationAwsIAMPermissionsStandardData(cfg IntegrationAwsIAMPermissio
 // handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsIAMPermissionsStandardData(stack *config.Stack, name string) (*IntegrationAwsIAMPermissionsStandardData, error) {
 	h := &IntegrationAwsIAMPermissionsStandardData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_integration_aws_iam_permissions_standard",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IntegrationAwsIAMPermissionsStandardData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_iam_permissions_standard. Safe to call multiple times;
@@ -3161,16 +3265,20 @@ func FromIntegrationAwsLogsServicesData(cfg IntegrationAwsLogsServicesData) Inte
 // handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsLogsServicesData(stack *config.Stack, name string) (*IntegrationAwsLogsServicesData, error) {
 	h := &IntegrationAwsLogsServicesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_integration_aws_logs_services",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IntegrationAwsLogsServicesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_logs_services. Safe to call multiple times;
@@ -3216,16 +3324,20 @@ func FromIntegrationAwsNamespaceRulesData(cfg IntegrationAwsNamespaceRulesData) 
 // handle whose Apply method configures the data source's attributes.
 func NewIntegrationAwsNamespaceRulesData(stack *config.Stack, name string) (*IntegrationAwsNamespaceRulesData, error) {
 	h := &IntegrationAwsNamespaceRulesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_integration_aws_namespace_rules",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IntegrationAwsNamespaceRulesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_namespace_rules. Safe to call multiple times;
@@ -3404,16 +3516,20 @@ func FromIPRangesData(cfg IPRangesData) IPRangesDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewIPRangesData(stack *config.Stack, name string) (*IPRangesData, error) {
 	h := &IPRangesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_ip_ranges",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *IPRangesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_ip_ranges. Safe to call multiple times;
@@ -3459,16 +3575,20 @@ func FromLogsArchivesOrderData(cfg LogsArchivesOrderData) LogsArchivesOrderDataO
 // handle whose Apply method configures the data source's attributes.
 func NewLogsArchivesOrderData(stack *config.Stack, name string) (*LogsArchivesOrderData, error) {
 	h := &LogsArchivesOrderData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_logs_archives_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *LogsArchivesOrderData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_archives_order. Safe to call multiple times;
@@ -3514,16 +3634,20 @@ func FromLogsIndexesData(cfg LogsIndexesData) LogsIndexesDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewLogsIndexesData(stack *config.Stack, name string) (*LogsIndexesData, error) {
 	h := &LogsIndexesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_logs_indexes",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *LogsIndexesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_indexes. Safe to call multiple times;
@@ -3569,16 +3693,20 @@ func FromLogsIndexesOrderData(cfg LogsIndexesOrderData) LogsIndexesOrderDataOpti
 // handle whose Apply method configures the data source's attributes.
 func NewLogsIndexesOrderData(stack *config.Stack, name string) (*LogsIndexesOrderData, error) {
 	h := &LogsIndexesOrderData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_logs_indexes_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *LogsIndexesOrderData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_indexes_order. Safe to call multiple times;
@@ -3631,16 +3759,20 @@ func FromLogsPipelinesData(cfg LogsPipelinesData) LogsPipelinesDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewLogsPipelinesData(stack *config.Stack, name string) (*LogsPipelinesData, error) {
 	h := &LogsPipelinesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_logs_pipelines",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *LogsPipelinesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_pipelines. Safe to call multiple times;
@@ -3686,16 +3818,20 @@ func FromLogsPipelinesOrderData(cfg LogsPipelinesOrderData) LogsPipelinesOrderDa
 // handle whose Apply method configures the data source's attributes.
 func NewLogsPipelinesOrderData(stack *config.Stack, name string) (*LogsPipelinesOrderData, error) {
 	h := &LogsPipelinesOrderData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_logs_pipelines_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *LogsPipelinesOrderData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_pipelines_order. Safe to call multiple times;
@@ -3762,16 +3898,20 @@ func FromMetricActiveTagsAndAggregationsData(cfg MetricActiveTagsAndAggregations
 // handle whose Apply method configures the data source's attributes.
 func NewMetricActiveTagsAndAggregationsData(stack *config.Stack, name string) (*MetricActiveTagsAndAggregationsData, error) {
 	h := &MetricActiveTagsAndAggregationsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_metric_active_tags_and_aggregations",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *MetricActiveTagsAndAggregationsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_metric_active_tags_and_aggregations. Safe to call multiple times;
@@ -3866,16 +4006,20 @@ func FromMetricMetadataData(cfg MetricMetadataData) MetricMetadataDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewMetricMetadataData(stack *config.Stack, name string) (*MetricMetadataData, error) {
 	h := &MetricMetadataData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_metric_metadata",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *MetricMetadataData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_metric_metadata. Safe to call multiple times;
@@ -3928,16 +4072,20 @@ func FromMetricTagsData(cfg MetricTagsData) MetricTagsDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewMetricTagsData(stack *config.Stack, name string) (*MetricTagsData, error) {
 	h := &MetricTagsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_metric_tags",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *MetricTagsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_metric_tags. Safe to call multiple times;
@@ -3990,16 +4138,20 @@ func FromMetricsData(cfg MetricsData) MetricsDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewMetricsData(stack *config.Stack, name string) (*MetricsData, error) {
 	h := &MetricsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_metrics",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *MetricsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_metrics. Safe to call multiple times;
@@ -4262,16 +4414,20 @@ func FromMonitorData(cfg MonitorData) MonitorDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewMonitorData(stack *config.Stack, name string) (*MonitorData, error) {
 	h := &MonitorData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_monitor",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *MonitorData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_monitor. Safe to call multiple times;
@@ -4317,16 +4473,20 @@ func FromMonitorConfigPoliciesData(cfg MonitorConfigPoliciesData) MonitorConfigP
 // handle whose Apply method configures the data source's attributes.
 func NewMonitorConfigPoliciesData(stack *config.Stack, name string) (*MonitorConfigPoliciesData, error) {
 	h := &MonitorConfigPoliciesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_monitor_config_policies",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *MonitorConfigPoliciesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_monitor_config_policies. Safe to call multiple times;
@@ -4393,16 +4553,20 @@ func FromMonitorsData(cfg MonitorsData) MonitorsDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewMonitorsData(stack *config.Stack, name string) (*MonitorsData, error) {
 	h := &MonitorsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_monitors",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *MonitorsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_monitors. Safe to call multiple times;
@@ -4654,16 +4818,20 @@ func FromOrganizationSettingsData(cfg OrganizationSettingsData) OrganizationSett
 // handle whose Apply method configures the data source's attributes.
 func NewOrganizationSettingsData(stack *config.Stack, name string) (*OrganizationSettingsData, error) {
 	h := &OrganizationSettingsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_organization_settings",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *OrganizationSettingsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_organization_settings. Safe to call multiple times;
@@ -4716,16 +4884,20 @@ func FromPermissionsData(cfg PermissionsData) PermissionsDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewPermissionsData(stack *config.Stack, name string) (*PermissionsData, error) {
 	h := &PermissionsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_permissions",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *PermissionsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_permissions. Safe to call multiple times;
@@ -4771,16 +4943,20 @@ func FromPowerpackData(cfg PowerpackData) PowerpackDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewPowerpackData(stack *config.Stack, name string) (*PowerpackData, error) {
 	h := &PowerpackData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_powerpack",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *PowerpackData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_powerpack. Safe to call multiple times;
@@ -5176,16 +5352,20 @@ func FromReferenceTableData(cfg ReferenceTableData) ReferenceTableDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewReferenceTableData(stack *config.Stack, name string) (*ReferenceTableData, error) {
 	h := &ReferenceTableData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_reference_table",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *ReferenceTableData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_reference_table. Safe to call multiple times;
@@ -5268,16 +5448,20 @@ func FromReferenceTableRowsData(cfg ReferenceTableRowsData) ReferenceTableRowsDa
 // handle whose Apply method configures the data source's attributes.
 func NewReferenceTableRowsData(stack *config.Stack, name string) (*ReferenceTableRowsData, error) {
 	h := &ReferenceTableRowsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_reference_table_rows",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *ReferenceTableRowsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_reference_table_rows. Safe to call multiple times;
@@ -5337,16 +5521,20 @@ func FromRoleData(cfg RoleData) RoleDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewRoleData(stack *config.Stack, name string) (*RoleData, error) {
 	h := &RoleData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_role",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *RoleData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_role. Safe to call multiple times;
@@ -5413,16 +5601,20 @@ func FromRoleUsersData(cfg RoleUsersData) RoleUsersDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewRoleUsersData(stack *config.Stack, name string) (*RoleUsersData, error) {
 	h := &RoleUsersData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_role_users",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *RoleUsersData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_role_users. Safe to call multiple times;
@@ -5475,16 +5667,20 @@ func FromRolesData(cfg RolesData) RolesDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewRolesData(stack *config.Stack, name string) (*RolesData, error) {
 	h := &RolesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_roles",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *RolesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_roles. Safe to call multiple times;
@@ -5565,16 +5761,20 @@ func FromRumApplicationData(cfg RumApplicationData) RumApplicationDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewRumApplicationData(stack *config.Stack, name string) (*RumApplicationData, error) {
 	h := &RumApplicationData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_rum_application",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *RumApplicationData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_rum_application. Safe to call multiple times;
@@ -5627,16 +5827,20 @@ func FromRumRetentionFiltersData(cfg RumRetentionFiltersData) RumRetentionFilter
 // handle whose Apply method configures the data source's attributes.
 func NewRumRetentionFiltersData(stack *config.Stack, name string) (*RumRetentionFiltersData, error) {
 	h := &RumRetentionFiltersData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_rum_retention_filters",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *RumRetentionFiltersData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_rum_retention_filters. Safe to call multiple times;
@@ -5710,16 +5914,20 @@ func FromSecurityMonitoringCriticalAssetData(cfg SecurityMonitoringCriticalAsset
 // handle whose Apply method configures the data source's attributes.
 func NewSecurityMonitoringCriticalAssetData(stack *config.Stack, name string) (*SecurityMonitoringCriticalAssetData, error) {
 	h := &SecurityMonitoringCriticalAssetData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_critical_asset",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SecurityMonitoringCriticalAssetData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_critical_asset. Safe to call multiple times;
@@ -5765,16 +5973,20 @@ func FromSecurityMonitoringCriticalAssetsData(cfg SecurityMonitoringCriticalAsse
 // handle whose Apply method configures the data source's attributes.
 func NewSecurityMonitoringCriticalAssetsData(stack *config.Stack, name string) (*SecurityMonitoringCriticalAssetsData, error) {
 	h := &SecurityMonitoringCriticalAssetsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_critical_assets",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SecurityMonitoringCriticalAssetsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_critical_assets. Safe to call multiple times;
@@ -5827,16 +6039,20 @@ func FromSecurityMonitoringFiltersData(cfg SecurityMonitoringFiltersData) Securi
 // handle whose Apply method configures the data source's attributes.
 func NewSecurityMonitoringFiltersData(stack *config.Stack, name string) (*SecurityMonitoringFiltersData, error) {
 	h := &SecurityMonitoringFiltersData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_filters",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SecurityMonitoringFiltersData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_filters. Safe to call multiple times;
@@ -5917,16 +6133,20 @@ func FromSecurityMonitoringRulesData(cfg SecurityMonitoringRulesData) SecurityMo
 // handle whose Apply method configures the data source's attributes.
 func NewSecurityMonitoringRulesData(stack *config.Stack, name string) (*SecurityMonitoringRulesData, error) {
 	h := &SecurityMonitoringRulesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_rules",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SecurityMonitoringRulesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_rules. Safe to call multiple times;
@@ -5979,16 +6199,20 @@ func FromSecurityMonitoringSuppressionsData(cfg SecurityMonitoringSuppressionsDa
 // handle whose Apply method configures the data source's attributes.
 func NewSecurityMonitoringSuppressionsData(stack *config.Stack, name string) (*SecurityMonitoringSuppressionsData, error) {
 	h := &SecurityMonitoringSuppressionsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_suppressions",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SecurityMonitoringSuppressionsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_suppressions. Safe to call multiple times;
@@ -6034,16 +6258,20 @@ func FromSensitiveDataScannerGroupOrderData(cfg SensitiveDataScannerGroupOrderDa
 // handle whose Apply method configures the data source's attributes.
 func NewSensitiveDataScannerGroupOrderData(stack *config.Stack, name string) (*SensitiveDataScannerGroupOrderData, error) {
 	h := &SensitiveDataScannerGroupOrderData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_sensitive_data_scanner_group_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SensitiveDataScannerGroupOrderData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_sensitive_data_scanner_group_order. Safe to call multiple times;
@@ -6124,16 +6352,20 @@ func FromSensitiveDataScannerStandardPatternData(cfg SensitiveDataScannerStandar
 // handle whose Apply method configures the data source's attributes.
 func NewSensitiveDataScannerStandardPatternData(stack *config.Stack, name string) (*SensitiveDataScannerStandardPatternData, error) {
 	h := &SensitiveDataScannerStandardPatternData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_sensitive_data_scanner_standard_pattern",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SensitiveDataScannerStandardPatternData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_sensitive_data_scanner_standard_pattern. Safe to call multiple times;
@@ -6256,16 +6488,20 @@ func FromServiceAccountData(cfg ServiceAccountData) ServiceAccountDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewServiceAccountData(stack *config.Stack, name string) (*ServiceAccountData, error) {
 	h := &ServiceAccountData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_service_account",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *ServiceAccountData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_service_account. Safe to call multiple times;
@@ -6381,16 +6617,20 @@ func FromServiceLevelObjectiveData(cfg ServiceLevelObjectiveData) ServiceLevelOb
 // handle whose Apply method configures the data source's attributes.
 func NewServiceLevelObjectiveData(stack *config.Stack, name string) (*ServiceLevelObjectiveData, error) {
 	h := &ServiceLevelObjectiveData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_service_level_objective",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *ServiceLevelObjectiveData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_service_level_objective. Safe to call multiple times;
@@ -6478,16 +6718,20 @@ func FromServiceLevelObjectivesData(cfg ServiceLevelObjectivesData) ServiceLevel
 // handle whose Apply method configures the data source's attributes.
 func NewServiceLevelObjectivesData(stack *config.Stack, name string) (*ServiceLevelObjectivesData, error) {
 	h := &ServiceLevelObjectivesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_service_level_objectives",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *ServiceLevelObjectivesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_service_level_objectives. Safe to call multiple times;
@@ -6582,16 +6826,20 @@ func FromSoftwareCatalogData(cfg SoftwareCatalogData) SoftwareCatalogDataOption 
 // handle whose Apply method configures the data source's attributes.
 func NewSoftwareCatalogData(stack *config.Stack, name string) (*SoftwareCatalogData, error) {
 	h := &SoftwareCatalogData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_software_catalog",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SoftwareCatalogData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_software_catalog. Safe to call multiple times;
@@ -6644,16 +6892,20 @@ func FromSyntheticsGlobalVariableData(cfg SyntheticsGlobalVariableData) Syntheti
 // handle whose Apply method configures the data source's attributes.
 func NewSyntheticsGlobalVariableData(stack *config.Stack, name string) (*SyntheticsGlobalVariableData, error) {
 	h := &SyntheticsGlobalVariableData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_synthetics_global_variable",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SyntheticsGlobalVariableData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_synthetics_global_variable. Safe to call multiple times;
@@ -6699,16 +6951,20 @@ func FromSyntheticsLocationsData(cfg SyntheticsLocationsData) SyntheticsLocation
 // handle whose Apply method configures the data source's attributes.
 func NewSyntheticsLocationsData(stack *config.Stack, name string) (*SyntheticsLocationsData, error) {
 	h := &SyntheticsLocationsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_synthetics_locations",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SyntheticsLocationsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_synthetics_locations. Safe to call multiple times;
@@ -6775,16 +7031,20 @@ func FromSyntheticsTestData(cfg SyntheticsTestData) SyntheticsTestDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewSyntheticsTestData(stack *config.Stack, name string) (*SyntheticsTestData, error) {
 	h := &SyntheticsTestData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_synthetics_test",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *SyntheticsTestData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_synthetics_test. Safe to call multiple times;
@@ -7129,16 +7389,20 @@ func FromTagPipelineRulesetData(cfg TagPipelineRulesetData) TagPipelineRulesetDa
 // handle whose Apply method configures the data source's attributes.
 func NewTagPipelineRulesetData(stack *config.Stack, name string) (*TagPipelineRulesetData, error) {
 	h := &TagPipelineRulesetData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_tag_pipeline_ruleset",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *TagPipelineRulesetData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_tag_pipeline_ruleset. Safe to call multiple times;
@@ -7233,16 +7497,20 @@ func FromTeamData(cfg TeamData) TeamDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewTeamData(stack *config.Stack, name string) (*TeamData, error) {
 	h := &TeamData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_team",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *TeamData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team. Safe to call multiple times;
@@ -7316,16 +7584,20 @@ func FromTeamHierarchyLinksData(cfg TeamHierarchyLinksData) TeamHierarchyLinksDa
 // handle whose Apply method configures the data source's attributes.
 func NewTeamHierarchyLinksData(stack *config.Stack, name string) (*TeamHierarchyLinksData, error) {
 	h := &TeamHierarchyLinksData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_team_hierarchy_links",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *TeamHierarchyLinksData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_hierarchy_links. Safe to call multiple times;
@@ -7392,16 +7664,20 @@ func FromTeamMembershipsData(cfg TeamMembershipsData) TeamMembershipsDataOption 
 // handle whose Apply method configures the data source's attributes.
 func NewTeamMembershipsData(stack *config.Stack, name string) (*TeamMembershipsData, error) {
 	h := &TeamMembershipsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_team_memberships",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *TeamMembershipsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_memberships. Safe to call multiple times;
@@ -7581,16 +7857,20 @@ func FromTeamNotificationRuleData(cfg TeamNotificationRuleData) TeamNotification
 // handle whose Apply method configures the data source's attributes.
 func NewTeamNotificationRuleData(stack *config.Stack, name string) (*TeamNotificationRuleData, error) {
 	h := &TeamNotificationRuleData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_team_notification_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *TeamNotificationRuleData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_notification_rule. Safe to call multiple times;
@@ -7793,16 +8073,20 @@ func FromTeamNotificationRulesData(cfg TeamNotificationRulesData) TeamNotificati
 // handle whose Apply method configures the data source's attributes.
 func NewTeamNotificationRulesData(stack *config.Stack, name string) (*TeamNotificationRulesData, error) {
 	h := &TeamNotificationRulesData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_team_notification_rules",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *TeamNotificationRulesData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_notification_rules. Safe to call multiple times;
@@ -7927,16 +8211,20 @@ func FromTeamsData(cfg TeamsData) TeamsDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewTeamsData(stack *config.Stack, name string) (*TeamsData, error) {
 	h := &TeamsData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_teams",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *TeamsData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_teams. Safe to call multiple times;
@@ -8080,16 +8368,20 @@ func FromUserData(cfg UserData) UserDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewUserData(stack *config.Stack, name string) (*UserData, error) {
 	h := &UserData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_user",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *UserData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_user. Safe to call multiple times;
@@ -8149,16 +8441,20 @@ func FromUsersData(cfg UsersData) UsersDataOption {
 // handle whose Apply method configures the data source's attributes.
 func NewUsersData(stack *config.Stack, name string) (*UsersData, error) {
 	h := &UsersData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_users",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *UsersData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_users. Safe to call multiple times;
@@ -8232,16 +8528,20 @@ func FromWorkflowAutomationData(cfg WorkflowAutomationData) WorkflowAutomationDa
 // handle whose Apply method configures the data source's attributes.
 func NewWorkflowAutomationData(stack *config.Stack, name string) (*WorkflowAutomationData, error) {
 	h := &WorkflowAutomationData{}
-	r := &config.DataSource{
+	h.resource = &config.DataSource{
 		Name:            name,
 		Type:            "datadog_workflow_automation",
 		TypedAttributes: h,
 	}
-	if err := stack.AddDataSourcePtr(r); err != nil {
+	if err := stack.AddDataSource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsDataSource returns the underlying data source, implementing config.DataSourcer.
+func (h *WorkflowAutomationData) AsDataSource() *config.DataSource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_workflow_automation. Safe to call multiple times;

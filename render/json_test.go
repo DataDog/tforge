@@ -218,7 +218,7 @@ func TestToJSON_ProviderWithConfig(t *testing.T) {
 
 func TestToJSON_ResourceBasic(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123", "instance_type": "t3.micro"},
@@ -244,7 +244,7 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 
 func TestToJSON_ResourceProvider(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Provider:   "aws.west",
@@ -270,7 +270,7 @@ func TestToJSON_ResourceProvider(t *testing.T) {
 
 func TestToJSON_ResourceProviderAbsentWhenEmpty(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
@@ -295,7 +295,7 @@ func TestToJSON_ResourceProviderAbsentWhenEmpty(t *testing.T) {
 
 func TestToJSON_ResourceDependsOn(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{},
@@ -324,7 +324,7 @@ func TestToJSON_ResourceDependsOn(t *testing.T) {
 
 func TestToJSON_ResourceCount(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{},
@@ -353,7 +353,7 @@ func TestToJSON_ResourceCount(t *testing.T) {
 
 func TestToJSON_ResourceForEach(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{},
@@ -382,7 +382,7 @@ func TestToJSON_ResourceForEach(t *testing.T) {
 
 func TestToJSON_ResourceLifecycle(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Lifecycle: &config.Lifecycle{
@@ -421,7 +421,7 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 
 func TestToJSON_ResourceTimeouts(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Timeouts: &config.Timeouts{
@@ -457,7 +457,7 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 
 func TestToJSON_ResourceProvisioners(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Provisioners: []config.Provisioner{
@@ -501,14 +501,14 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 
 func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-web"},
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "api",
 		Attributes: map[string]any{"ami": "ami-api"},
@@ -541,21 +541,21 @@ func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 
 func TestToJSON_MultipleResourceTypes(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_vpc",
 		Name:       "main",
 		Attributes: map[string]any{"cidr_block": "10.0.0.0/16"},
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_subnet",
 		Name:       "public",
 		Attributes: map[string]any{"cidr_block": "10.0.1.0/24"},
@@ -587,14 +587,14 @@ func TestToJSON_MultipleResourceTypes(t *testing.T) {
 
 func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "ubuntu",
 		Attributes: map[string]any{"most_recent": true},
 	}); err != nil {
 		t.Fatal(err)
 	}
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "amazon_linux",
 		Attributes: map[string]any{"most_recent": false},
@@ -627,7 +627,7 @@ func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 
 func TestToJSON_DataSource(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{"most_recent": true},
@@ -652,7 +652,7 @@ func TestToJSON_DataSource(t *testing.T) {
 
 func TestToJSON_DataSourceProvider(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Provider:   "aws.west",
@@ -678,7 +678,7 @@ func TestToJSON_DataSourceProvider(t *testing.T) {
 
 func TestToJSON_DataSourceDependsOn(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{},
@@ -707,7 +707,7 @@ func TestToJSON_DataSourceDependsOn(t *testing.T) {
 
 func TestToJSON_DataSourceCount(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{},
@@ -736,7 +736,7 @@ func TestToJSON_DataSourceCount(t *testing.T) {
 
 func TestToJSON_DataSourceForEach(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{},
@@ -946,7 +946,7 @@ func TestToJSON_FullStack(t *testing.T) {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
@@ -954,7 +954,7 @@ func TestToJSON_FullStack(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{"most_recent": true},
@@ -1046,7 +1046,7 @@ func TestToFile_CreatesDirectory(t *testing.T) {
 
 func TestToJSON_ResourceConnection(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1091,7 +1091,7 @@ func TestToJSON_ResourceConnection(t *testing.T) {
 
 func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1132,7 +1132,7 @@ func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
 
 func TestToJSON_LifecyclePrecondition(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Lifecycle: &config.Lifecycle{
@@ -1168,7 +1168,7 @@ func TestToJSON_LifecyclePrecondition(t *testing.T) {
 
 func TestToJSON_LifecyclePostcondition(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Lifecycle: &config.Lifecycle{
@@ -1236,7 +1236,7 @@ func TestToJSON_OutputPrecondition(t *testing.T) {
 
 func TestToJSON_ProvisionerConnection(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Provisioners: []config.Provisioner{
@@ -1425,7 +1425,7 @@ func TestToJSON_ModuleForEach(t *testing.T) {
 
 func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1462,7 +1462,7 @@ func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 
 func TestConnectionJSON_NilExtra(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1499,7 +1499,7 @@ func TestConnectionJSON_NilExtra(t *testing.T) {
 
 func TestConnectionJSON_EmptyExtra(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1533,7 +1533,7 @@ func TestConnectionJSON_EmptyExtra(t *testing.T) {
 
 func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1731,7 +1731,7 @@ func strPtr(s string) *string { return &s }
 func TestToJSON_TypedAttributes(t *testing.T) {
 	stack := config.NewStack("test")
 	stack.AddProvider(config.Provider{Name: "datadog"})
-	if err := stack.AddResourcePtr(&config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:            "datadog_monitor",
 		Name:            "cpu",
 		TypedAttributes: &typedMonitor{Name: strPtr("hi"), Type: strPtr("metric alert")},
@@ -1759,7 +1759,7 @@ func TestToJSON_TypedAttributes(t *testing.T) {
 func TestToJSON_TypedAttributes_MutatesAfterAdd(t *testing.T) {
 	stack := config.NewStack("test")
 	payload := &typedMonitor{Name: strPtr("initial")}
-	if err := stack.AddResourcePtr(&config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:            "datadog_monitor",
 		Name:            "cpu",
 		TypedAttributes: payload,
@@ -1786,7 +1786,7 @@ func TestToJSON_TypedAttributes_MutatesAfterAdd(t *testing.T) {
 
 func TestToJSON_BothAttributesAndTypedAttributes_Error(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResourcePtr(&config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:            "datadog_monitor",
 		Name:            "cpu",
 		Attributes:      map[string]any{"name": "untyped"},
@@ -1804,7 +1804,7 @@ func TestToJSON_BothAttributesAndTypedAttributes_Error(t *testing.T) {
 // an explicit double-assignment by the caller and must be flagged.
 func TestToJSON_EmptyAttributesAndTypedAttributes_Error(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResourcePtr(&config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:            "datadog_monitor",
 		Name:            "cpu",
 		Attributes:      map[string]any{},

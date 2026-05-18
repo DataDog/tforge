@@ -138,7 +138,7 @@ func TestAddResource(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewStack("test")
-			err := s.AddResource(tt.res)
+			err := s.AddResource(&tt.res)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("AddResource() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -178,7 +178,7 @@ func TestAddDataSource(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := NewStack("test")
-			err := s.AddDataSource(tt.ds)
+			err := s.AddDataSource(&tt.ds)
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("AddDataSource() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -194,12 +194,12 @@ func TestAddDataSource(t *testing.T) {
 
 func TestAddResourceDuplicate(t *testing.T) {
 	s := NewStack("test")
-	err := s.AddResource(Resource{Type: "aws_instance", Name: "web", Attributes: map[string]any{"ami": "first"}})
+	err := s.AddResource(&Resource{Type: "aws_instance", Name: "web", Attributes: map[string]any{"ami": "first"}})
 	if err != nil {
 		t.Fatalf("first AddResource() error = %v", err)
 	}
 
-	err = s.AddResource(Resource{Type: "aws_instance", Name: "web", Attributes: map[string]any{"ami": "second"}})
+	err = s.AddResource(&Resource{Type: "aws_instance", Name: "web", Attributes: map[string]any{"ami": "second"}})
 	if err == nil {
 		t.Fatal("second AddResource() with same type and name should return error")
 	}
@@ -208,13 +208,13 @@ func TestAddResourceDuplicate(t *testing.T) {
 	}
 
 	// Different name should succeed
-	err = s.AddResource(Resource{Type: "aws_instance", Name: "api"})
+	err = s.AddResource(&Resource{Type: "aws_instance", Name: "api"})
 	if err != nil {
 		t.Fatalf("AddResource() with different name error = %v", err)
 	}
 
 	// Different type should succeed
-	err = s.AddResource(Resource{Type: "aws_s3_bucket", Name: "web"})
+	err = s.AddResource(&Resource{Type: "aws_s3_bucket", Name: "web"})
 	if err != nil {
 		t.Fatalf("AddResource() with different type error = %v", err)
 	}
@@ -224,47 +224,37 @@ func TestAddResourceDuplicate(t *testing.T) {
 	}
 }
 
-func TestAddResourcePtr_MutationPropagates(t *testing.T) {
+func TestAddResource_MutationPropagates(t *testing.T) {
 	s := NewStack("test")
 	r := &Resource{Type: "aws_instance", Name: "web"}
-	if err := s.AddResourcePtr(r); err != nil {
-		t.Fatalf("AddResourcePtr error = %v", err)
-	}
-	r.Attributes = map[string]any{"ami": "ami-123"}
-
-	if s.Resources[0].Attributes["ami"] != "ami-123" {
-		t.Fatalf("post-add mutation not visible: got %v", s.Resources[0].Attributes)
-	}
-}
-
-func TestAddResourcePtr_NilRejected(t *testing.T) {
-	s := NewStack("test")
-	if err := s.AddResourcePtr(nil); err == nil {
-		t.Fatal("AddResourcePtr(nil) should return an error")
-	}
-}
-
-func TestAddResource_ValueDoesNotPropagate(t *testing.T) {
-	s := NewStack("test")
-	r := Resource{Type: "aws_instance", Name: "web"}
 	if err := s.AddResource(r); err != nil {
 		t.Fatalf("AddResource error = %v", err)
 	}
 	r.Attributes = map[string]any{"ami": "ami-123"}
 
-	if s.Resources[0].Attributes != nil {
-		t.Fatalf("AddResource should value-copy; mutation leaked: %v", s.Resources[0].Attributes)
+	if s.Resources[0].AsResource().Attributes["ami"] != "ami-123" {
+		t.Fatalf("post-add mutation not visible: got %v", s.Resources[0].AsResource().Attributes)
+	}
+}
+
+func TestAddResource_NilRejected(t *testing.T) {
+	s := NewStack("test")
+	if err := s.AddResource(nil); err == nil {
+		t.Fatal("AddResource(nil) should return an error")
+	}
+	if err := s.AddResource((*Resource)(nil)); err == nil {
+		t.Fatal("AddResource((*Resource)(nil)) should return an error")
 	}
 }
 
 func TestAddDataSourceDuplicate(t *testing.T) {
 	s := NewStack("test")
-	err := s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", Attributes: map[string]any{"filter": "first"}})
+	err := s.AddDataSource(&DataSource{Type: "aws_ami", Name: "latest", Attributes: map[string]any{"filter": "first"}})
 	if err != nil {
 		t.Fatalf("first AddDataSource() error = %v", err)
 	}
 
-	err = s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", Attributes: map[string]any{"filter": "second"}})
+	err = s.AddDataSource(&DataSource{Type: "aws_ami", Name: "latest", Attributes: map[string]any{"filter": "second"}})
 	if err == nil {
 		t.Fatal("second AddDataSource() with same type and name should return error")
 	}
@@ -273,7 +263,7 @@ func TestAddDataSourceDuplicate(t *testing.T) {
 	}
 
 	// Different name should succeed
-	err = s.AddDataSource(DataSource{Type: "aws_ami", Name: "base"})
+	err = s.AddDataSource(&DataSource{Type: "aws_ami", Name: "base"})
 	if err != nil {
 		t.Fatalf("AddDataSource() with different name error = %v", err)
 	}

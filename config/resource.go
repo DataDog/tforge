@@ -62,6 +62,19 @@ func (r Resource) Ref(attr string) string {
 	return fmt.Sprintf("${%s.%s.%s}", r.Type, r.Name, attr)
 }
 
+// Resourcer is implemented by anything that can be added to Stack.Resources.
+// The single method returns the underlying Resource that the stack and renderer
+// inspect. *Resource implements it via identity; generated typed handles (e.g.
+// *Monitor) implement it by returning their back-pointer to the stack-owned
+// Resource. The pointer-receiver method ensures callers cannot pass a Resource
+// value to AddResource — the compiler enforces pointer use.
+type Resourcer interface {
+	AsResource() *Resource
+}
+
+// AsResource implements Resourcer: a *Resource is its own underlying Resource.
+func (r *Resource) AsResource() *Resource { return r }
+
 // DataSource represents a Terraform data source.
 type DataSource struct {
 	// Type is the data source type (e.g., "aws_ami").
@@ -93,6 +106,15 @@ func (d DataSource) Address() string {
 func (d DataSource) Ref(attr string) string {
 	return fmt.Sprintf("${data.%s.%s.%s}", d.Type, d.Name, attr)
 }
+
+// DataSourcer is implemented by anything that can be added to
+// Stack.DataSources. See Resourcer for the parallel rationale.
+type DataSourcer interface {
+	AsDataSource() *DataSource
+}
+
+// AsDataSource implements DataSourcer: a *DataSource is its own underlying DataSource.
+func (d *DataSource) AsDataSource() *DataSource { return d }
 
 // Lifecycle contains resource lifecycle customizations.
 type Lifecycle struct {

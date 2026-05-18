@@ -320,16 +320,20 @@ func FromActionConnection(cfg ActionConnection) ActionConnectionOption {
 // handle whose Apply method configures the resource's attributes.
 func NewActionConnection(stack *config.Stack, name string) (*ActionConnection, error) {
 	h := &ActionConnection{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_action_connection",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ActionConnection) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_action_connection. Safe to call multiple times;
@@ -415,16 +419,20 @@ func FromAgentlessScanningAwsScanOptions(cfg AgentlessScanningAwsScanOptions) Ag
 // handle whose Apply method configures the resource's attributes.
 func NewAgentlessScanningAwsScanOptions(stack *config.Stack, name string) (*AgentlessScanningAwsScanOptions, error) {
 	h := &AgentlessScanningAwsScanOptions{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_agentless_scanning_aws_scan_options",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AgentlessScanningAwsScanOptions) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_agentless_scanning_aws_scan_options. Safe to call multiple times;
@@ -496,16 +504,20 @@ func FromAgentlessScanningGcpScanOptions(cfg AgentlessScanningGcpScanOptions) Ag
 // handle whose Apply method configures the resource's attributes.
 func NewAgentlessScanningGcpScanOptions(stack *config.Stack, name string) (*AgentlessScanningGcpScanOptions, error) {
 	h := &AgentlessScanningGcpScanOptions{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_agentless_scanning_gcp_scan_options",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AgentlessScanningGcpScanOptions) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_agentless_scanning_gcp_scan_options. Safe to call multiple times;
@@ -577,16 +589,20 @@ func FromAPIKey(cfg APIKey) APIKeyOption {
 // handle whose Apply method configures the resource's attributes.
 func NewAPIKey(stack *config.Stack, name string) (*APIKey, error) {
 	h := &APIKey{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_api_key",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *APIKey) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_api_key. Safe to call multiple times;
@@ -702,16 +718,20 @@ func FromApmRetentionFilter(cfg ApmRetentionFilter) ApmRetentionFilterOption {
 // handle whose Apply method configures the resource's attributes.
 func NewApmRetentionFilter(stack *config.Stack, name string) (*ApmRetentionFilter, error) {
 	h := &ApmRetentionFilter{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_apm_retention_filter",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ApmRetentionFilter) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_apm_retention_filter. Safe to call multiple times;
@@ -769,16 +789,20 @@ func FromApmRetentionFilterOrder(cfg ApmRetentionFilterOrder) ApmRetentionFilter
 // handle whose Apply method configures the resource's attributes.
 func NewApmRetentionFilterOrder(stack *config.Stack, name string) (*ApmRetentionFilterOrder, error) {
 	h := &ApmRetentionFilterOrder{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_apm_retention_filter_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ApmRetentionFilterOrder) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_apm_retention_filter_order. Safe to call multiple times;
@@ -871,16 +895,20 @@ func FromAppBuilderApp(cfg AppBuilderApp) AppBuilderAppOption {
 // handle whose Apply method configures the resource's attributes.
 func NewAppBuilderApp(stack *config.Stack, name string) (*AppBuilderApp, error) {
 	h := &AppBuilderApp{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_app_builder_app",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AppBuilderApp) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_app_builder_app. Safe to call multiple times;
@@ -931,16 +959,20 @@ func FromAppKeyRegistration(cfg AppKeyRegistration) AppKeyRegistrationOption {
 // handle whose Apply method configures the resource's attributes.
 func NewAppKeyRegistration(stack *config.Stack, name string) (*AppKeyRegistration, error) {
 	h := &AppKeyRegistration{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_app_key_registration",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AppKeyRegistration) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_app_key_registration. Safe to call multiple times;
@@ -1012,16 +1044,20 @@ func FromApplicationKey(cfg ApplicationKey) ApplicationKeyOption {
 // handle whose Apply method configures the resource's attributes.
 func NewApplicationKey(stack *config.Stack, name string) (*ApplicationKey, error) {
 	h := &ApplicationKey{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_application_key",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ApplicationKey) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_application_key. Safe to call multiple times;
@@ -1359,16 +1395,20 @@ func FromAppsecWafCustomRule(cfg AppsecWafCustomRule) AppsecWafCustomRuleOption 
 // handle whose Apply method configures the resource's attributes.
 func NewAppsecWafCustomRule(stack *config.Stack, name string) (*AppsecWafCustomRule, error) {
 	h := &AppsecWafCustomRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_appsec_waf_custom_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AppsecWafCustomRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_appsec_waf_custom_rule. Safe to call multiple times;
@@ -1569,16 +1609,20 @@ func FromAppsecWafExclusionFilter(cfg AppsecWafExclusionFilter) AppsecWafExclusi
 // handle whose Apply method configures the resource's attributes.
 func NewAppsecWafExclusionFilter(stack *config.Stack, name string) (*AppsecWafExclusionFilter, error) {
 	h := &AppsecWafExclusionFilter{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_appsec_waf_exclusion_filter",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AppsecWafExclusionFilter) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_appsec_waf_exclusion_filter. Safe to call multiple times;
@@ -1657,16 +1701,20 @@ func FromAuthnMapping(cfg AuthnMapping) AuthnMappingOption {
 // handle whose Apply method configures the resource's attributes.
 func NewAuthnMapping(stack *config.Stack, name string) (*AuthnMapping, error) {
 	h := &AuthnMapping{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_authn_mapping",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AuthnMapping) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_authn_mapping. Safe to call multiple times;
@@ -1830,16 +1878,20 @@ func FromAwsCurConfig(cfg AwsCurConfig) AwsCurConfigOption {
 // handle whose Apply method configures the resource's attributes.
 func NewAwsCurConfig(stack *config.Stack, name string) (*AwsCurConfig, error) {
 	h := &AwsCurConfig{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_aws_cur_config",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AwsCurConfig) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_aws_cur_config. Safe to call multiple times;
@@ -2048,16 +2100,20 @@ func FromAzureUcConfig(cfg AzureUcConfig) AzureUcConfigOption {
 // handle whose Apply method configures the resource's attributes.
 func NewAzureUcConfig(stack *config.Stack, name string) (*AzureUcConfig, error) {
 	h := &AzureUcConfig{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_azure_uc_config",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *AzureUcConfig) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_azure_uc_config. Safe to call multiple times;
@@ -2157,16 +2213,20 @@ func FromChildOrganization(cfg ChildOrganization) ChildOrganizationOption {
 // handle whose Apply method configures the resource's attributes.
 func NewChildOrganization(stack *config.Stack, name string) (*ChildOrganization, error) {
 	h := &ChildOrganization{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_child_organization",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ChildOrganization) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_child_organization. Safe to call multiple times;
@@ -2324,16 +2384,20 @@ func FromCloudConfigurationRule(cfg CloudConfigurationRule) CloudConfigurationRu
 // handle whose Apply method configures the resource's attributes.
 func NewCloudConfigurationRule(stack *config.Stack, name string) (*CloudConfigurationRule, error) {
 	h := &CloudConfigurationRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_cloud_configuration_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *CloudConfigurationRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_cloud_configuration_rule. Safe to call multiple times;
@@ -2558,16 +2622,20 @@ func FromCloudInventorySyncConfig(cfg CloudInventorySyncConfig) CloudInventorySy
 // handle whose Apply method configures the resource's attributes.
 func NewCloudInventorySyncConfig(stack *config.Stack, name string) (*CloudInventorySyncConfig, error) {
 	h := &CloudInventorySyncConfig{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_cloud_inventory_sync_config",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *CloudInventorySyncConfig) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_cloud_inventory_sync_config. Safe to call multiple times;
@@ -2646,16 +2714,20 @@ func FromCloudWorkloadSecurityAgentRule(cfg CloudWorkloadSecurityAgentRule) Clou
 // handle whose Apply method configures the resource's attributes.
 func NewCloudWorkloadSecurityAgentRule(stack *config.Stack, name string) (*CloudWorkloadSecurityAgentRule, error) {
 	h := &CloudWorkloadSecurityAgentRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_cloud_workload_security_agent_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *CloudWorkloadSecurityAgentRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_cloud_workload_security_agent_rule. Safe to call multiple times;
@@ -2801,16 +2873,20 @@ func FromComplianceCustomFramework(cfg ComplianceCustomFramework) ComplianceCust
 // handle whose Apply method configures the resource's attributes.
 func NewComplianceCustomFramework(stack *config.Stack, name string) (*ComplianceCustomFramework, error) {
 	h := &ComplianceCustomFramework{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_compliance_custom_framework",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ComplianceCustomFramework) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_compliance_custom_framework. Safe to call multiple times;
@@ -2882,16 +2958,20 @@ func FromComplianceResourceEvaluationFilter(cfg ComplianceResourceEvaluationFilt
 // handle whose Apply method configures the resource's attributes.
 func NewComplianceResourceEvaluationFilter(stack *config.Stack, name string) (*ComplianceResourceEvaluationFilter, error) {
 	h := &ComplianceResourceEvaluationFilter{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_compliance_resource_evaluation_filter",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ComplianceResourceEvaluationFilter) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_compliance_resource_evaluation_filter. Safe to call multiple times;
@@ -3191,16 +3271,20 @@ func FromCostBudget(cfg CostBudget) CostBudgetOption {
 // handle whose Apply method configures the resource's attributes.
 func NewCostBudget(stack *config.Stack, name string) (*CostBudget, error) {
 	h := &CostBudget{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_cost_budget",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *CostBudget) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_cost_budget. Safe to call multiple times;
@@ -3446,16 +3530,20 @@ func FromCsmThreatsAgentRule(cfg CsmThreatsAgentRule) CsmThreatsAgentRuleOption 
 // handle whose Apply method configures the resource's attributes.
 func NewCsmThreatsAgentRule(stack *config.Stack, name string) (*CsmThreatsAgentRule, error) {
 	h := &CsmThreatsAgentRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_csm_threats_agent_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *CsmThreatsAgentRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_csm_threats_agent_rule. Safe to call multiple times;
@@ -3541,16 +3629,20 @@ func FromCsmThreatsPolicy(cfg CsmThreatsPolicy) CsmThreatsPolicyOption {
 // handle whose Apply method configures the resource's attributes.
 func NewCsmThreatsPolicy(stack *config.Stack, name string) (*CsmThreatsPolicy, error) {
 	h := &CsmThreatsPolicy{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_csm_threats_policy",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *CsmThreatsPolicy) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_csm_threats_policy. Safe to call multiple times;
@@ -4000,16 +4092,20 @@ func FromCustomAllocationRule(cfg CustomAllocationRule) CustomAllocationRuleOpti
 // handle whose Apply method configures the resource's attributes.
 func NewCustomAllocationRule(stack *config.Stack, name string) (*CustomAllocationRule, error) {
 	h := &CustomAllocationRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_custom_allocation_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *CustomAllocationRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_custom_allocation_rule. Safe to call multiple times;
@@ -4074,16 +4170,20 @@ func FromCustomAllocationRules(cfg CustomAllocationRules) CustomAllocationRulesO
 // handle whose Apply method configures the resource's attributes.
 func NewCustomAllocationRules(stack *config.Stack, name string) (*CustomAllocationRules, error) {
 	h := &CustomAllocationRules{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_custom_allocation_rules",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *CustomAllocationRules) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_custom_allocation_rules. Safe to call multiple times;
@@ -106657,16 +106757,20 @@ func FromDashboard(cfg Dashboard) DashboardOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDashboard(stack *config.Stack, name string) (*Dashboard, error) {
 	h := &Dashboard{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_dashboard",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Dashboard) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_dashboard. Safe to call multiple times;
@@ -106745,16 +106849,20 @@ func FromDashboardJSON(cfg DashboardJSON) DashboardJSONOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDashboardJSON(stack *config.Stack, name string) (*DashboardJSON, error) {
 	h := &DashboardJSON{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_dashboard_json",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *DashboardJSON) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_dashboard_json. Safe to call multiple times;
@@ -106849,16 +106957,20 @@ func FromDashboardList(cfg DashboardList) DashboardListOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDashboardList(stack *config.Stack, name string) (*DashboardList, error) {
 	h := &DashboardList{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_dashboard_list",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *DashboardList) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_dashboard_list. Safe to call multiple times;
@@ -106973,16 +107085,20 @@ func FromDataset(cfg Dataset) DatasetOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDataset(stack *config.Stack, name string) (*Dataset, error) {
 	h := &Dataset{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_dataset",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Dataset) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_dataset. Safe to call multiple times;
@@ -107103,16 +107219,20 @@ func FromDatastore(cfg Datastore) DatastoreOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDatastore(stack *config.Stack, name string) (*Datastore, error) {
 	h := &Datastore{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_datastore",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Datastore) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_datastore. Safe to call multiple times;
@@ -107184,16 +107304,20 @@ func FromDatastoreItem(cfg DatastoreItem) DatastoreItemOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDatastoreItem(stack *config.Stack, name string) (*DatastoreItem, error) {
 	h := &DatastoreItem{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_datastore_item",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *DatastoreItem) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_datastore_item. Safe to call multiple times;
@@ -107381,16 +107505,20 @@ func FromDeploymentGate(cfg DeploymentGate) DeploymentGateOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDeploymentGate(stack *config.Stack, name string) (*DeploymentGate, error) {
 	h := &DeploymentGate{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_deployment_gate",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *DeploymentGate) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_deployment_gate. Safe to call multiple times;
@@ -107455,16 +107583,20 @@ func FromDomainAllowlist(cfg DomainAllowlist) DomainAllowlistOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDomainAllowlist(stack *config.Stack, name string) (*DomainAllowlist, error) {
 	h := &DomainAllowlist{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_domain_allowlist",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *DomainAllowlist) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_domain_allowlist. Safe to call multiple times;
@@ -107671,16 +107803,20 @@ func FromDowntime(cfg Downtime) DowntimeOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDowntime(stack *config.Stack, name string) (*Downtime, error) {
 	h := &Downtime{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_downtime",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Downtime) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_downtime. Safe to call multiple times;
@@ -107917,16 +108053,20 @@ func FromDowntimeSchedule(cfg DowntimeSchedule) DowntimeScheduleOption {
 // handle whose Apply method configures the resource's attributes.
 func NewDowntimeSchedule(stack *config.Stack, name string) (*DowntimeSchedule, error) {
 	h := &DowntimeSchedule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_downtime_schedule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *DowntimeSchedule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_downtime_schedule. Safe to call multiple times;
@@ -108068,16 +108208,20 @@ func FromGcpUcConfig(cfg GcpUcConfig) GcpUcConfigOption {
 // handle whose Apply method configures the resource's attributes.
 func NewGcpUcConfig(stack *config.Stack, name string) (*GcpUcConfig, error) {
 	h := &GcpUcConfig{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_gcp_uc_config",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *GcpUcConfig) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_gcp_uc_config. Safe to call multiple times;
@@ -108228,16 +108372,20 @@ func FromIncidentNotificationRule(cfg IncidentNotificationRule) IncidentNotifica
 // handle whose Apply method configures the resource's attributes.
 func NewIncidentNotificationRule(stack *config.Stack, name string) (*IncidentNotificationRule, error) {
 	h := &IncidentNotificationRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_incident_notification_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IncidentNotificationRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_incident_notification_rule. Safe to call multiple times;
@@ -108337,16 +108485,20 @@ func FromIncidentNotificationTemplate(cfg IncidentNotificationTemplate) Incident
 // handle whose Apply method configures the resource's attributes.
 func NewIncidentNotificationTemplate(stack *config.Stack, name string) (*IncidentNotificationTemplate, error) {
 	h := &IncidentNotificationTemplate{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_incident_notification_template",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IncidentNotificationTemplate) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_incident_notification_template. Safe to call multiple times;
@@ -108418,16 +108570,20 @@ func FromIncidentType(cfg IncidentType) IncidentTypeOption {
 // handle whose Apply method configures the resource's attributes.
 func NewIncidentType(stack *config.Stack, name string) (*IncidentType, error) {
 	h := &IncidentType{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_incident_type",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IncidentType) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_incident_type. Safe to call multiple times;
@@ -108973,16 +109129,20 @@ func FromIntegrationAwsAccount(cfg IntegrationAwsAccount) IntegrationAwsAccountO
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationAwsAccount(stack *config.Stack, name string) (*IntegrationAwsAccount, error) {
 	h := &IntegrationAwsAccount{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_aws_account",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationAwsAccount) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_account. Safe to call multiple times;
@@ -109061,16 +109221,20 @@ func FromIntegrationAwsEventBridge(cfg IntegrationAwsEventBridge) IntegrationAws
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationAwsEventBridge(stack *config.Stack, name string) (*IntegrationAwsEventBridge, error) {
 	h := &IntegrationAwsEventBridge{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_aws_event_bridge",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationAwsEventBridge) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_event_bridge. Safe to call multiple times;
@@ -109121,16 +109285,20 @@ func FromIntegrationAwsExternalID(cfg IntegrationAwsExternalID) IntegrationAwsEx
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationAwsExternalID(stack *config.Stack, name string) (*IntegrationAwsExternalID, error) {
 	h := &IntegrationAwsExternalID{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_aws_external_id",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationAwsExternalID) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_aws_external_id. Safe to call multiple times;
@@ -109279,16 +109447,20 @@ func FromIntegrationAzure(cfg IntegrationAzure) IntegrationAzureOption {
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationAzure(stack *config.Stack, name string) (*IntegrationAzure, error) {
 	h := &IntegrationAzure{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_azure",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationAzure) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_azure. Safe to call multiple times;
@@ -109367,16 +109539,20 @@ func FromIntegrationCloudflareAccount(cfg IntegrationCloudflareAccount) Integrat
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationCloudflareAccount(stack *config.Stack, name string) (*IntegrationCloudflareAccount, error) {
 	h := &IntegrationCloudflareAccount{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_cloudflare_account",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationCloudflareAccount) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_cloudflare_account. Safe to call multiple times;
@@ -109448,16 +109624,20 @@ func FromIntegrationConfluentAccount(cfg IntegrationConfluentAccount) Integratio
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationConfluentAccount(stack *config.Stack, name string) (*IntegrationConfluentAccount, error) {
 	h := &IntegrationConfluentAccount{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_confluent_account",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationConfluentAccount) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_confluent_account. Safe to call multiple times;
@@ -109543,16 +109723,20 @@ func FromIntegrationConfluentResource(cfg IntegrationConfluentResource) Integrat
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationConfluentResource(stack *config.Stack, name string) (*IntegrationConfluentResource, error) {
 	h := &IntegrationConfluentResource{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_confluent_resource",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationConfluentResource) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_confluent_resource. Safe to call multiple times;
@@ -109617,16 +109801,20 @@ func FromIntegrationFastlyAccount(cfg IntegrationFastlyAccount) IntegrationFastl
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationFastlyAccount(stack *config.Stack, name string) (*IntegrationFastlyAccount, error) {
 	h := &IntegrationFastlyAccount{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_fastly_account",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationFastlyAccount) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_fastly_account. Safe to call multiple times;
@@ -109698,16 +109886,20 @@ func FromIntegrationFastlyService(cfg IntegrationFastlyService) IntegrationFastl
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationFastlyService(stack *config.Stack, name string) (*IntegrationFastlyService, error) {
 	h := &IntegrationFastlyService{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_fastly_service",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationFastlyService) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_fastly_service. Safe to call multiple times;
@@ -109849,16 +110041,20 @@ func FromIntegrationGcp(cfg IntegrationGcp) IntegrationGcpOption {
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationGcp(stack *config.Stack, name string) (*IntegrationGcp, error) {
 	h := &IntegrationGcp{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_gcp",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationGcp) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_gcp. Safe to call multiple times;
@@ -110014,16 +110210,20 @@ func FromIntegrationGcpSts(cfg IntegrationGcpSts) IntegrationGcpStsOption {
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationGcpSts(stack *config.Stack, name string) (*IntegrationGcpSts, error) {
 	h := &IntegrationGcpSts{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_gcp_sts",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationGcpSts) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_gcp_sts. Safe to call multiple times;
@@ -110102,16 +110302,20 @@ func FromIntegrationMsTeamsTenantBasedHandle(cfg IntegrationMsTeamsTenantBasedHa
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationMsTeamsTenantBasedHandle(stack *config.Stack, name string) (*IntegrationMsTeamsTenantBasedHandle, error) {
 	h := &IntegrationMsTeamsTenantBasedHandle{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_ms_teams_tenant_based_handle",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationMsTeamsTenantBasedHandle) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_ms_teams_tenant_based_handle. Safe to call multiple times;
@@ -110176,16 +110380,20 @@ func FromIntegrationMsTeamsWorkflowsWebhookHandle(cfg IntegrationMsTeamsWorkflow
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationMsTeamsWorkflowsWebhookHandle(stack *config.Stack, name string) (*IntegrationMsTeamsWorkflowsWebhookHandle, error) {
 	h := &IntegrationMsTeamsWorkflowsWebhookHandle{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_ms_teams_workflows_webhook_handle",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationMsTeamsWorkflowsWebhookHandle) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_ms_teams_workflows_webhook_handle. Safe to call multiple times;
@@ -110264,16 +110472,20 @@ func FromIntegrationOpsgenieServiceObject(cfg IntegrationOpsgenieServiceObject) 
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationOpsgenieServiceObject(stack *config.Stack, name string) (*IntegrationOpsgenieServiceObject, error) {
 	h := &IntegrationOpsgenieServiceObject{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_opsgenie_service_object",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationOpsgenieServiceObject) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_opsgenie_service_object. Safe to call multiple times;
@@ -110345,16 +110557,20 @@ func FromIntegrationPagerduty(cfg IntegrationPagerduty) IntegrationPagerdutyOpti
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationPagerduty(stack *config.Stack, name string) (*IntegrationPagerduty, error) {
 	h := &IntegrationPagerduty{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_pagerduty",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationPagerduty) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_pagerduty. Safe to call multiple times;
@@ -110419,16 +110635,20 @@ func FromIntegrationPagerdutyServiceObject(cfg IntegrationPagerdutyServiceObject
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationPagerdutyServiceObject(stack *config.Stack, name string) (*IntegrationPagerdutyServiceObject, error) {
 	h := &IntegrationPagerdutyServiceObject{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_pagerduty_service_object",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationPagerdutyServiceObject) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_pagerduty_service_object. Safe to call multiple times;
@@ -110551,16 +110771,20 @@ func FromIntegrationSlackChannel(cfg IntegrationSlackChannel) IntegrationSlackCh
 // handle whose Apply method configures the resource's attributes.
 func NewIntegrationSlackChannel(stack *config.Stack, name string) (*IntegrationSlackChannel, error) {
 	h := &IntegrationSlackChannel{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_integration_slack_channel",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IntegrationSlackChannel) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_integration_slack_channel. Safe to call multiple times;
@@ -110655,16 +110879,20 @@ func FromIPAllowlist(cfg IPAllowlist) IPAllowlistOption {
 // handle whose Apply method configures the resource's attributes.
 func NewIPAllowlist(stack *config.Stack, name string) (*IPAllowlist, error) {
 	h := &IPAllowlist{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_ip_allowlist",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *IPAllowlist) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_ip_allowlist. Safe to call multiple times;
@@ -110931,16 +111159,20 @@ func FromLogsArchive(cfg LogsArchive) LogsArchiveOption {
 // handle whose Apply method configures the resource's attributes.
 func NewLogsArchive(stack *config.Stack, name string) (*LogsArchive, error) {
 	h := &LogsArchive{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_archive",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsArchive) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_archive. Safe to call multiple times;
@@ -110998,16 +111230,20 @@ func FromLogsArchiveOrder(cfg LogsArchiveOrder) LogsArchiveOrderOption {
 // handle whose Apply method configures the resource's attributes.
 func NewLogsArchiveOrder(stack *config.Stack, name string) (*LogsArchiveOrder, error) {
 	h := &LogsArchiveOrder{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_archive_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsArchiveOrder) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_archive_order. Safe to call multiple times;
@@ -111380,16 +111616,20 @@ func FromLogsCustomDestination(cfg LogsCustomDestination) LogsCustomDestinationO
 // handle whose Apply method configures the resource's attributes.
 func NewLogsCustomDestination(stack *config.Stack, name string) (*LogsCustomDestination, error) {
 	h := &LogsCustomDestination{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_custom_destination",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsCustomDestination) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_custom_destination. Safe to call multiple times;
@@ -114746,16 +114986,20 @@ func FromLogsCustomPipeline(cfg LogsCustomPipeline) LogsCustomPipelineOption {
 // handle whose Apply method configures the resource's attributes.
 func NewLogsCustomPipeline(stack *config.Stack, name string) (*LogsCustomPipeline, error) {
 	h := &LogsCustomPipeline{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_custom_pipeline",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsCustomPipeline) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_custom_pipeline. Safe to call multiple times;
@@ -114995,16 +115239,20 @@ func FromLogsIndex(cfg LogsIndex) LogsIndexOption {
 // handle whose Apply method configures the resource's attributes.
 func NewLogsIndex(stack *config.Stack, name string) (*LogsIndex, error) {
 	h := &LogsIndex{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_index",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsIndex) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_index. Safe to call multiple times;
@@ -115069,16 +115317,20 @@ func FromLogsIndexOrder(cfg LogsIndexOrder) LogsIndexOrderOption {
 // handle whose Apply method configures the resource's attributes.
 func NewLogsIndexOrder(stack *config.Stack, name string) (*LogsIndexOrder, error) {
 	h := &LogsIndexOrder{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_index_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsIndexOrder) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_index_order. Safe to call multiple times;
@@ -115136,16 +115388,20 @@ func FromLogsIntegrationPipeline(cfg LogsIntegrationPipeline) LogsIntegrationPip
 // handle whose Apply method configures the resource's attributes.
 func NewLogsIntegrationPipeline(stack *config.Stack, name string) (*LogsIntegrationPipeline, error) {
 	h := &LogsIntegrationPipeline{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_integration_pipeline",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsIntegrationPipeline) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_integration_pipeline. Safe to call multiple times;
@@ -115314,16 +115570,20 @@ func FromLogsMetric(cfg LogsMetric) LogsMetricOption {
 // handle whose Apply method configures the resource's attributes.
 func NewLogsMetric(stack *config.Stack, name string) (*LogsMetric, error) {
 	h := &LogsMetric{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_metric",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsMetric) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_metric. Safe to call multiple times;
@@ -115388,16 +115648,20 @@ func FromLogsPipelineOrder(cfg LogsPipelineOrder) LogsPipelineOrderOption {
 // handle whose Apply method configures the resource's attributes.
 func NewLogsPipelineOrder(stack *config.Stack, name string) (*LogsPipelineOrder, error) {
 	h := &LogsPipelineOrder{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_pipeline_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsPipelineOrder) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_pipeline_order. Safe to call multiple times;
@@ -115476,16 +115740,20 @@ func FromLogsRestrictionQuery(cfg LogsRestrictionQuery) LogsRestrictionQueryOpti
 // handle whose Apply method configures the resource's attributes.
 func NewLogsRestrictionQuery(stack *config.Stack, name string) (*LogsRestrictionQuery, error) {
 	h := &LogsRestrictionQuery{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_logs_restriction_query",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *LogsRestrictionQuery) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_logs_restriction_query. Safe to call multiple times;
@@ -115585,16 +115853,20 @@ func FromMetricMetadata(cfg MetricMetadata) MetricMetadataOption {
 // handle whose Apply method configures the resource's attributes.
 func NewMetricMetadata(stack *config.Stack, name string) (*MetricMetadata, error) {
 	h := &MetricMetadata{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_metric_metadata",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *MetricMetadata) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_metric_metadata. Safe to call multiple times;
@@ -115717,16 +115989,20 @@ func FromMetricTagConfiguration(cfg MetricTagConfiguration) MetricTagConfigurati
 // handle whose Apply method configures the resource's attributes.
 func NewMetricTagConfiguration(stack *config.Stack, name string) (*MetricTagConfiguration, error) {
 	h := &MetricTagConfiguration{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_metric_tag_configuration",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *MetricTagConfiguration) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_metric_tag_configuration. Safe to call multiple times;
@@ -116690,16 +116966,20 @@ func FromMonitor(cfg Monitor) MonitorOption {
 // handle whose Apply method configures the resource's attributes.
 func NewMonitor(stack *config.Stack, name string) (*Monitor, error) {
 	h := &Monitor{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_monitor",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Monitor) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_monitor. Safe to call multiple times;
@@ -116801,16 +117081,20 @@ func FromMonitorConfigPolicy(cfg MonitorConfigPolicy) MonitorConfigPolicyOption 
 // handle whose Apply method configures the resource's attributes.
 func NewMonitorConfigPolicy(stack *config.Stack, name string) (*MonitorConfigPolicy, error) {
 	h := &MonitorConfigPolicy{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_monitor_config_policy",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *MonitorConfigPolicy) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_monitor_config_policy. Safe to call multiple times;
@@ -116875,16 +117159,20 @@ func FromMonitorJSON(cfg MonitorJSON) MonitorJSONOption {
 // handle whose Apply method configures the resource's attributes.
 func NewMonitorJSON(stack *config.Stack, name string) (*MonitorJSON, error) {
 	h := &MonitorJSON{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_monitor_json",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *MonitorJSON) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_monitor_json. Safe to call multiple times;
@@ -117053,16 +117341,20 @@ func FromMonitorNotificationRule(cfg MonitorNotificationRule) MonitorNotificatio
 // handle whose Apply method configures the resource's attributes.
 func NewMonitorNotificationRule(stack *config.Stack, name string) (*MonitorNotificationRule, error) {
 	h := &MonitorNotificationRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_monitor_notification_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *MonitorNotificationRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_monitor_notification_rule. Safe to call multiple times;
@@ -125699,16 +125991,20 @@ func FromObservabilityPipeline(cfg ObservabilityPipeline) ObservabilityPipelineO
 // handle whose Apply method configures the resource's attributes.
 func NewObservabilityPipeline(stack *config.Stack, name string) (*ObservabilityPipeline, error) {
 	h := &ObservabilityPipeline{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_observability_pipeline",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ObservabilityPipeline) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_observability_pipeline. Safe to call multiple times;
@@ -125882,16 +126178,20 @@ func FromOnCallEscalationPolicy(cfg OnCallEscalationPolicy) OnCallEscalationPoli
 // handle whose Apply method configures the resource's attributes.
 func NewOnCallEscalationPolicy(stack *config.Stack, name string) (*OnCallEscalationPolicy, error) {
 	h := &OnCallEscalationPolicy{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_on_call_escalation_policy",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *OnCallEscalationPolicy) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_on_call_escalation_policy. Safe to call multiple times;
@@ -126122,16 +126422,20 @@ func FromOnCallSchedule(cfg OnCallSchedule) OnCallScheduleOption {
 // handle whose Apply method configures the resource's attributes.
 func NewOnCallSchedule(stack *config.Stack, name string) (*OnCallSchedule, error) {
 	h := &OnCallSchedule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_on_call_schedule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *OnCallSchedule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_on_call_schedule. Safe to call multiple times;
@@ -126416,16 +126720,20 @@ func FromOnCallTeamRoutingRules(cfg OnCallTeamRoutingRules) OnCallTeamRoutingRul
 // handle whose Apply method configures the resource's attributes.
 func NewOnCallTeamRoutingRules(stack *config.Stack, name string) (*OnCallTeamRoutingRules, error) {
 	h := &OnCallTeamRoutingRules{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_on_call_team_routing_rules",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *OnCallTeamRoutingRules) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_on_call_team_routing_rules. Safe to call multiple times;
@@ -126548,16 +126856,20 @@ func FromOnCallUserNotificationChannel(cfg OnCallUserNotificationChannel) OnCall
 // handle whose Apply method configures the resource's attributes.
 func NewOnCallUserNotificationChannel(stack *config.Stack, name string) (*OnCallUserNotificationChannel, error) {
 	h := &OnCallUserNotificationChannel{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_on_call_user_notification_channel",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *OnCallUserNotificationChannel) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_on_call_user_notification_channel. Safe to call multiple times;
@@ -126665,16 +126977,20 @@ func FromOnCallUserNotificationRule(cfg OnCallUserNotificationRule) OnCallUserNo
 // handle whose Apply method configures the resource's attributes.
 func NewOnCallUserNotificationRule(stack *config.Stack, name string) (*OnCallUserNotificationRule, error) {
 	h := &OnCallUserNotificationRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_on_call_user_notification_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *OnCallUserNotificationRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_on_call_user_notification_rule. Safe to call multiple times;
@@ -126732,16 +127048,20 @@ func FromOpenapiAPI(cfg OpenapiAPI) OpenapiAPIOption {
 // handle whose Apply method configures the resource's attributes.
 func NewOpenapiAPI(stack *config.Stack, name string) (*OpenapiAPI, error) {
 	h := &OpenapiAPI{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_openapi_api",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *OpenapiAPI) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_openapi_api. Safe to call multiple times;
@@ -126841,16 +127161,20 @@ func FromOrgConnection(cfg OrgConnection) OrgConnectionOption {
 // handle whose Apply method configures the resource's attributes.
 func NewOrgConnection(stack *config.Stack, name string) (*OrgConnection, error) {
 	h := &OrgConnection{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_org_connection",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *OrgConnection) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_org_connection. Safe to call multiple times;
@@ -127121,16 +127445,20 @@ func FromOrganizationSettings(cfg OrganizationSettings) OrganizationSettingsOpti
 // handle whose Apply method configures the resource's attributes.
 func NewOrganizationSettings(stack *config.Stack, name string) (*OrganizationSettings, error) {
 	h := &OrganizationSettings{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_organization_settings",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *OrganizationSettings) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_organization_settings. Safe to call multiple times;
@@ -156420,16 +156748,20 @@ func FromPowerpack(cfg Powerpack) PowerpackOption {
 // handle whose Apply method configures the resource's attributes.
 func NewPowerpack(stack *config.Stack, name string) (*Powerpack, error) {
 	h := &Powerpack{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_powerpack",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Powerpack) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_powerpack. Safe to call multiple times;
@@ -156837,16 +157169,20 @@ func FromReferenceTable(cfg ReferenceTable) ReferenceTableOption {
 // handle whose Apply method configures the resource's attributes.
 func NewReferenceTable(stack *config.Stack, name string) (*ReferenceTable, error) {
 	h := &ReferenceTable{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_reference_table",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ReferenceTable) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_reference_table. Safe to call multiple times;
@@ -156940,16 +157276,20 @@ func FromRestrictionPolicy(cfg RestrictionPolicy) RestrictionPolicyOption {
 // handle whose Apply method configures the resource's attributes.
 func NewRestrictionPolicy(stack *config.Stack, name string) (*RestrictionPolicy, error) {
 	h := &RestrictionPolicy{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_restriction_policy",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *RestrictionPolicy) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_restriction_policy. Safe to call multiple times;
@@ -157065,16 +157405,20 @@ func FromRole(cfg Role) RoleOption {
 // handle whose Apply method configures the resource's attributes.
 func NewRole(stack *config.Stack, name string) (*Role, error) {
 	h := &Role{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_role",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Role) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_role. Safe to call multiple times;
@@ -157167,16 +157511,20 @@ func FromRumApplication(cfg RumApplication) RumApplicationOption {
 // handle whose Apply method configures the resource's attributes.
 func NewRumApplication(stack *config.Stack, name string) (*RumApplication, error) {
 	h := &RumApplication{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_rum_application",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *RumApplication) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_rum_application. Safe to call multiple times;
@@ -157378,16 +157726,20 @@ func FromRumMetric(cfg RumMetric) RumMetricOption {
 // handle whose Apply method configures the resource's attributes.
 func NewRumMetric(stack *config.Stack, name string) (*RumMetric, error) {
 	h := &RumMetric{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_rum_metric",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *RumMetric) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_rum_metric. Safe to call multiple times;
@@ -157480,16 +157832,20 @@ func FromRumRetentionFilter(cfg RumRetentionFilter) RumRetentionFilterOption {
 // handle whose Apply method configures the resource's attributes.
 func NewRumRetentionFilter(stack *config.Stack, name string) (*RumRetentionFilter, error) {
 	h := &RumRetentionFilter{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_rum_retention_filter",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *RumRetentionFilter) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_rum_retention_filter. Safe to call multiple times;
@@ -157554,16 +157910,20 @@ func FromRumRetentionFiltersOrder(cfg RumRetentionFiltersOrder) RumRetentionFilt
 // handle whose Apply method configures the resource's attributes.
 func NewRumRetentionFiltersOrder(stack *config.Stack, name string) (*RumRetentionFiltersOrder, error) {
 	h := &RumRetentionFiltersOrder{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_rum_retention_filters_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *RumRetentionFiltersOrder) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_rum_retention_filters_order. Safe to call multiple times;
@@ -157742,16 +158102,20 @@ func FromSecureEmbedDashboard(cfg SecureEmbedDashboard) SecureEmbedDashboardOpti
 // handle whose Apply method configures the resource's attributes.
 func NewSecureEmbedDashboard(stack *config.Stack, name string) (*SecureEmbedDashboard, error) {
 	h := &SecureEmbedDashboard{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_secure_embed_dashboard",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SecureEmbedDashboard) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_secure_embed_dashboard. Safe to call multiple times;
@@ -157837,16 +158201,20 @@ func FromSecurityMonitoringCriticalAsset(cfg SecurityMonitoringCriticalAsset) Se
 // handle whose Apply method configures the resource's attributes.
 func NewSecurityMonitoringCriticalAsset(stack *config.Stack, name string) (*SecurityMonitoringCriticalAsset, error) {
 	h := &SecurityMonitoringCriticalAsset{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_critical_asset",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SecurityMonitoringCriticalAsset) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_critical_asset. Safe to call multiple times;
@@ -158173,16 +158541,20 @@ func FromSecurityMonitoringDefaultRule(cfg SecurityMonitoringDefaultRule) Securi
 // handle whose Apply method configures the resource's attributes.
 func NewSecurityMonitoringDefaultRule(stack *config.Stack, name string) (*SecurityMonitoringDefaultRule, error) {
 	h := &SecurityMonitoringDefaultRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_default_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SecurityMonitoringDefaultRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_default_rule. Safe to call multiple times;
@@ -158305,16 +158677,20 @@ func FromSecurityMonitoringFilter(cfg SecurityMonitoringFilter) SecurityMonitori
 // handle whose Apply method configures the resource's attributes.
 func NewSecurityMonitoringFilter(stack *config.Stack, name string) (*SecurityMonitoringFilter, error) {
 	h := &SecurityMonitoringFilter{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_filter",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SecurityMonitoringFilter) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_filter. Safe to call multiple times;
@@ -159350,16 +159726,20 @@ func FromSecurityMonitoringRule(cfg SecurityMonitoringRule) SecurityMonitoringRu
 // handle whose Apply method configures the resource's attributes.
 func NewSecurityMonitoringRule(stack *config.Stack, name string) (*SecurityMonitoringRule, error) {
 	h := &SecurityMonitoringRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SecurityMonitoringRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_rule. Safe to call multiple times;
@@ -159417,16 +159797,20 @@ func FromSecurityMonitoringRuleJSON(cfg SecurityMonitoringRuleJSON) SecurityMoni
 // handle whose Apply method configures the resource's attributes.
 func NewSecurityMonitoringRuleJSON(stack *config.Stack, name string) (*SecurityMonitoringRuleJSON, error) {
 	h := &SecurityMonitoringRuleJSON{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_rule_json",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SecurityMonitoringRuleJSON) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_rule_json. Safe to call multiple times;
@@ -159547,16 +159931,20 @@ func FromSecurityMonitoringSuppression(cfg SecurityMonitoringSuppression) Securi
 // handle whose Apply method configures the resource's attributes.
 func NewSecurityMonitoringSuppression(stack *config.Stack, name string) (*SecurityMonitoringSuppression, error) {
 	h := &SecurityMonitoringSuppression{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_security_monitoring_suppression",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SecurityMonitoringSuppression) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_monitoring_suppression. Safe to call multiple times;
@@ -159735,16 +160123,20 @@ func FromSecurityNotificationRule(cfg SecurityNotificationRule) SecurityNotifica
 // handle whose Apply method configures the resource's attributes.
 func NewSecurityNotificationRule(stack *config.Stack, name string) (*SecurityNotificationRule, error) {
 	h := &SecurityNotificationRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_security_notification_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SecurityNotificationRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_security_notification_rule. Safe to call multiple times;
@@ -159890,16 +160282,20 @@ func FromSensitiveDataScannerGroup(cfg SensitiveDataScannerGroup) SensitiveDataS
 // handle whose Apply method configures the resource's attributes.
 func NewSensitiveDataScannerGroup(stack *config.Stack, name string) (*SensitiveDataScannerGroup, error) {
 	h := &SensitiveDataScannerGroup{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_sensitive_data_scanner_group",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SensitiveDataScannerGroup) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_sensitive_data_scanner_group. Safe to call multiple times;
@@ -159957,16 +160353,20 @@ func FromSensitiveDataScannerGroupOrder(cfg SensitiveDataScannerGroupOrder) Sens
 // handle whose Apply method configures the resource's attributes.
 func NewSensitiveDataScannerGroupOrder(stack *config.Stack, name string) (*SensitiveDataScannerGroupOrder, error) {
 	h := &SensitiveDataScannerGroupOrder{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_sensitive_data_scanner_group_order",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SensitiveDataScannerGroupOrder) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_sensitive_data_scanner_group_order. Safe to call multiple times;
@@ -160175,16 +160575,20 @@ func FromSensitiveDataScannerRule(cfg SensitiveDataScannerRule) SensitiveDataSca
 // handle whose Apply method configures the resource's attributes.
 func NewSensitiveDataScannerRule(stack *config.Stack, name string) (*SensitiveDataScannerRule, error) {
 	h := &SensitiveDataScannerRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_sensitive_data_scanner_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SensitiveDataScannerRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_sensitive_data_scanner_rule. Safe to call multiple times;
@@ -160263,16 +160667,20 @@ func FromServiceAccount(cfg ServiceAccount) ServiceAccountOption {
 // handle whose Apply method configures the resource's attributes.
 func NewServiceAccount(stack *config.Stack, name string) (*ServiceAccount, error) {
 	h := &ServiceAccount{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_service_account",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ServiceAccount) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_service_account. Safe to call multiple times;
@@ -160365,16 +160773,20 @@ func FromServiceAccountApplicationKey(cfg ServiceAccountApplicationKey) ServiceA
 // handle whose Apply method configures the resource's attributes.
 func NewServiceAccountApplicationKey(stack *config.Stack, name string) (*ServiceAccountApplicationKey, error) {
 	h := &ServiceAccountApplicationKey{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_service_account_application_key",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ServiceAccountApplicationKey) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_service_account_application_key. Safe to call multiple times;
@@ -160432,16 +160844,20 @@ func FromServiceDefinitionYaml(cfg ServiceDefinitionYaml) ServiceDefinitionYamlO
 // handle whose Apply method configures the resource's attributes.
 func NewServiceDefinitionYaml(stack *config.Stack, name string) (*ServiceDefinitionYaml, error) {
 	h := &ServiceDefinitionYaml{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_service_definition_yaml",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ServiceDefinitionYaml) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_service_definition_yaml. Safe to call multiple times;
@@ -160962,16 +161378,20 @@ func FromServiceLevelObjective(cfg ServiceLevelObjective) ServiceLevelObjectiveO
 // handle whose Apply method configures the resource's attributes.
 func NewServiceLevelObjective(stack *config.Stack, name string) (*ServiceLevelObjective, error) {
 	h := &ServiceLevelObjective{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_service_level_objective",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *ServiceLevelObjective) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_service_level_objective. Safe to call multiple times;
@@ -161078,16 +161498,20 @@ func FromSloCorrection(cfg SloCorrection) SloCorrectionOption {
 // handle whose Apply method configures the resource's attributes.
 func NewSloCorrection(stack *config.Stack, name string) (*SloCorrection, error) {
 	h := &SloCorrection{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_slo_correction",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SloCorrection) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_slo_correction. Safe to call multiple times;
@@ -161145,16 +161569,20 @@ func FromSoftwareCatalog(cfg SoftwareCatalog) SoftwareCatalogOption {
 // handle whose Apply method configures the resource's attributes.
 func NewSoftwareCatalog(stack *config.Stack, name string) (*SoftwareCatalog, error) {
 	h := &SoftwareCatalog{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_software_catalog",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SoftwareCatalog) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_software_catalog. Safe to call multiple times;
@@ -161320,16 +161748,20 @@ func FromSpansMetric(cfg SpansMetric) SpansMetricOption {
 // handle whose Apply method configures the resource's attributes.
 func NewSpansMetric(stack *config.Stack, name string) (*SpansMetric, error) {
 	h := &SpansMetric{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_spans_metric",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SpansMetric) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_spans_metric. Safe to call multiple times;
@@ -161387,16 +161819,20 @@ func FromSyntheticsConcurrencyCap(cfg SyntheticsConcurrencyCap) SyntheticsConcur
 // handle whose Apply method configures the resource's attributes.
 func NewSyntheticsConcurrencyCap(stack *config.Stack, name string) (*SyntheticsConcurrencyCap, error) {
 	h := &SyntheticsConcurrencyCap{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_synthetics_concurrency_cap",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SyntheticsConcurrencyCap) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_synthetics_concurrency_cap. Safe to call multiple times;
@@ -161664,16 +162100,20 @@ func FromSyntheticsGlobalVariable(cfg SyntheticsGlobalVariable) SyntheticsGlobal
 // handle whose Apply method configures the resource's attributes.
 func NewSyntheticsGlobalVariable(stack *config.Stack, name string) (*SyntheticsGlobalVariable, error) {
 	h := &SyntheticsGlobalVariable{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_synthetics_global_variable",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SyntheticsGlobalVariable) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_synthetics_global_variable. Safe to call multiple times;
@@ -161796,16 +162236,20 @@ func FromSyntheticsPrivateLocation(cfg SyntheticsPrivateLocation) SyntheticsPriv
 // handle whose Apply method configures the resource's attributes.
 func NewSyntheticsPrivateLocation(stack *config.Stack, name string) (*SyntheticsPrivateLocation, error) {
 	h := &SyntheticsPrivateLocation{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_synthetics_private_location",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SyntheticsPrivateLocation) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_synthetics_private_location. Safe to call multiple times;
@@ -161944,16 +162388,20 @@ func FromSyntheticsSuite(cfg SyntheticsSuite) SyntheticsSuiteOption {
 // handle whose Apply method configures the resource's attributes.
 func NewSyntheticsSuite(stack *config.Stack, name string) (*SyntheticsSuite, error) {
 	h := &SyntheticsSuite{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_synthetics_suite",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SyntheticsSuite) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_synthetics_suite. Safe to call multiple times;
@@ -165621,16 +166069,20 @@ func FromSyntheticsTest(cfg SyntheticsTest) SyntheticsTestOption {
 // handle whose Apply method configures the resource's attributes.
 func NewSyntheticsTest(stack *config.Stack, name string) (*SyntheticsTest, error) {
 	h := &SyntheticsTest{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_synthetics_test",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *SyntheticsTest) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_synthetics_test. Safe to call multiple times;
@@ -165987,16 +166439,20 @@ func FromTagPipelineRuleset(cfg TagPipelineRuleset) TagPipelineRulesetOption {
 // handle whose Apply method configures the resource's attributes.
 func NewTagPipelineRuleset(stack *config.Stack, name string) (*TagPipelineRuleset, error) {
 	h := &TagPipelineRuleset{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_tag_pipeline_ruleset",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *TagPipelineRuleset) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_tag_pipeline_ruleset. Safe to call multiple times;
@@ -166061,16 +166517,20 @@ func FromTagPipelineRulesets(cfg TagPipelineRulesets) TagPipelineRulesetsOption 
 // handle whose Apply method configures the resource's attributes.
 func NewTagPipelineRulesets(stack *config.Stack, name string) (*TagPipelineRulesets, error) {
 	h := &TagPipelineRulesets{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_tag_pipeline_rulesets",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *TagPipelineRulesets) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_tag_pipeline_rulesets. Safe to call multiple times;
@@ -166163,16 +166623,20 @@ func FromTeam(cfg Team) TeamOption {
 // handle whose Apply method configures the resource's attributes.
 func NewTeam(stack *config.Stack, name string) (*Team, error) {
 	h := &Team{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_team",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Team) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team. Safe to call multiple times;
@@ -166251,16 +166715,20 @@ func FromTeamHierarchyLinks(cfg TeamHierarchyLinks) TeamHierarchyLinksOption {
 // handle whose Apply method configures the resource's attributes.
 func NewTeamHierarchyLinks(stack *config.Stack, name string) (*TeamHierarchyLinks, error) {
 	h := &TeamHierarchyLinks{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_team_hierarchy_links",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *TeamHierarchyLinks) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_hierarchy_links. Safe to call multiple times;
@@ -166339,16 +166807,20 @@ func FromTeamLink(cfg TeamLink) TeamLinkOption {
 // handle whose Apply method configures the resource's attributes.
 func NewTeamLink(stack *config.Stack, name string) (*TeamLink, error) {
 	h := &TeamLink{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_team_link",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *TeamLink) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_link. Safe to call multiple times;
@@ -166420,16 +166892,20 @@ func FromTeamMembership(cfg TeamMembership) TeamMembershipOption {
 // handle whose Apply method configures the resource's attributes.
 func NewTeamMembership(stack *config.Stack, name string) (*TeamMembership, error) {
 	h := &TeamMembership{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_team_membership",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *TeamMembership) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_membership. Safe to call multiple times;
@@ -166614,16 +167090,20 @@ func FromTeamNotificationRule(cfg TeamNotificationRule) TeamNotificationRuleOpti
 // handle whose Apply method configures the resource's attributes.
 func NewTeamNotificationRule(stack *config.Stack, name string) (*TeamNotificationRule, error) {
 	h := &TeamNotificationRule{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_team_notification_rule",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *TeamNotificationRule) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_notification_rule. Safe to call multiple times;
@@ -166695,16 +167175,20 @@ func FromTeamPermissionSetting(cfg TeamPermissionSetting) TeamPermissionSettingO
 // handle whose Apply method configures the resource's attributes.
 func NewTeamPermissionSetting(stack *config.Stack, name string) (*TeamPermissionSetting, error) {
 	h := &TeamPermissionSetting{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_team_permission_setting",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *TeamPermissionSetting) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_team_permission_setting. Safe to call multiple times;
@@ -166804,16 +167288,20 @@ func FromUser(cfg User) UserOption {
 // handle whose Apply method configures the resource's attributes.
 func NewUser(stack *config.Stack, name string) (*User, error) {
 	h := &User{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_user",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *User) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_user. Safe to call multiple times;
@@ -166878,16 +167366,20 @@ func FromUserRole(cfg UserRole) UserRoleOption {
 // handle whose Apply method configures the resource's attributes.
 func NewUserRole(stack *config.Stack, name string) (*UserRole, error) {
 	h := &UserRole{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_user_role",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *UserRole) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_user_role. Safe to call multiple times;
@@ -166973,16 +167465,20 @@ func FromWebhook(cfg Webhook) WebhookOption {
 // handle whose Apply method configures the resource's attributes.
 func NewWebhook(stack *config.Stack, name string) (*Webhook, error) {
 	h := &Webhook{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_webhook",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *Webhook) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_webhook. Safe to call multiple times;
@@ -167054,16 +167550,20 @@ func FromWebhookCustomVariable(cfg WebhookCustomVariable) WebhookCustomVariableO
 // handle whose Apply method configures the resource's attributes.
 func NewWebhookCustomVariable(stack *config.Stack, name string) (*WebhookCustomVariable, error) {
 	h := &WebhookCustomVariable{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_webhook_custom_variable",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *WebhookCustomVariable) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_webhook_custom_variable. Safe to call multiple times;
@@ -167156,16 +167656,20 @@ func FromWorkflowAutomation(cfg WorkflowAutomation) WorkflowAutomationOption {
 // handle whose Apply method configures the resource's attributes.
 func NewWorkflowAutomation(stack *config.Stack, name string) (*WorkflowAutomation, error) {
 	h := &WorkflowAutomation{}
-	r := &config.Resource{
+	h.resource = &config.Resource{
 		Name:            name,
 		Type:            "datadog_workflow_automation",
 		TypedAttributes: h,
 	}
-	if err := stack.AddResourcePtr(r); err != nil {
+	if err := stack.AddResource(h); err != nil {
 		return nil, err
 	}
-	h.resource = r
 	return h, nil
+}
+
+// AsResource returns the underlying resource, implementing config.Resourcer.
+func (h *WorkflowAutomation) AsResource() *config.Resource {
+	return h.resource
 }
 
 // Apply sets attribute fields on the datadog_workflow_automation. Safe to call multiple times;

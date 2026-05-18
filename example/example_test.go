@@ -49,7 +49,7 @@ func buildExampleStack() *config.Stack {
 		},
 	})
 
-	stack.AddResource(config.Resource{
+	stack.AddResource(&config.Resource{
 		Type: "datadog_monitor",
 		Name: "cpu_alert",
 		Attributes: map[string]any{

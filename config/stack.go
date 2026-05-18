@@ -7,7 +7,7 @@
 //
 //	stack := config.NewStack("my-infrastructure")
 //	stack.AddProvider(config.Provider{Name: "aws", Version: "~> 5.0"})
-//	stack.AddResource(config.Resource{Type: "aws_instance", Name: "web"})
+//	stack.AddResource(&config.Resource{Type: "aws_instance", Name: "web"})
 package config
 
 import (
@@ -30,13 +30,13 @@ type Stack struct {
 	Providers []Provider
 
 	// Resources contains managed resource configurations.
-	// Stored by pointer so that generated typed handles can mutate the
-	// resource in place after construction (e.g., via Apply / ApplyResourceOptions).
-	Resources []*Resource
+	// Stored as Resourcer (an interface) so generated typed handles can be
+	// added directly and so callers are compiler-enforced to pass pointers.
+	// Iterate via .AsResource() to read the underlying *Resource.
+	Resources []Resourcer
 
-	// DataSources contains data source configurations.
-	// Stored by pointer for the same reason as Resources.
-	DataSources []*DataSource
+	// DataSources contains data source configurations. See Resources.
+	DataSources []DataSourcer
 
 	// Modules contains module call configurations.
 	Modules []Module
@@ -78,33 +78,31 @@ func (s *Stack) AddProvider(p Provider) {
 	}
 }
 
-// AddResource adds a managed resource to the stack.
-// The resource value is copied into the stack; subsequent mutations to r
-// are not visible to the stack. For mutation-after-add semantics, use
-// AddResourcePtr (the path used by generated typed constructors).
-// Returns an error if Type or Name is empty, or on duplicate address.
-func (s *Stack) AddResource(r Resource) error {
-	return s.AddResourcePtr(&r)
-}
-
-// AddResourcePtr adds a managed resource by pointer. Mutations to the
-// pointed-to Resource after AddResourcePtr returns are reflected in the
-// stack and the rendered output. Used by generated typed constructors.
-// Returns an error if Type or Name is empty, or on duplicate address.
-func (s *Stack) AddResourcePtr(r *Resource) error {
+// AddResource adds a managed resource to the stack. Accepts any Resourcer:
+// commonly *Resource for untyped callers, or a generated typed handle (e.g.
+// *Monitor) which carries a back-pointer to the underlying *Resource.
+// Mutations to the pointed-to Resource after AddResource returns are reflected
+// in the stack and the rendered output.
+// Returns an error if r is nil, the underlying *Resource is nil, Type or Name
+// is empty, or on duplicate address.
+func (s *Stack) AddResource(r Resourcer) error {
 	if r == nil {
 		return fmt.Errorf("resource is nil")
 	}
-	if r.Type == "" {
+	res := r.AsResource()
+	if res == nil {
+		return fmt.Errorf("resource is nil")
+	}
+	if res.Type == "" {
 		return fmt.Errorf("resource type is required")
 	}
-	if r.Name == "" {
+	if res.Name == "" {
 		return fmt.Errorf("resource name is required")
 	}
 
-	addr := r.Address()
+	addr := res.Address()
 	for _, existing := range s.Resources {
-		if existing.Address() == addr {
+		if existing.AsResource().Address() == addr {
 			return fmt.Errorf("duplicate resource: %s", addr)
 		}
 	}
@@ -113,30 +111,26 @@ func (s *Stack) AddResourcePtr(r *Resource) error {
 	return nil
 }
 
-// AddDataSource adds a data source to the stack.
-// Value-copy semantics — see AddResource. Use AddDataSourcePtr for
-// mutation-after-add (used by generated typed constructors).
-// Returns an error if Type or Name is empty, or on duplicate address.
-func (s *Stack) AddDataSource(d DataSource) error {
-	return s.AddDataSourcePtr(&d)
-}
-
-// AddDataSourcePtr adds a data source by pointer. Mutations after add
-// propagate to the stack. Used by generated typed constructors.
-func (s *Stack) AddDataSourcePtr(d *DataSource) error {
+// AddDataSource adds a data source to the stack. See AddResource for the
+// rationale of the interface parameter type.
+func (s *Stack) AddDataSource(d DataSourcer) error {
 	if d == nil {
 		return fmt.Errorf("data source is nil")
 	}
-	if d.Type == "" {
+	ds := d.AsDataSource()
+	if ds == nil {
+		return fmt.Errorf("data source is nil")
+	}
+	if ds.Type == "" {
 		return fmt.Errorf("data source type is required")
 	}
-	if d.Name == "" {
+	if ds.Name == "" {
 		return fmt.Errorf("data source name is required")
 	}
 
-	addr := d.Address()
+	addr := ds.Address()
 	for _, existing := range s.DataSources {
-		if existing.Address() == addr {
+		if existing.AsDataSource().Address() == addr {
 			return fmt.Errorf("duplicate data source: %s", addr)
 		}
 	}

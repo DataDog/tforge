@@ -54,6 +54,9 @@ type TerraformHclModuleConfig struct {
 	// DependsOn lists explicit dependencies.
 	DependsOn []string
 
+	// Count specifies the number of instances (mutually exclusive with ForEach).
+	Count any
+
 	// ForEach specifies iteration (mutually exclusive with Count).
 	ForEach any
 }
@@ -69,6 +72,7 @@ func NewTerraformHclModule(stack *Stack, name string, cfg TerraformHclModuleConf
 		Variables: cfg.Variables,
 		MetaArguments: MetaArguments{
 			DependsOn: cfg.DependsOn,
+			Count:     cfg.Count,
 			ForEach:   cfg.ForEach,
 		},
 	})

@@ -30,7 +30,7 @@ func NewMyStack() *config.Stack {
 	})
 
 	sa := config.Resource{Type: "google_service_account", Name: "sa"}
-	must(stack.AddResource(config.Resource{
+	must(stack.AddResource(&config.Resource{
 		Type: "google_service_account",
 		Name: "sa",
 		Attributes: map[string]any{
@@ -40,7 +40,7 @@ func NewMyStack() *config.Stack {
 	}))
 
 	cluster := config.Resource{Type: "google_container_cluster", Name: "cluster"}
-	must(stack.AddResource(config.Resource{
+	must(stack.AddResource(&config.Resource{
 		Type: "google_container_cluster",
 		Name: "cluster",
 		Attributes: map[string]any{
@@ -50,7 +50,7 @@ func NewMyStack() *config.Stack {
 		},
 	}))
 
-	must(stack.AddResource(config.Resource{
+	must(stack.AddResource(&config.Resource{
 		Type: "google_container_node_pool",
 		Name: "main-pool",
 		Attributes: map[string]any{
@@ -77,7 +77,7 @@ func NewMyStack() *config.Stack {
 		},
 	}))
 
-	must(stack.AddResource(config.Resource{
+	must(stack.AddResource(&config.Resource{
 		Type: "local_file",
 		Name: "kubeconfig",
 		Attributes: map[string]any{
@@ -97,7 +97,7 @@ func NewMyStack() *config.Stack {
 		},
 	})
 
-	must(stack.AddResource(config.Resource{
+	must(stack.AddResource(&config.Resource{
 		Type: "kubernetes_namespace",
 		Name: "namespace",
 		Attributes: map[string]any{
@@ -120,7 +120,7 @@ func NewMyStack() *config.Stack {
 		},
 	})
 
-	must(stack.AddResource(config.Resource{
+	must(stack.AddResource(&config.Resource{
 		Type: "helm_release",
 		Name: "cert-manager",
 		Attributes: map[string]any{
