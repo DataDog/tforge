@@ -1,4 +1,4 @@
-.PHONY: fmt lint test coverage coverage-check build install clean setup update-snapshots pre-commit snapshot-tests validate-golden clear-golden-cache migration-test
+.PHONY: fmt lint test coverage coverage-check build install clean setup update-snapshots pre-commit snapshot-tests validate-golden clear-golden-cache migration-test handletest
 
 # Minimum test coverage percentage enforced by `make coverage-check`.
 # This is the single source of truth — docs reference this variable.
@@ -8,8 +8,9 @@ COVERAGE_THRESHOLD = 80
 TERRAFORM_VERSIONS = 1.5 1.9 latest
 TOFU_VERSIONS = 1.8 latest
 
-# Packages excluded from lint and coverage (generated code, CLI glue)
-EXCLUDED = /cmd/ /example /testdata
+# Packages excluded from lint and coverage (generated code, CLI glue,
+# generator end-to-end fixture under internal/handletest).
+EXCLUDED = /cmd/ /example /testdata /internal/handletest
 PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)'))
 # Lint needs relative paths, not module-prefixed
 LINT_PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)') | sed "s|^$$(go list -m)/|./|")
@@ -52,9 +53,10 @@ build:
 install:
 	go install ./cmd/tforge
 
-# Regenerate golden files (JSON output + generated Go code)
+# Regenerate golden files (JSON output + generated Go code) and the
+# internal/handletest fixture used by package generate's round-trip tests.
 update-snapshots: install
-	go generate ./testdata/golden/...
+	go generate ./testdata/golden/... ./internal/handletest/...
 	go test -tags integration -run TestSnapshots -update -count=1 -timeout 10m .
 
 # Verify golden files match generated output (runs with both CLIs via Go tests)
@@ -74,9 +76,16 @@ clear-golden-cache:
 migration-test: install
 	go test -tags integration -run TestMigration -v -count=1 -timeout 10m .
 
+# Run the generator round-trip fixture (internal/handletest). This package is
+# excluded from coverage-check because measuring generated-code coverage is
+# noise, but its tests are real Go and run as a discrete step so CI catches
+# constructor-emission regressions.
+handletest:
+	go test -race -count=1 ./internal/handletest/...
+
 # Run full CI validation locally (pre-commit).
 # Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.
-pre-commit: lint coverage-check snapshot-tests validate-golden migration-test
+pre-commit: lint coverage-check handletest snapshot-tests validate-golden migration-test
 
 # One-time setup after cloning (installs pre-commit hook)
 setup:

@@ -1,0 +1,35 @@
+{
+  "resource_schemas": {
+    "test_widget": {
+      "block": {
+        "attributes": {
+          "name":    {"type": "string", "required": true},
+          "enabled": {"type": "bool",   "optional": true},
+          "count":   {"type": "number", "optional": true},
+          "tags":    {"type": ["list", "string"], "optional": true}
+        },
+        "block_types": {
+          "setting": {
+            "nesting_mode": "list",
+            "block": {
+              "attributes": {
+                "key":   {"type": "string", "required": true},
+                "value": {"type": "string", "optional": true}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "data_source_schemas": {
+    "test_lookup": {
+      "block": {
+        "attributes": {
+          "filter": {"type": "string", "optional": true},
+          "id":     {"type": "string", "computed": true}
+        }
+      }
+    }
+  }
+}
