@@ -1,12 +1,16 @@
+//go:build integration
+
 // Package gen hosts a tiny generated SDK used to exercise the generator end
 // to end: a synthetic schema (../schema.json) is fed through `tforge generate`
 // at build time, and these tests call the resulting constructors to verify
 // the marshal/unmarshal round-trip preserves field values.
 //
-// The shape mirrors testdata/golden/datadog/datadog/ — a generate.go shim
-// plus committed *_gen.go output — but lives under internal/ so the package
-// is part of the regular `go test ./...` discovery (testdata/ is excluded
-// by the Go toolchain). Regenerate via `make update-snapshots`.
+// The *_gen.go files are not committed; `make handletest` (or
+// `make update-snapshots`) runs `go generate` first to produce them and then
+// `go test -tags integration` to run the tests defined here. Without the
+// integration build tag this file is skipped, so `go test ./...` on a fresh
+// checkout (where *_gen.go does not exist) still passes — the gen package
+// is empty in that case.
 package gen
 
 import (

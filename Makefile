@@ -76,12 +76,14 @@ clear-golden-cache:
 migration-test: install
 	go test -tags integration -run TestMigration -v -count=1 -timeout 10m .
 
-# Run the generator round-trip fixture (internal/handletest). This package is
-# excluded from coverage-check because measuring generated-code coverage is
-# noise, but its tests are real Go and run as a discrete step so CI catches
-# constructor-emission regressions.
-handletest:
-	go test -race -count=1 ./internal/handletest/...
+# Run the generator round-trip fixture (internal/handletest). The fixture's
+# *_gen.go files are gitignored (matching the rest of the repo), so we
+# regenerate from schema.json before running the tests. The test file uses
+# the `integration` build tag so `go test ./...` on a fresh checkout (where
+# *_gen.go does not yet exist) leaves the gen package empty and still passes.
+handletest: install
+	go generate ./internal/handletest/...
+	go test -tags integration -race -count=1 ./internal/handletest/...
 
 # Run full CI validation locally (pre-commit).
 # Keep these dependencies in sync with CI jobs in .github/workflows/ci.yml.
