@@ -15,11 +15,16 @@ import (
 // DataDog's GitHub releases) using OpenTofu/Terraform's dev_overrides mechanism.
 // No network access: the registry is never consulted.
 //
-// The version is derived from the provider binary filename inside the zip
-// (the convention `terraform-provider-<name>_v<version>` from the official
-// terraform-provider release tooling).
+// The version is derived from the archive filename, which must follow the
+// Terraform provider registry protocol convention
+// `terraform-provider-<name>_<version>_<os>_<arch>.zip`.
 func FetchSchemaFromBinary(ctx context.Context, source, archivePath string) (*Schema, error) {
 	src, err := ParseSource(source)
+	if err != nil {
+		return nil, err
+	}
+
+	version, err := parseVersionFromArchive(archivePath, src)
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +45,7 @@ func FetchSchemaFromBinary(ctx context.Context, source, archivePath string) (*Sc
 		return nil, fmt.Errorf("creating overrides dir: %w", err)
 	}
 
-	version, err := unzipProvider(archivePath, overrideDir, src)
-	if err != nil {
+	if err := unzipProvider(archivePath, overrideDir, src); err != nil {
 		return nil, fmt.Errorf("extracting provider archive: %w", err)
 	}
 
@@ -71,33 +75,52 @@ func FetchSchemaFromBinary(ctx context.Context, source, archivePath string) (*Sc
 	return runProvidersSchema(ctx, cliPath, tmpDir, cmdEnv, src, version)
 }
 
-// unzipProvider extracts archivePath into dest and returns the version detected
-// from the provider binary filename (`terraform-provider-<name>_v<version>`).
-func unzipProvider(archivePath, dest string, src Source) (string, error) {
+// parseVersionFromArchive extracts the provider version from a release zip's
+// filename. Official Terraform provider release archives are named
+// `terraform-provider-<name>_<version>_<os>_<arch>.zip` per the registry
+// protocol: https://developer.hashicorp.com/terraform/internals/provider-registry-protocol#find-a-provider-package
+func parseVersionFromArchive(archivePath string, src Source) (string, error) {
+	base := filepath.Base(archivePath)
+	expected := fmt.Sprintf("terraform-provider-%s_<version>_<os>_<arch>.zip", src.Name)
+	prefix := "terraform-provider-" + src.Name + "_"
+	if !strings.HasPrefix(base, prefix) || !strings.HasSuffix(base, ".zip") {
+		return "", fmt.Errorf("archive name %q does not match expected format %s", base, expected)
+	}
+	rest := strings.TrimSuffix(strings.TrimPrefix(base, prefix), ".zip")
+	parts := strings.Split(rest, "_")
+	if len(parts) != 3 || parts[0] == "" {
+		return "", fmt.Errorf("archive name %q does not match expected format %s", base, expected)
+	}
+	return parts[0], nil
+}
+
+// unzipProvider extracts archivePath into dest and verifies the archive
+// contains a provider plugin binary (`terraform-provider-<name>*`).
+func unzipProvider(archivePath, dest string, src Source) error {
 	r, err := zip.OpenReader(archivePath)
 	if err != nil {
-		return "", fmt.Errorf("opening %s: %w", archivePath, err)
+		return fmt.Errorf("opening %s: %w", archivePath, err)
 	}
 	defer r.Close()
 
-	binaryPrefix := "terraform-provider-" + src.Name + "_v"
-	var version string
+	binaryPrefix := "terraform-provider-" + src.Name
+	var foundBinary bool
 	for _, f := range r.File {
 		if f.FileInfo().IsDir() {
 			continue
 		}
 		name := filepath.Base(f.Name)
 		if err := extractZipEntry(f, filepath.Join(dest, name)); err != nil {
-			return "", err
+			return err
 		}
 		if strings.HasPrefix(name, binaryPrefix) {
-			version = strings.TrimPrefix(name, binaryPrefix)
+			foundBinary = true
 		}
 	}
-	if version == "" {
-		return "", fmt.Errorf("no provider binary matching %s* found in %s", binaryPrefix, archivePath)
+	if !foundBinary {
+		return fmt.Errorf("no provider binary matching %s* found in %s", binaryPrefix, archivePath)
 	}
-	return version, nil
+	return nil
 }
 
 func extractZipEntry(f *zip.File, dest string) error {
@@ -118,4 +141,3 @@ func extractZipEntry(f *zip.File, dest string) error {
 	}
 	return nil
 }
-

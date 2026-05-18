@@ -113,9 +113,9 @@ func runGenerate(args []string, stderr io.Writer) error {
 	fs.SetOutput(stderr)
 
 	providerSource := fs.String("provider", "", "Provider source (namespace/name), e.g., datadog/datadog")
-	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0. Mutually exclusive with -provider-binary (the version is read from the archive).")
+	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0. Mutually exclusive with -provider-zip-file (the version is read from the archive filename).")
 	schemaFile := fs.String("schema", "", "Path to cached schema JSON file (alternative to -provider/-version)")
-	providerBinary := fs.String("provider-binary", "", "Path to a local Terraform provider release zip (e.g. terraform-provider-datadog_3.39.0_linux_amd64.zip). When set, the schema is extracted offline via Terraform dev_overrides instead of fetching from the registry. Requires -provider; the version is read from the archive.")
+	providerZipFile := fs.String("provider-zip-file", "", "Path to a local Terraform provider release zip (e.g. terraform-provider-datadog_3.39.0_linux_amd64.zip). When set, the schema is extracted offline via Terraform dev_overrides instead of fetching from the registry. Requires -provider; the version is read from the archive filename.")
 	outputDir := fs.String("output", generate.DefaultOutputDir, "Output directory for generated code")
 	packageName := fs.String("package", "", "Go package name (defaults to provider name)")
 	fs.Usage = func() {
@@ -135,7 +135,7 @@ Examples:
 
   # Generate from a local provider archive (offline; for hermetic builds)
   tforge generate -provider datadog/datadog \
-      -provider-binary ./terraform-provider-datadog_3.39.0_linux_amd64.zip \
+      -provider-zip-file ./terraform-provider-datadog_3.39.0_linux_amd64.zip \
       -package datadog -output ./datadog
 
   # Use with go:generate
@@ -147,18 +147,18 @@ Examples:
 	}
 
 	switch {
-	case *providerBinary != "":
+	case *providerZipFile != "":
 		if *providerSource == "" {
 			fs.Usage()
-			return fmt.Errorf("-provider is required with -provider-binary")
+			return fmt.Errorf("-provider is required with -provider-zip-file")
 		}
 		if *providerVersion != "" {
 			fs.Usage()
-			return fmt.Errorf("-version is incompatible with -provider-binary; the version is read from the archive")
+			return fmt.Errorf("-version is incompatible with -provider-zip-file; the version is read from the archive filename")
 		}
 		if *schemaFile != "" {
 			fs.Usage()
-			return fmt.Errorf("-provider-binary and -schema are mutually exclusive")
+			return fmt.Errorf("-provider-zip-file and -schema are mutually exclusive")
 		}
 	case *schemaFile == "":
 		if *providerSource == "" || *providerVersion == "" {
@@ -178,11 +178,11 @@ Examples:
 		if err != nil {
 			return fmt.Errorf("loading schema: %w", err)
 		}
-	case *providerBinary != "":
-		fmt.Fprintf(stderr, "Loading schema from local provider %s (%s)...\n", *providerBinary, *providerSource)
-		schema, fetchErr := provider.FetchSchemaFromBinary(context.Background(), *providerSource, *providerBinary)
+	case *providerZipFile != "":
+		fmt.Fprintf(stderr, "Loading schema from local provider %s (%s)...\n", *providerZipFile, *providerSource)
+		schema, fetchErr := provider.FetchSchemaFromBinary(context.Background(), *providerSource, *providerZipFile)
 		if fetchErr != nil {
-			return fmt.Errorf("loading schema from binary: %w", fetchErr)
+			return fmt.Errorf("loading schema from archive: %w", fetchErr)
 		}
 		ps = schema.Provider
 		source = schema.Source
@@ -227,8 +227,8 @@ func runSchema(args []string, stdout, stderr io.Writer) error {
 	fs.SetOutput(stderr)
 
 	providerSource := fs.String("provider", "", "Provider source (namespace/name), e.g., datadog/datadog")
-	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0. Mutually exclusive with -provider-binary (the version is read from the archive).")
-	providerBinary := fs.String("provider-binary", "", "Path to a local Terraform provider release zip (e.g. terraform-provider-datadog_3.39.0_linux_amd64.zip). When set, the schema is extracted offline via Terraform dev_overrides instead of fetching from the registry. Requires -provider; the version is read from the archive.")
+	providerVersion := fs.String("version", "", "Provider version, e.g., 3.39.0. Mutually exclusive with -provider-zip-file (the version is read from the archive filename).")
+	providerZipFile := fs.String("provider-zip-file", "", "Path to a local Terraform provider release zip (e.g. terraform-provider-datadog_3.39.0_linux_amd64.zip). When set, the schema is extracted offline via Terraform dev_overrides instead of fetching from the registry. Requires -provider; the version is read from the archive filename.")
 	outputFile := fs.String("output", "", "Output file path (default: stdout)")
 
 	fs.Usage = func() {
@@ -245,7 +245,7 @@ Examples:
 
   # Extract schema from a local provider archive (offline)
   tforge schema -provider datadog/datadog \
-      -provider-binary ./terraform-provider-datadog_3.39.0_linux_amd64.zip \
+      -provider-zip-file ./terraform-provider-datadog_3.39.0_linux_amd64.zip \
       -output datadog-schema.json
 
   # Print schema to stdout
@@ -256,7 +256,7 @@ Examples:
 		return err
 	}
 
-	if *providerBinary == "" {
+	if *providerZipFile == "" {
 		if *providerSource == "" || *providerVersion == "" {
 			fs.Usage()
 			return fmt.Errorf("-provider and -version are required")
@@ -264,21 +264,21 @@ Examples:
 	} else {
 		if *providerSource == "" {
 			fs.Usage()
-			return fmt.Errorf("-provider is required with -provider-binary")
+			return fmt.Errorf("-provider is required with -provider-zip-file")
 		}
 		if *providerVersion != "" {
 			fs.Usage()
-			return fmt.Errorf("-version is incompatible with -provider-binary; the version is read from the archive")
+			return fmt.Errorf("-version is incompatible with -provider-zip-file; the version is read from the archive filename")
 		}
 	}
 
 	var schema *provider.Schema
 	var err error
-	if *providerBinary != "" {
-		fmt.Fprintf(stderr, "Loading schema from local provider %s (%s)...\n", *providerBinary, *providerSource)
-		schema, err = provider.FetchSchemaFromBinary(context.Background(), *providerSource, *providerBinary)
+	if *providerZipFile != "" {
+		fmt.Fprintf(stderr, "Loading schema from local provider %s (%s)...\n", *providerZipFile, *providerSource)
+		schema, err = provider.FetchSchemaFromBinary(context.Background(), *providerSource, *providerZipFile)
 		if err != nil {
-			return fmt.Errorf("loading schema from binary: %w", err)
+			return fmt.Errorf("loading schema from archive: %w", err)
 		}
 	} else {
 		fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
