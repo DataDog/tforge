@@ -26,8 +26,16 @@ type Resource struct {
 	// Format: "provider.alias" (e.g., "aws.west")
 	Provider string
 
-	// Attributes contains the resource attributes.
+	// Attributes contains the resource attributes as a map.
+	// Used by untyped callers (stack.AddResource with a literal map).
+	// Mutually exclusive with TypedAttributes — setting both is an error at render time.
 	Attributes map[string]any
+
+	// TypedAttributes holds a typed payload (e.g., a generated *Monitor)
+	// that is JSON-marshaled at render time. Used by generated typed constructors
+	// so that post-construction mutation is reflected in the output.
+	// Mutually exclusive with Attributes.
+	TypedAttributes any
 
 	MetaArguments
 
@@ -65,8 +73,13 @@ type DataSource struct {
 	// Provider specifies a non-default provider configuration.
 	Provider string
 
-	// Attributes contains the data source filter/query attributes.
+	// Attributes contains the data source filter/query attributes as a map.
+	// Used by untyped callers. Mutually exclusive with TypedAttributes.
 	Attributes map[string]any
+
+	// TypedAttributes holds a typed payload that is JSON-marshaled at render time.
+	// Used by generated typed constructors. Mutually exclusive with Attributes.
+	TypedAttributes any
 
 	MetaArguments
 }

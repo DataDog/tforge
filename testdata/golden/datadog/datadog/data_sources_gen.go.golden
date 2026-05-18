@@ -2,11 +2,7 @@
 
 package datadog
 
-import (
-	"encoding/json"
-	"fmt"
-	config "github.com/DataDog/tforge/config"
-)
+import config "github.com/DataDog/tforge/config"
 
 // APIKeyData represents the datadog_api_key data source.
 // Use this data source to retrieve information about an existing api key.
@@ -15,6 +11,7 @@ type APIKeyData struct {
 	ID         string `json:"id,omitempty"`
 	Key        string `json:"key,omitempty"`
 	Name       string `json:"name,omitempty"`
+	resource   *config.DataSource
 }
 
 type APIKeyDataOption func(*APIKeyData)
@@ -45,29 +42,35 @@ func APIKeyData_SetName(v string) APIKeyDataOption {
 
 func FromAPIKeyData(cfg APIKeyData) APIKeyDataOption {
 	return func(o *APIKeyData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewAPIKeyData creates a datadog_api_key DataSource and adds it to the stack.
-func NewAPIKeyData(stack *config.Stack, name string, opts ...APIKeyDataOption) error {
-	var cfg APIKeyData
+// NewAPIKeyData creates a datadog_api_key data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewAPIKeyData(stack *config.Stack, name string) (*APIKeyData, error) {
+	h := &APIKeyData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_api_key",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_api_key. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *APIKeyData) Apply(opts ...APIKeyDataOption) *APIKeyData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_api_key config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_api_key config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_api_key",
-	})
+	return h
 }
 
 // ApmRetentionFiltersOrderData represents the datadog_apm_retention_filters_order data source.
@@ -75,6 +78,7 @@ func NewAPIKeyData(stack *config.Stack, name string, opts ...APIKeyDataOption) e
 type ApmRetentionFiltersOrderData struct {
 	FilterIDS []string `json:"filter_ids,omitempty"`
 	ID        string   `json:"id,omitempty"`
+	resource  *config.DataSource
 }
 
 type ApmRetentionFiltersOrderDataOption func(*ApmRetentionFiltersOrderData)
@@ -93,29 +97,35 @@ func ApmRetentionFiltersOrderData_SetID(v string) ApmRetentionFiltersOrderDataOp
 
 func FromApmRetentionFiltersOrderData(cfg ApmRetentionFiltersOrderData) ApmRetentionFiltersOrderDataOption {
 	return func(o *ApmRetentionFiltersOrderData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewApmRetentionFiltersOrderData creates a datadog_apm_retention_filters_order DataSource and adds it to the stack.
-func NewApmRetentionFiltersOrderData(stack *config.Stack, name string, opts ...ApmRetentionFiltersOrderDataOption) error {
-	var cfg ApmRetentionFiltersOrderData
+// NewApmRetentionFiltersOrderData creates a datadog_apm_retention_filters_order data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewApmRetentionFiltersOrderData(stack *config.Stack, name string) (*ApmRetentionFiltersOrderData, error) {
+	h := &ApmRetentionFiltersOrderData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_apm_retention_filters_order",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_apm_retention_filters_order. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *ApmRetentionFiltersOrderData) Apply(opts ...ApmRetentionFiltersOrderDataOption) *ApmRetentionFiltersOrderData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_apm_retention_filters_order config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_apm_retention_filters_order config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_apm_retention_filters_order",
-	})
+	return h
 }
 
 // ApplicationKeyData represents the datadog_application_key data source.
@@ -125,6 +135,7 @@ type ApplicationKeyData struct {
 	ID         string `json:"id,omitempty"`
 	Key        string `json:"key,omitempty"`
 	Name       string `json:"name,omitempty"`
+	resource   *config.DataSource
 }
 
 type ApplicationKeyDataOption func(*ApplicationKeyData)
@@ -155,29 +166,35 @@ func ApplicationKeyData_SetName(v string) ApplicationKeyDataOption {
 
 func FromApplicationKeyData(cfg ApplicationKeyData) ApplicationKeyDataOption {
 	return func(o *ApplicationKeyData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewApplicationKeyData creates a datadog_application_key DataSource and adds it to the stack.
-func NewApplicationKeyData(stack *config.Stack, name string, opts ...ApplicationKeyDataOption) error {
-	var cfg ApplicationKeyData
+// NewApplicationKeyData creates a datadog_application_key data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewApplicationKeyData(stack *config.Stack, name string) (*ApplicationKeyData, error) {
+	h := &ApplicationKeyData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_application_key",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_application_key. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *ApplicationKeyData) Apply(opts ...ApplicationKeyDataOption) *ApplicationKeyData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_application_key config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_application_key config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_application_key",
-	})
+	return h
 }
 
 // CloudWorkloadSecurityAgentRulesData represents the datadog_cloud_workload_security_agent_rules data source.
@@ -185,6 +202,7 @@ func NewApplicationKeyData(stack *config.Stack, name string, opts ...Application
 type CloudWorkloadSecurityAgentRulesData struct {
 	AgentRules []map[string]any `json:"agent_rules,omitempty"`
 	ID         string           `json:"id,omitempty"`
+	resource   *config.DataSource
 }
 
 type CloudWorkloadSecurityAgentRulesDataOption func(*CloudWorkloadSecurityAgentRulesData)
@@ -203,29 +221,35 @@ func CloudWorkloadSecurityAgentRulesData_SetID(v string) CloudWorkloadSecurityAg
 
 func FromCloudWorkloadSecurityAgentRulesData(cfg CloudWorkloadSecurityAgentRulesData) CloudWorkloadSecurityAgentRulesDataOption {
 	return func(o *CloudWorkloadSecurityAgentRulesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewCloudWorkloadSecurityAgentRulesData creates a datadog_cloud_workload_security_agent_rules DataSource and adds it to the stack.
-func NewCloudWorkloadSecurityAgentRulesData(stack *config.Stack, name string, opts ...CloudWorkloadSecurityAgentRulesDataOption) error {
-	var cfg CloudWorkloadSecurityAgentRulesData
+// NewCloudWorkloadSecurityAgentRulesData creates a datadog_cloud_workload_security_agent_rules data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewCloudWorkloadSecurityAgentRulesData(stack *config.Stack, name string) (*CloudWorkloadSecurityAgentRulesData, error) {
+	h := &CloudWorkloadSecurityAgentRulesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_cloud_workload_security_agent_rules",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_cloud_workload_security_agent_rules. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *CloudWorkloadSecurityAgentRulesData) Apply(opts ...CloudWorkloadSecurityAgentRulesDataOption) *CloudWorkloadSecurityAgentRulesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_cloud_workload_security_agent_rules config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_cloud_workload_security_agent_rules config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_cloud_workload_security_agent_rules",
-	})
+	return h
 }
 
 // CsmThreatsAgentRulesData represents the datadog_csm_threats_agent_rules data source.
@@ -234,6 +258,7 @@ type CsmThreatsAgentRulesData struct {
 	AgentRules    []map[string]any `json:"agent_rules,omitempty"`
 	AgentRulesIDS []string         `json:"agent_rules_ids,omitempty"`
 	ID            string           `json:"id,omitempty"`
+	resource      *config.DataSource
 }
 
 type CsmThreatsAgentRulesDataOption func(*CsmThreatsAgentRulesData)
@@ -258,38 +283,45 @@ func CsmThreatsAgentRulesData_SetID(v string) CsmThreatsAgentRulesDataOption {
 
 func FromCsmThreatsAgentRulesData(cfg CsmThreatsAgentRulesData) CsmThreatsAgentRulesDataOption {
 	return func(o *CsmThreatsAgentRulesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewCsmThreatsAgentRulesData creates a datadog_csm_threats_agent_rules DataSource and adds it to the stack.
-func NewCsmThreatsAgentRulesData(stack *config.Stack, name string, opts ...CsmThreatsAgentRulesDataOption) error {
-	var cfg CsmThreatsAgentRulesData
+// NewCsmThreatsAgentRulesData creates a datadog_csm_threats_agent_rules data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewCsmThreatsAgentRulesData(stack *config.Stack, name string) (*CsmThreatsAgentRulesData, error) {
+	h := &CsmThreatsAgentRulesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_csm_threats_agent_rules",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_csm_threats_agent_rules. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *CsmThreatsAgentRulesData) Apply(opts ...CsmThreatsAgentRulesDataOption) *CsmThreatsAgentRulesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_csm_threats_agent_rules config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_csm_threats_agent_rules config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_csm_threats_agent_rules",
-	})
+	return h
 }
 
 // DashboardData represents the datadog_dashboard data source.
 // Use this data source to retrieve information about an existing dashboard, for use in other resources. In particular, it can be used in a monitor message to link to a specific dashboard.
 type DashboardData struct {
-	ID    string `json:"id,omitempty"`
-	Name  string `json:"name"`
-	Title string `json:"title,omitempty"`
-	URL   string `json:"url,omitempty"`
+	ID       string `json:"id,omitempty"`
+	Name     string `json:"name"`
+	Title    string `json:"title,omitempty"`
+	URL      string `json:"url,omitempty"`
+	resource *config.DataSource
 }
 
 type DashboardDataOption func(*DashboardData)
@@ -320,36 +352,43 @@ func DashboardData_SetURL(v string) DashboardDataOption {
 
 func FromDashboardData(cfg DashboardData) DashboardDataOption {
 	return func(o *DashboardData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewDashboardData creates a datadog_dashboard DataSource and adds it to the stack.
-func NewDashboardData(stack *config.Stack, name string, opts ...DashboardDataOption) error {
-	var cfg DashboardData
+// NewDashboardData creates a datadog_dashboard data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewDashboardData(stack *config.Stack, name string) (*DashboardData, error) {
+	h := &DashboardData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_dashboard",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_dashboard. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *DashboardData) Apply(opts ...DashboardDataOption) *DashboardData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_dashboard config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_dashboard config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_dashboard",
-	})
+	return h
 }
 
 // DashboardListData represents the datadog_dashboard_list data source.
 // Use this data source to retrieve information about an existing dashboard list, for use in other resources. In particular, it can be used in a dashboard to register it in the list.
 type DashboardListData struct {
-	ID   string `json:"id,omitempty"`
-	Name string `json:"name"`
+	ID       string `json:"id,omitempty"`
+	Name     string `json:"name"`
+	resource *config.DataSource
 }
 
 type DashboardListDataOption func(*DashboardListData)
@@ -368,29 +407,35 @@ func DashboardListData_SetName(v string) DashboardListDataOption {
 
 func FromDashboardListData(cfg DashboardListData) DashboardListDataOption {
 	return func(o *DashboardListData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewDashboardListData creates a datadog_dashboard_list DataSource and adds it to the stack.
-func NewDashboardListData(stack *config.Stack, name string, opts ...DashboardListDataOption) error {
-	var cfg DashboardListData
+// NewDashboardListData creates a datadog_dashboard_list data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewDashboardListData(stack *config.Stack, name string) (*DashboardListData, error) {
+	h := &DashboardListData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_dashboard_list",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_dashboard_list. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *DashboardListData) Apply(opts ...DashboardListDataOption) *DashboardListData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_dashboard_list config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_dashboard_list config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_dashboard_list",
-	})
+	return h
 }
 
 // HostsData represents the datadog_hosts data source.
@@ -405,6 +450,7 @@ type HostsData struct {
 	SortField             string           `json:"sort_field,omitempty"`
 	TotalMatching         float64          `json:"total_matching,omitempty"`
 	TotalReturned         float64          `json:"total_returned,omitempty"`
+	resource              *config.DataSource
 }
 
 type HostsDataOption func(*HostsData)
@@ -465,29 +511,35 @@ func HostsData_SetTotalReturned(v float64) HostsDataOption {
 
 func FromHostsData(cfg HostsData) HostsDataOption {
 	return func(o *HostsData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewHostsData creates a datadog_hosts DataSource and adds it to the stack.
-func NewHostsData(stack *config.Stack, name string, opts ...HostsDataOption) error {
-	var cfg HostsData
+// NewHostsData creates a datadog_hosts data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewHostsData(stack *config.Stack, name string) (*HostsData, error) {
+	h := &HostsData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_hosts",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_hosts. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *HostsData) Apply(opts ...HostsDataOption) *HostsData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_hosts config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_hosts config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_hosts",
-	})
+	return h
 }
 
 // IntegrationAwsLogsServicesData represents the datadog_integration_aws_logs_services data source.
@@ -495,6 +547,7 @@ func NewHostsData(stack *config.Stack, name string, opts ...HostsDataOption) err
 type IntegrationAwsLogsServicesData struct {
 	AwsLogsServices []map[string]any `json:"aws_logs_services,omitempty"`
 	ID              string           `json:"id,omitempty"`
+	resource        *config.DataSource
 }
 
 type IntegrationAwsLogsServicesDataOption func(*IntegrationAwsLogsServicesData)
@@ -513,29 +566,35 @@ func IntegrationAwsLogsServicesData_SetID(v string) IntegrationAwsLogsServicesDa
 
 func FromIntegrationAwsLogsServicesData(cfg IntegrationAwsLogsServicesData) IntegrationAwsLogsServicesDataOption {
 	return func(o *IntegrationAwsLogsServicesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewIntegrationAwsLogsServicesData creates a datadog_integration_aws_logs_services DataSource and adds it to the stack.
-func NewIntegrationAwsLogsServicesData(stack *config.Stack, name string, opts ...IntegrationAwsLogsServicesDataOption) error {
-	var cfg IntegrationAwsLogsServicesData
+// NewIntegrationAwsLogsServicesData creates a datadog_integration_aws_logs_services data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewIntegrationAwsLogsServicesData(stack *config.Stack, name string) (*IntegrationAwsLogsServicesData, error) {
+	h := &IntegrationAwsLogsServicesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_integration_aws_logs_services",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_integration_aws_logs_services. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *IntegrationAwsLogsServicesData) Apply(opts ...IntegrationAwsLogsServicesDataOption) *IntegrationAwsLogsServicesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_integration_aws_logs_services config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_integration_aws_logs_services config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_integration_aws_logs_services",
-	})
+	return h
 }
 
 // IntegrationAwsNamespaceRulesData represents the datadog_integration_aws_namespace_rules data source.
@@ -543,6 +602,7 @@ func NewIntegrationAwsLogsServicesData(stack *config.Stack, name string, opts ..
 type IntegrationAwsNamespaceRulesData struct {
 	ID             string   `json:"id,omitempty"`
 	NamespaceRules []string `json:"namespace_rules,omitempty"`
+	resource       *config.DataSource
 }
 
 type IntegrationAwsNamespaceRulesDataOption func(*IntegrationAwsNamespaceRulesData)
@@ -561,29 +621,35 @@ func IntegrationAwsNamespaceRulesData_SetNamespaceRules(v []string) IntegrationA
 
 func FromIntegrationAwsNamespaceRulesData(cfg IntegrationAwsNamespaceRulesData) IntegrationAwsNamespaceRulesDataOption {
 	return func(o *IntegrationAwsNamespaceRulesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewIntegrationAwsNamespaceRulesData creates a datadog_integration_aws_namespace_rules DataSource and adds it to the stack.
-func NewIntegrationAwsNamespaceRulesData(stack *config.Stack, name string, opts ...IntegrationAwsNamespaceRulesDataOption) error {
-	var cfg IntegrationAwsNamespaceRulesData
+// NewIntegrationAwsNamespaceRulesData creates a datadog_integration_aws_namespace_rules data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewIntegrationAwsNamespaceRulesData(stack *config.Stack, name string) (*IntegrationAwsNamespaceRulesData, error) {
+	h := &IntegrationAwsNamespaceRulesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_integration_aws_namespace_rules",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_integration_aws_namespace_rules. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *IntegrationAwsNamespaceRulesData) Apply(opts ...IntegrationAwsNamespaceRulesDataOption) *IntegrationAwsNamespaceRulesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_integration_aws_namespace_rules config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_integration_aws_namespace_rules config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_integration_aws_namespace_rules",
-	})
+	return h
 }
 
 // IPRangesData represents the datadog_ip_ranges data source.
@@ -610,6 +676,7 @@ type IPRangesData struct {
 	SyntheticsIpv6ByLocation map[string]string `json:"synthetics_ipv6_by_location,omitempty"`
 	WebhooksIpv4             []string          `json:"webhooks_ipv4,omitempty"`
 	WebhooksIpv6             []string          `json:"webhooks_ipv6,omitempty"`
+	resource                 *config.DataSource
 }
 
 type IPRangesDataOption func(*IPRangesData)
@@ -742,29 +809,35 @@ func IPRangesData_SetWebhooksIpv6(v []string) IPRangesDataOption {
 
 func FromIPRangesData(cfg IPRangesData) IPRangesDataOption {
 	return func(o *IPRangesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewIPRangesData creates a datadog_ip_ranges DataSource and adds it to the stack.
-func NewIPRangesData(stack *config.Stack, name string, opts ...IPRangesDataOption) error {
-	var cfg IPRangesData
+// NewIPRangesData creates a datadog_ip_ranges data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewIPRangesData(stack *config.Stack, name string) (*IPRangesData, error) {
+	h := &IPRangesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_ip_ranges",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_ip_ranges. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *IPRangesData) Apply(opts ...IPRangesDataOption) *IPRangesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_ip_ranges config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_ip_ranges config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_ip_ranges",
-	})
+	return h
 }
 
 // LogsArchivesOrderData represents the datadog_logs_archives_order data source.
@@ -772,6 +845,7 @@ func NewIPRangesData(stack *config.Stack, name string, opts ...IPRangesDataOptio
 type LogsArchivesOrderData struct {
 	ArchiveIDS []string `json:"archive_ids,omitempty"`
 	ID         string   `json:"id,omitempty"`
+	resource   *config.DataSource
 }
 
 type LogsArchivesOrderDataOption func(*LogsArchivesOrderData)
@@ -790,29 +864,35 @@ func LogsArchivesOrderData_SetID(v string) LogsArchivesOrderDataOption {
 
 func FromLogsArchivesOrderData(cfg LogsArchivesOrderData) LogsArchivesOrderDataOption {
 	return func(o *LogsArchivesOrderData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewLogsArchivesOrderData creates a datadog_logs_archives_order DataSource and adds it to the stack.
-func NewLogsArchivesOrderData(stack *config.Stack, name string, opts ...LogsArchivesOrderDataOption) error {
-	var cfg LogsArchivesOrderData
+// NewLogsArchivesOrderData creates a datadog_logs_archives_order data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewLogsArchivesOrderData(stack *config.Stack, name string) (*LogsArchivesOrderData, error) {
+	h := &LogsArchivesOrderData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_logs_archives_order",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_logs_archives_order. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *LogsArchivesOrderData) Apply(opts ...LogsArchivesOrderDataOption) *LogsArchivesOrderData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_logs_archives_order config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_logs_archives_order config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_logs_archives_order",
-	})
+	return h
 }
 
 // LogsIndexesData represents the datadog_logs_indexes data source.
@@ -820,6 +900,7 @@ func NewLogsArchivesOrderData(stack *config.Stack, name string, opts ...LogsArch
 type LogsIndexesData struct {
 	ID          string           `json:"id,omitempty"`
 	LogsIndexes []map[string]any `json:"logs_indexes,omitempty"`
+	resource    *config.DataSource
 }
 
 type LogsIndexesDataOption func(*LogsIndexesData)
@@ -838,29 +919,35 @@ func LogsIndexesData_SetLogsIndexes(v []map[string]any) LogsIndexesDataOption {
 
 func FromLogsIndexesData(cfg LogsIndexesData) LogsIndexesDataOption {
 	return func(o *LogsIndexesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewLogsIndexesData creates a datadog_logs_indexes DataSource and adds it to the stack.
-func NewLogsIndexesData(stack *config.Stack, name string, opts ...LogsIndexesDataOption) error {
-	var cfg LogsIndexesData
+// NewLogsIndexesData creates a datadog_logs_indexes data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewLogsIndexesData(stack *config.Stack, name string) (*LogsIndexesData, error) {
+	h := &LogsIndexesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_logs_indexes",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_logs_indexes. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *LogsIndexesData) Apply(opts ...LogsIndexesDataOption) *LogsIndexesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_logs_indexes config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_logs_indexes config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_logs_indexes",
-	})
+	return h
 }
 
 // LogsIndexesOrderData represents the datadog_logs_indexes_order data source.
@@ -868,6 +955,7 @@ func NewLogsIndexesData(stack *config.Stack, name string, opts ...LogsIndexesDat
 type LogsIndexesOrderData struct {
 	ID         string   `json:"id,omitempty"`
 	IndexNames []string `json:"index_names,omitempty"`
+	resource   *config.DataSource
 }
 
 type LogsIndexesOrderDataOption func(*LogsIndexesOrderData)
@@ -886,29 +974,35 @@ func LogsIndexesOrderData_SetIndexNames(v []string) LogsIndexesOrderDataOption {
 
 func FromLogsIndexesOrderData(cfg LogsIndexesOrderData) LogsIndexesOrderDataOption {
 	return func(o *LogsIndexesOrderData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewLogsIndexesOrderData creates a datadog_logs_indexes_order DataSource and adds it to the stack.
-func NewLogsIndexesOrderData(stack *config.Stack, name string, opts ...LogsIndexesOrderDataOption) error {
-	var cfg LogsIndexesOrderData
+// NewLogsIndexesOrderData creates a datadog_logs_indexes_order data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewLogsIndexesOrderData(stack *config.Stack, name string) (*LogsIndexesOrderData, error) {
+	h := &LogsIndexesOrderData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_logs_indexes_order",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_logs_indexes_order. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *LogsIndexesOrderData) Apply(opts ...LogsIndexesOrderDataOption) *LogsIndexesOrderData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_logs_indexes_order config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_logs_indexes_order config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_logs_indexes_order",
-	})
+	return h
 }
 
 // LogsPipelinesData represents the datadog_logs_pipelines data source.
@@ -917,6 +1011,7 @@ type LogsPipelinesData struct {
 	ID            string           `json:"id,omitempty"`
 	IsReadOnly    string           `json:"is_read_only,omitempty"`
 	LogsPipelines []map[string]any `json:"logs_pipelines,omitempty"`
+	resource      *config.DataSource
 }
 
 type LogsPipelinesDataOption func(*LogsPipelinesData)
@@ -941,29 +1036,35 @@ func LogsPipelinesData_SetLogsPipelines(v []map[string]any) LogsPipelinesDataOpt
 
 func FromLogsPipelinesData(cfg LogsPipelinesData) LogsPipelinesDataOption {
 	return func(o *LogsPipelinesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewLogsPipelinesData creates a datadog_logs_pipelines DataSource and adds it to the stack.
-func NewLogsPipelinesData(stack *config.Stack, name string, opts ...LogsPipelinesDataOption) error {
-	var cfg LogsPipelinesData
+// NewLogsPipelinesData creates a datadog_logs_pipelines data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewLogsPipelinesData(stack *config.Stack, name string) (*LogsPipelinesData, error) {
+	h := &LogsPipelinesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_logs_pipelines",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_logs_pipelines. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *LogsPipelinesData) Apply(opts ...LogsPipelinesDataOption) *LogsPipelinesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_logs_pipelines config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_logs_pipelines config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_logs_pipelines",
-	})
+	return h
 }
 
 // MonitorData represents the datadog_monitor data source.
@@ -1003,6 +1104,7 @@ type MonitorData struct {
 	TagsFilter              []string         `json:"tags_filter,omitempty"`
 	TimeoutH                float64          `json:"timeout_h,omitempty"`
 	Type                    string           `json:"type,omitempty"`
+	resource                *config.DataSource
 }
 
 type MonitorDataOption func(*MonitorData)
@@ -1213,29 +1315,35 @@ func MonitorData_SetType(v string) MonitorDataOption {
 
 func FromMonitorData(cfg MonitorData) MonitorDataOption {
 	return func(o *MonitorData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewMonitorData creates a datadog_monitor DataSource and adds it to the stack.
-func NewMonitorData(stack *config.Stack, name string, opts ...MonitorDataOption) error {
-	var cfg MonitorData
+// NewMonitorData creates a datadog_monitor data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewMonitorData(stack *config.Stack, name string) (*MonitorData, error) {
+	h := &MonitorData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_monitor",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_monitor. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *MonitorData) Apply(opts ...MonitorDataOption) *MonitorData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_monitor config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_monitor config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_monitor",
-	})
+	return h
 }
 
 // MonitorConfigPoliciesData represents the datadog_monitor_config_policies data source.
@@ -1243,6 +1351,7 @@ func NewMonitorData(stack *config.Stack, name string, opts ...MonitorDataOption)
 type MonitorConfigPoliciesData struct {
 	ID                    string           `json:"id,omitempty"`
 	MonitorConfigPolicies []map[string]any `json:"monitor_config_policies,omitempty"`
+	resource              *config.DataSource
 }
 
 type MonitorConfigPoliciesDataOption func(*MonitorConfigPoliciesData)
@@ -1261,29 +1370,35 @@ func MonitorConfigPoliciesData_SetMonitorConfigPolicies(v []map[string]any) Moni
 
 func FromMonitorConfigPoliciesData(cfg MonitorConfigPoliciesData) MonitorConfigPoliciesDataOption {
 	return func(o *MonitorConfigPoliciesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewMonitorConfigPoliciesData creates a datadog_monitor_config_policies DataSource and adds it to the stack.
-func NewMonitorConfigPoliciesData(stack *config.Stack, name string, opts ...MonitorConfigPoliciesDataOption) error {
-	var cfg MonitorConfigPoliciesData
+// NewMonitorConfigPoliciesData creates a datadog_monitor_config_policies data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewMonitorConfigPoliciesData(stack *config.Stack, name string) (*MonitorConfigPoliciesData, error) {
+	h := &MonitorConfigPoliciesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_monitor_config_policies",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_monitor_config_policies. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *MonitorConfigPoliciesData) Apply(opts ...MonitorConfigPoliciesDataOption) *MonitorConfigPoliciesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_monitor_config_policies config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_monitor_config_policies config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_monitor_config_policies",
-	})
+	return h
 }
 
 // MonitorsData represents the datadog_monitors data source.
@@ -1294,6 +1409,7 @@ type MonitorsData struct {
 	Monitors          []map[string]any `json:"monitors,omitempty"`
 	NameFilter        string           `json:"name_filter,omitempty"`
 	TagsFilter        []string         `json:"tags_filter,omitempty"`
+	resource          *config.DataSource
 }
 
 type MonitorsDataOption func(*MonitorsData)
@@ -1330,29 +1446,35 @@ func MonitorsData_SetTagsFilter(v []string) MonitorsDataOption {
 
 func FromMonitorsData(cfg MonitorsData) MonitorsDataOption {
 	return func(o *MonitorsData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewMonitorsData creates a datadog_monitors DataSource and adds it to the stack.
-func NewMonitorsData(stack *config.Stack, name string, opts ...MonitorsDataOption) error {
-	var cfg MonitorsData
+// NewMonitorsData creates a datadog_monitors data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewMonitorsData(stack *config.Stack, name string) (*MonitorsData, error) {
+	h := &MonitorsData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_monitors",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_monitors. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *MonitorsData) Apply(opts ...MonitorsDataOption) *MonitorsData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_monitors config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_monitors config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_monitors",
-	})
+	return h
 }
 
 // PermissionsData represents the datadog_permissions data source.
@@ -1361,6 +1483,7 @@ type PermissionsData struct {
 	ID                string            `json:"id,omitempty"`
 	IncludeRestricted *bool             `json:"include_restricted,omitempty"`
 	Permissions       map[string]string `json:"permissions,omitempty"`
+	resource          *config.DataSource
 }
 
 type PermissionsDataOption func(*PermissionsData)
@@ -1385,29 +1508,35 @@ func PermissionsData_SetPermissions(v map[string]string) PermissionsDataOption {
 
 func FromPermissionsData(cfg PermissionsData) PermissionsDataOption {
 	return func(o *PermissionsData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewPermissionsData creates a datadog_permissions DataSource and adds it to the stack.
-func NewPermissionsData(stack *config.Stack, name string, opts ...PermissionsDataOption) error {
-	var cfg PermissionsData
+// NewPermissionsData creates a datadog_permissions data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewPermissionsData(stack *config.Stack, name string) (*PermissionsData, error) {
+	h := &PermissionsData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_permissions",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_permissions. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *PermissionsData) Apply(opts ...PermissionsDataOption) *PermissionsData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_permissions config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_permissions config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_permissions",
-	})
+	return h
 }
 
 // RoleData represents the datadog_role data source.
@@ -1417,6 +1546,7 @@ type RoleData struct {
 	ID        string  `json:"id,omitempty"`
 	Name      string  `json:"name,omitempty"`
 	UserCount float64 `json:"user_count,omitempty"`
+	resource  *config.DataSource
 }
 
 type RoleDataOption func(*RoleData)
@@ -1447,29 +1577,35 @@ func RoleData_SetUserCount(v float64) RoleDataOption {
 
 func FromRoleData(cfg RoleData) RoleDataOption {
 	return func(o *RoleData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewRoleData creates a datadog_role DataSource and adds it to the stack.
-func NewRoleData(stack *config.Stack, name string, opts ...RoleDataOption) error {
-	var cfg RoleData
+// NewRoleData creates a datadog_role data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewRoleData(stack *config.Stack, name string) (*RoleData, error) {
+	h := &RoleData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_role",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_role. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *RoleData) Apply(opts ...RoleDataOption) *RoleData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_role config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_role config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_role",
-	})
+	return h
 }
 
 // RoleUsersData represents the datadog_role_users data source.
@@ -1480,6 +1616,7 @@ type RoleUsersData struct {
 	ID         string           `json:"id,omitempty"`
 	RoleID     string           `json:"role_id"`
 	RoleUsers  []map[string]any `json:"role_users,omitempty"`
+	resource   *config.DataSource
 }
 
 type RoleUsersDataOption func(*RoleUsersData)
@@ -1516,37 +1653,44 @@ func RoleUsersData_SetRoleUsers(v []map[string]any) RoleUsersDataOption {
 
 func FromRoleUsersData(cfg RoleUsersData) RoleUsersDataOption {
 	return func(o *RoleUsersData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewRoleUsersData creates a datadog_role_users DataSource and adds it to the stack.
-func NewRoleUsersData(stack *config.Stack, name string, opts ...RoleUsersDataOption) error {
-	var cfg RoleUsersData
+// NewRoleUsersData creates a datadog_role_users data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewRoleUsersData(stack *config.Stack, name string) (*RoleUsersData, error) {
+	h := &RoleUsersData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_role_users",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_role_users. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *RoleUsersData) Apply(opts ...RoleUsersDataOption) *RoleUsersData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_role_users config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_role_users config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_role_users",
-	})
+	return h
 }
 
 // RolesData represents the datadog_roles data source.
 // Use this data source to retrieve information about multiple roles for use in other resources.
 type RolesData struct {
-	Filter string           `json:"filter,omitempty"`
-	ID     string           `json:"id,omitempty"`
-	Roles  []map[string]any `json:"roles,omitempty"`
+	Filter   string           `json:"filter,omitempty"`
+	ID       string           `json:"id,omitempty"`
+	Roles    []map[string]any `json:"roles,omitempty"`
+	resource *config.DataSource
 }
 
 type RolesDataOption func(*RolesData)
@@ -1571,29 +1715,35 @@ func RolesData_SetRoles(v []map[string]any) RolesDataOption {
 
 func FromRolesData(cfg RolesData) RolesDataOption {
 	return func(o *RolesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewRolesData creates a datadog_roles DataSource and adds it to the stack.
-func NewRolesData(stack *config.Stack, name string, opts ...RolesDataOption) error {
-	var cfg RolesData
+// NewRolesData creates a datadog_roles data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewRolesData(stack *config.Stack, name string) (*RolesData, error) {
+	h := &RolesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_roles",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_roles. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *RolesData) Apply(opts ...RolesDataOption) *RolesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_roles config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_roles config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_roles",
-	})
+	return h
 }
 
 // RumApplicationData represents the datadog_rum_application data source.
@@ -1605,6 +1755,7 @@ type RumApplicationData struct {
 	NameFilter  string `json:"name_filter,omitempty"`
 	Type        string `json:"type,omitempty"`
 	TypeFilter  string `json:"type_filter,omitempty"`
+	resource    *config.DataSource
 }
 
 type RumApplicationDataOption func(*RumApplicationData)
@@ -1647,29 +1798,35 @@ func RumApplicationData_SetTypeFilter(v string) RumApplicationDataOption {
 
 func FromRumApplicationData(cfg RumApplicationData) RumApplicationDataOption {
 	return func(o *RumApplicationData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewRumApplicationData creates a datadog_rum_application DataSource and adds it to the stack.
-func NewRumApplicationData(stack *config.Stack, name string, opts ...RumApplicationDataOption) error {
-	var cfg RumApplicationData
+// NewRumApplicationData creates a datadog_rum_application data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewRumApplicationData(stack *config.Stack, name string) (*RumApplicationData, error) {
+	h := &RumApplicationData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_rum_application",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_rum_application. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *RumApplicationData) Apply(opts ...RumApplicationDataOption) *RumApplicationData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_rum_application config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_rum_application config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_rum_application",
-	})
+	return h
 }
 
 // SecurityMonitoringFiltersData represents the datadog_security_monitoring_filters data source.
@@ -1678,6 +1835,7 @@ type SecurityMonitoringFiltersData struct {
 	Filters    []map[string]any `json:"filters,omitempty"`
 	FiltersIDS []string         `json:"filters_ids,omitempty"`
 	ID         string           `json:"id,omitempty"`
+	resource   *config.DataSource
 }
 
 type SecurityMonitoringFiltersDataOption func(*SecurityMonitoringFiltersData)
@@ -1702,29 +1860,35 @@ func SecurityMonitoringFiltersData_SetID(v string) SecurityMonitoringFiltersData
 
 func FromSecurityMonitoringFiltersData(cfg SecurityMonitoringFiltersData) SecurityMonitoringFiltersDataOption {
 	return func(o *SecurityMonitoringFiltersData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewSecurityMonitoringFiltersData creates a datadog_security_monitoring_filters DataSource and adds it to the stack.
-func NewSecurityMonitoringFiltersData(stack *config.Stack, name string, opts ...SecurityMonitoringFiltersDataOption) error {
-	var cfg SecurityMonitoringFiltersData
+// NewSecurityMonitoringFiltersData creates a datadog_security_monitoring_filters data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewSecurityMonitoringFiltersData(stack *config.Stack, name string) (*SecurityMonitoringFiltersData, error) {
+	h := &SecurityMonitoringFiltersData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_security_monitoring_filters",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_security_monitoring_filters. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *SecurityMonitoringFiltersData) Apply(opts ...SecurityMonitoringFiltersDataOption) *SecurityMonitoringFiltersData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_security_monitoring_filters config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_security_monitoring_filters config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_security_monitoring_filters",
-	})
+	return h
 }
 
 // SecurityMonitoringRulesData represents the datadog_security_monitoring_rules data source.
@@ -1737,6 +1901,7 @@ type SecurityMonitoringRulesData struct {
 	Rules             []map[string]any `json:"rules,omitempty"`
 	TagsFilter        []string         `json:"tags_filter,omitempty"`
 	UserOnlyFilter    *bool            `json:"user_only_filter,omitempty"`
+	resource          *config.DataSource
 }
 
 type SecurityMonitoringRulesDataOption func(*SecurityMonitoringRulesData)
@@ -1785,29 +1950,35 @@ func SecurityMonitoringRulesData_SetUserOnlyFilter(v bool) SecurityMonitoringRul
 
 func FromSecurityMonitoringRulesData(cfg SecurityMonitoringRulesData) SecurityMonitoringRulesDataOption {
 	return func(o *SecurityMonitoringRulesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewSecurityMonitoringRulesData creates a datadog_security_monitoring_rules DataSource and adds it to the stack.
-func NewSecurityMonitoringRulesData(stack *config.Stack, name string, opts ...SecurityMonitoringRulesDataOption) error {
-	var cfg SecurityMonitoringRulesData
+// NewSecurityMonitoringRulesData creates a datadog_security_monitoring_rules data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewSecurityMonitoringRulesData(stack *config.Stack, name string) (*SecurityMonitoringRulesData, error) {
+	h := &SecurityMonitoringRulesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_security_monitoring_rules",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_security_monitoring_rules. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *SecurityMonitoringRulesData) Apply(opts ...SecurityMonitoringRulesDataOption) *SecurityMonitoringRulesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_security_monitoring_rules config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_security_monitoring_rules config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_security_monitoring_rules",
-	})
+	return h
 }
 
 // SecurityMonitoringSuppressionsData represents the datadog_security_monitoring_suppressions data source.
@@ -1816,6 +1987,7 @@ type SecurityMonitoringSuppressionsData struct {
 	ID             string           `json:"id,omitempty"`
 	SuppressionIDS []string         `json:"suppression_ids,omitempty"`
 	Suppressions   []map[string]any `json:"suppressions,omitempty"`
+	resource       *config.DataSource
 }
 
 type SecurityMonitoringSuppressionsDataOption func(*SecurityMonitoringSuppressionsData)
@@ -1840,29 +2012,35 @@ func SecurityMonitoringSuppressionsData_SetSuppressions(v []map[string]any) Secu
 
 func FromSecurityMonitoringSuppressionsData(cfg SecurityMonitoringSuppressionsData) SecurityMonitoringSuppressionsDataOption {
 	return func(o *SecurityMonitoringSuppressionsData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewSecurityMonitoringSuppressionsData creates a datadog_security_monitoring_suppressions DataSource and adds it to the stack.
-func NewSecurityMonitoringSuppressionsData(stack *config.Stack, name string, opts ...SecurityMonitoringSuppressionsDataOption) error {
-	var cfg SecurityMonitoringSuppressionsData
+// NewSecurityMonitoringSuppressionsData creates a datadog_security_monitoring_suppressions data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewSecurityMonitoringSuppressionsData(stack *config.Stack, name string) (*SecurityMonitoringSuppressionsData, error) {
+	h := &SecurityMonitoringSuppressionsData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_security_monitoring_suppressions",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_security_monitoring_suppressions. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *SecurityMonitoringSuppressionsData) Apply(opts ...SecurityMonitoringSuppressionsDataOption) *SecurityMonitoringSuppressionsData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_security_monitoring_suppressions config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_security_monitoring_suppressions config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_security_monitoring_suppressions",
-	})
+	return h
 }
 
 // SensitiveDataScannerGroupOrderData represents the datadog_sensitive_data_scanner_group_order data source.
@@ -1870,6 +2048,7 @@ func NewSecurityMonitoringSuppressionsData(stack *config.Stack, name string, opt
 type SensitiveDataScannerGroupOrderData struct {
 	GroupIDS []string `json:"group_ids,omitempty"`
 	ID       string   `json:"id,omitempty"`
+	resource *config.DataSource
 }
 
 type SensitiveDataScannerGroupOrderDataOption func(*SensitiveDataScannerGroupOrderData)
@@ -1888,29 +2067,35 @@ func SensitiveDataScannerGroupOrderData_SetID(v string) SensitiveDataScannerGrou
 
 func FromSensitiveDataScannerGroupOrderData(cfg SensitiveDataScannerGroupOrderData) SensitiveDataScannerGroupOrderDataOption {
 	return func(o *SensitiveDataScannerGroupOrderData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewSensitiveDataScannerGroupOrderData creates a datadog_sensitive_data_scanner_group_order DataSource and adds it to the stack.
-func NewSensitiveDataScannerGroupOrderData(stack *config.Stack, name string, opts ...SensitiveDataScannerGroupOrderDataOption) error {
-	var cfg SensitiveDataScannerGroupOrderData
+// NewSensitiveDataScannerGroupOrderData creates a datadog_sensitive_data_scanner_group_order data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewSensitiveDataScannerGroupOrderData(stack *config.Stack, name string) (*SensitiveDataScannerGroupOrderData, error) {
+	h := &SensitiveDataScannerGroupOrderData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_sensitive_data_scanner_group_order",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_sensitive_data_scanner_group_order. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *SensitiveDataScannerGroupOrderData) Apply(opts ...SensitiveDataScannerGroupOrderDataOption) *SensitiveDataScannerGroupOrderData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_sensitive_data_scanner_group_order config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_sensitive_data_scanner_group_order config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_sensitive_data_scanner_group_order",
-	})
+	return h
 }
 
 // SensitiveDataScannerStandardPatternData represents the datadog_sensitive_data_scanner_standard_pattern data source.
@@ -1922,6 +2107,7 @@ type SensitiveDataScannerStandardPatternData struct {
 	Name             string   `json:"name,omitempty"`
 	Pattern          string   `json:"pattern,omitempty"`
 	Tags             []string `json:"tags,omitempty"`
+	resource         *config.DataSource
 }
 
 type SensitiveDataScannerStandardPatternDataOption func(*SensitiveDataScannerStandardPatternData)
@@ -1964,29 +2150,35 @@ func SensitiveDataScannerStandardPatternData_SetTags(v []string) SensitiveDataSc
 
 func FromSensitiveDataScannerStandardPatternData(cfg SensitiveDataScannerStandardPatternData) SensitiveDataScannerStandardPatternDataOption {
 	return func(o *SensitiveDataScannerStandardPatternData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewSensitiveDataScannerStandardPatternData creates a datadog_sensitive_data_scanner_standard_pattern DataSource and adds it to the stack.
-func NewSensitiveDataScannerStandardPatternData(stack *config.Stack, name string, opts ...SensitiveDataScannerStandardPatternDataOption) error {
-	var cfg SensitiveDataScannerStandardPatternData
+// NewSensitiveDataScannerStandardPatternData creates a datadog_sensitive_data_scanner_standard_pattern data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewSensitiveDataScannerStandardPatternData(stack *config.Stack, name string) (*SensitiveDataScannerStandardPatternData, error) {
+	h := &SensitiveDataScannerStandardPatternData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_sensitive_data_scanner_standard_pattern",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_sensitive_data_scanner_standard_pattern. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *SensitiveDataScannerStandardPatternData) Apply(opts ...SensitiveDataScannerStandardPatternDataOption) *SensitiveDataScannerStandardPatternData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_sensitive_data_scanner_standard_pattern config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_sensitive_data_scanner_standard_pattern config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_sensitive_data_scanner_standard_pattern",
-	})
+	return h
 }
 
 // ServiceAccountData represents the datadog_service_account data source.
@@ -2004,6 +2196,7 @@ type ServiceAccountData struct {
 	Status       string   `json:"status,omitempty"`
 	Title        string   `json:"title,omitempty"`
 	Verified     bool     `json:"verified,omitempty"`
+	resource     *config.DataSource
 }
 
 type ServiceAccountDataOption func(*ServiceAccountData)
@@ -2082,29 +2275,35 @@ func ServiceAccountData_SetVerified(v bool) ServiceAccountDataOption {
 
 func FromServiceAccountData(cfg ServiceAccountData) ServiceAccountDataOption {
 	return func(o *ServiceAccountData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewServiceAccountData creates a datadog_service_account DataSource and adds it to the stack.
-func NewServiceAccountData(stack *config.Stack, name string, opts ...ServiceAccountDataOption) error {
-	var cfg ServiceAccountData
+// NewServiceAccountData creates a datadog_service_account data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewServiceAccountData(stack *config.Stack, name string) (*ServiceAccountData, error) {
+	h := &ServiceAccountData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_service_account",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_service_account. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *ServiceAccountData) Apply(opts ...ServiceAccountDataOption) *ServiceAccountData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_service_account config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_service_account config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_service_account",
-	})
+	return h
 }
 
 // ServiceLevelObjectiveData represents the datadog_service_level_objective data source.
@@ -2121,6 +2320,7 @@ type ServiceLevelObjectiveData struct {
 	Timeframe        string           `json:"timeframe,omitempty"`
 	Type             string           `json:"type,omitempty"`
 	WarningThreshold float64          `json:"warning_threshold,omitempty"`
+	resource         *config.DataSource
 }
 
 type ServiceLevelObjectiveDataOption func(*ServiceLevelObjectiveData)
@@ -2193,29 +2393,35 @@ func ServiceLevelObjectiveData_SetWarningThreshold(v float64) ServiceLevelObject
 
 func FromServiceLevelObjectiveData(cfg ServiceLevelObjectiveData) ServiceLevelObjectiveDataOption {
 	return func(o *ServiceLevelObjectiveData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewServiceLevelObjectiveData creates a datadog_service_level_objective DataSource and adds it to the stack.
-func NewServiceLevelObjectiveData(stack *config.Stack, name string, opts ...ServiceLevelObjectiveDataOption) error {
-	var cfg ServiceLevelObjectiveData
+// NewServiceLevelObjectiveData creates a datadog_service_level_objective data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewServiceLevelObjectiveData(stack *config.Stack, name string) (*ServiceLevelObjectiveData, error) {
+	h := &ServiceLevelObjectiveData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_service_level_objective",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_service_level_objective. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *ServiceLevelObjectiveData) Apply(opts ...ServiceLevelObjectiveDataOption) *ServiceLevelObjectiveData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_service_level_objective config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_service_level_objective config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_service_level_objective",
-	})
+	return h
 }
 
 // ServiceLevelObjectivesData represents the datadog_service_level_objectives data source.
@@ -2229,6 +2435,7 @@ type ServiceLevelObjectivesData struct {
 	Query              string           `json:"query,omitempty"`
 	Slos               []map[string]any `json:"slos,omitempty"`
 	TagsQuery          string           `json:"tags_query,omitempty"`
+	resource           *config.DataSource
 }
 
 type ServiceLevelObjectivesDataOption func(*ServiceLevelObjectivesData)
@@ -2283,37 +2490,44 @@ func ServiceLevelObjectivesData_SetTagsQuery(v string) ServiceLevelObjectivesDat
 
 func FromServiceLevelObjectivesData(cfg ServiceLevelObjectivesData) ServiceLevelObjectivesDataOption {
 	return func(o *ServiceLevelObjectivesData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewServiceLevelObjectivesData creates a datadog_service_level_objectives DataSource and adds it to the stack.
-func NewServiceLevelObjectivesData(stack *config.Stack, name string, opts ...ServiceLevelObjectivesDataOption) error {
-	var cfg ServiceLevelObjectivesData
+// NewServiceLevelObjectivesData creates a datadog_service_level_objectives data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewServiceLevelObjectivesData(stack *config.Stack, name string) (*ServiceLevelObjectivesData, error) {
+	h := &ServiceLevelObjectivesData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_service_level_objectives",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_service_level_objectives. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *ServiceLevelObjectivesData) Apply(opts ...ServiceLevelObjectivesDataOption) *ServiceLevelObjectivesData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_service_level_objectives config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_service_level_objectives config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_service_level_objectives",
-	})
+	return h
 }
 
 // SyntheticsGlobalVariableData represents the datadog_synthetics_global_variable data source.
 // Use this data source to retrieve a Datadog Synthetics global variable (to be used in Synthetics tests).
 type SyntheticsGlobalVariableData struct {
-	ID   string   `json:"id,omitempty"`
-	Name string   `json:"name"`
-	Tags []string `json:"tags,omitempty"`
+	ID       string   `json:"id,omitempty"`
+	Name     string   `json:"name"`
+	Tags     []string `json:"tags,omitempty"`
+	resource *config.DataSource
 }
 
 type SyntheticsGlobalVariableDataOption func(*SyntheticsGlobalVariableData)
@@ -2338,29 +2552,35 @@ func SyntheticsGlobalVariableData_SetTags(v []string) SyntheticsGlobalVariableDa
 
 func FromSyntheticsGlobalVariableData(cfg SyntheticsGlobalVariableData) SyntheticsGlobalVariableDataOption {
 	return func(o *SyntheticsGlobalVariableData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewSyntheticsGlobalVariableData creates a datadog_synthetics_global_variable DataSource and adds it to the stack.
-func NewSyntheticsGlobalVariableData(stack *config.Stack, name string, opts ...SyntheticsGlobalVariableDataOption) error {
-	var cfg SyntheticsGlobalVariableData
+// NewSyntheticsGlobalVariableData creates a datadog_synthetics_global_variable data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewSyntheticsGlobalVariableData(stack *config.Stack, name string) (*SyntheticsGlobalVariableData, error) {
+	h := &SyntheticsGlobalVariableData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_synthetics_global_variable",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_synthetics_global_variable. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *SyntheticsGlobalVariableData) Apply(opts ...SyntheticsGlobalVariableDataOption) *SyntheticsGlobalVariableData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_synthetics_global_variable config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_synthetics_global_variable config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_synthetics_global_variable",
-	})
+	return h
 }
 
 // SyntheticsLocationsData represents the datadog_synthetics_locations data source.
@@ -2368,6 +2588,7 @@ func NewSyntheticsGlobalVariableData(stack *config.Stack, name string, opts ...S
 type SyntheticsLocationsData struct {
 	ID        string            `json:"id,omitempty"`
 	Locations map[string]string `json:"locations,omitempty"`
+	resource  *config.DataSource
 }
 
 type SyntheticsLocationsDataOption func(*SyntheticsLocationsData)
@@ -2386,39 +2607,46 @@ func SyntheticsLocationsData_SetLocations(v map[string]string) SyntheticsLocatio
 
 func FromSyntheticsLocationsData(cfg SyntheticsLocationsData) SyntheticsLocationsDataOption {
 	return func(o *SyntheticsLocationsData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewSyntheticsLocationsData creates a datadog_synthetics_locations DataSource and adds it to the stack.
-func NewSyntheticsLocationsData(stack *config.Stack, name string, opts ...SyntheticsLocationsDataOption) error {
-	var cfg SyntheticsLocationsData
+// NewSyntheticsLocationsData creates a datadog_synthetics_locations data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewSyntheticsLocationsData(stack *config.Stack, name string) (*SyntheticsLocationsData, error) {
+	h := &SyntheticsLocationsData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_synthetics_locations",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_synthetics_locations. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *SyntheticsLocationsData) Apply(opts ...SyntheticsLocationsDataOption) *SyntheticsLocationsData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_synthetics_locations config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_synthetics_locations config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_synthetics_locations",
-	})
+	return h
 }
 
 // SyntheticsTestData represents the datadog_synthetics_test data source.
 // Use this data source to retrieve a Datadog Synthetic Test.
 type SyntheticsTestData struct {
-	ID     string   `json:"id,omitempty"`
-	Name   string   `json:"name,omitempty"`
-	Tags   []string `json:"tags,omitempty"`
-	TestID string   `json:"test_id"`
-	URL    string   `json:"url,omitempty"`
+	ID       string   `json:"id,omitempty"`
+	Name     string   `json:"name,omitempty"`
+	Tags     []string `json:"tags,omitempty"`
+	TestID   string   `json:"test_id"`
+	URL      string   `json:"url,omitempty"`
+	resource *config.DataSource
 }
 
 type SyntheticsTestDataOption func(*SyntheticsTestData)
@@ -2455,29 +2683,35 @@ func SyntheticsTestData_SetURL(v string) SyntheticsTestDataOption {
 
 func FromSyntheticsTestData(cfg SyntheticsTestData) SyntheticsTestDataOption {
 	return func(o *SyntheticsTestData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewSyntheticsTestData creates a datadog_synthetics_test DataSource and adds it to the stack.
-func NewSyntheticsTestData(stack *config.Stack, name string, opts ...SyntheticsTestDataOption) error {
-	var cfg SyntheticsTestData
+// NewSyntheticsTestData creates a datadog_synthetics_test data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewSyntheticsTestData(stack *config.Stack, name string) (*SyntheticsTestData, error) {
+	h := &SyntheticsTestData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_synthetics_test",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_synthetics_test. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *SyntheticsTestData) Apply(opts ...SyntheticsTestDataOption) *SyntheticsTestData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_synthetics_test config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_synthetics_test config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_synthetics_test",
-	})
+	return h
 }
 
 // TeamData represents the datadog_team data source.
@@ -2492,6 +2726,7 @@ type TeamData struct {
 	Summary       string  `json:"summary,omitempty"`
 	TeamID        string  `json:"team_id,omitempty"`
 	UserCount     float64 `json:"user_count,omitempty"`
+	resource      *config.DataSource
 }
 
 type TeamDataOption func(*TeamData)
@@ -2552,29 +2787,35 @@ func TeamData_SetUserCount(v float64) TeamDataOption {
 
 func FromTeamData(cfg TeamData) TeamDataOption {
 	return func(o *TeamData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewTeamData creates a datadog_team DataSource and adds it to the stack.
-func NewTeamData(stack *config.Stack, name string, opts ...TeamDataOption) error {
-	var cfg TeamData
+// NewTeamData creates a datadog_team data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewTeamData(stack *config.Stack, name string) (*TeamData, error) {
+	h := &TeamData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_team",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_team. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *TeamData) Apply(opts ...TeamDataOption) *TeamData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_team config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_team config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_team",
-	})
+	return h
 }
 
 // TeamMembershipsData represents the datadog_team_memberships data source.
@@ -2585,6 +2826,7 @@ type TeamMembershipsData struct {
 	ID              string           `json:"id,omitempty"`
 	TeamID          string           `json:"team_id"`
 	TeamMemberships []map[string]any `json:"team_memberships,omitempty"`
+	resource        *config.DataSource
 }
 
 type TeamMembershipsDataOption func(*TeamMembershipsData)
@@ -2621,29 +2863,35 @@ func TeamMembershipsData_SetTeamMemberships(v []map[string]any) TeamMembershipsD
 
 func FromTeamMembershipsData(cfg TeamMembershipsData) TeamMembershipsDataOption {
 	return func(o *TeamMembershipsData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewTeamMembershipsData creates a datadog_team_memberships DataSource and adds it to the stack.
-func NewTeamMembershipsData(stack *config.Stack, name string, opts ...TeamMembershipsDataOption) error {
-	var cfg TeamMembershipsData
+// NewTeamMembershipsData creates a datadog_team_memberships data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewTeamMembershipsData(stack *config.Stack, name string) (*TeamMembershipsData, error) {
+	h := &TeamMembershipsData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_team_memberships",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_team_memberships. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *TeamMembershipsData) Apply(opts ...TeamMembershipsDataOption) *TeamMembershipsData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_team_memberships config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_team_memberships config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_team_memberships",
-	})
+	return h
 }
 
 // UserData represents the datadog_user data source.
@@ -2654,6 +2902,7 @@ type UserData struct {
 	Filter     string `json:"filter"`
 	ID         string `json:"id,omitempty"`
 	Name       string `json:"name,omitempty"`
+	resource   *config.DataSource
 }
 
 type UserDataOption func(*UserData)
@@ -2690,29 +2939,35 @@ func UserData_SetName(v string) UserDataOption {
 
 func FromUserData(cfg UserData) UserDataOption {
 	return func(o *UserData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewUserData creates a datadog_user DataSource and adds it to the stack.
-func NewUserData(stack *config.Stack, name string, opts ...UserDataOption) error {
-	var cfg UserData
+// NewUserData creates a datadog_user data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewUserData(stack *config.Stack, name string) (*UserData, error) {
+	h := &UserData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_user",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_user. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *UserData) Apply(opts ...UserDataOption) *UserData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_user config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_user config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_user",
-	})
+	return h
 }
 
 // UsersData represents the datadog_users data source.
@@ -2722,6 +2977,7 @@ type UsersData struct {
 	FilterStatus string           `json:"filter_status,omitempty"`
 	ID           string           `json:"id,omitempty"`
 	Users        []map[string]any `json:"users,omitempty"`
+	resource     *config.DataSource
 }
 
 type UsersDataOption func(*UsersData)
@@ -2752,27 +3008,33 @@ func UsersData_SetUsers(v []map[string]any) UsersDataOption {
 
 func FromUsersData(cfg UsersData) UsersDataOption {
 	return func(o *UsersData) {
+		save := o.resource
 		*o = cfg
+		o.resource = save
 	}
 }
 
-// NewUsersData creates a datadog_users DataSource and adds it to the stack.
-func NewUsersData(stack *config.Stack, name string, opts ...UsersDataOption) error {
-	var cfg UsersData
+// NewUsersData creates a datadog_users data source, attaches it to the stack, and returns a
+// handle whose Apply method configures the resource's attributes.
+func NewUsersData(stack *config.Stack, name string) (*UsersData, error) {
+	h := &UsersData{}
+	r := &config.DataSource{
+		Name:            name,
+		Type:            "datadog_users",
+		TypedAttributes: h,
+	}
+	if err := stack.AddDataSourcePtr(r); err != nil {
+		return nil, err
+	}
+	h.resource = r
+	return h, nil
+}
+
+// Apply sets attribute fields on the datadog_users. Safe to call multiple times;
+// each call mutates the typed payload in place. Returns the receiver for chaining.
+func (h *UsersData) Apply(opts ...UsersDataOption) *UsersData {
 	for _, opt := range opts {
-		opt(&cfg)
+		opt(h)
 	}
-	data, err := json.Marshal(cfg)
-	if err != nil {
-		return fmt.Errorf("marshaling datadog_users config: %w", err)
-	}
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return fmt.Errorf("converting datadog_users config: %w", err)
-	}
-	return stack.AddDataSource(config.DataSource{
-		Attributes: m,
-		Name:       name,
-		Type:       "datadog_users",
-	})
+	return h
 }

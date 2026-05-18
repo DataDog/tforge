@@ -1718,3 +1718,84 @@ func TestProviderConfigJSON_MarshalJSON(t *testing.T) {
 		}
 	})
 }
+
+// typedMonitor mimics a generated typed resource payload: schema-named fields
+// via JSON tags so render-time marshaling produces the correct attribute keys.
+type typedMonitor struct {
+	Name *string `json:"name,omitempty"`
+	Type *string `json:"type,omitempty"`
+}
+
+func strPtr(s string) *string { return &s }
+
+func TestToJSON_TypedAttributes(t *testing.T) {
+	stack := config.NewStack("test")
+	stack.AddProvider(config.Provider{Name: "datadog"})
+	if err := stack.AddResourcePtr(&config.Resource{
+		Type:            "datadog_monitor",
+		Name:            "cpu",
+		TypedAttributes: &typedMonitor{Name: strPtr("hi"), Type: strPtr("metric alert")},
+	}); err != nil {
+		t.Fatalf("AddResourcePtr error = %v", err)
+	}
+
+	data, err := ToJSON(stack, "test")
+	if err != nil {
+		t.Fatalf("ToJSON error = %v", err)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(data, &out); err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	cpu := mustMap(t, mustMap(t, mustMap(t, out, "resource"), "datadog_monitor"), "cpu")
+	if cpu["name"] != "hi" {
+		t.Errorf("name = %v, want \"hi\"", cpu["name"])
+	}
+	if cpu["type"] != "metric alert" {
+		t.Errorf("type = %v, want \"metric alert\"", cpu["type"])
+	}
+}
+
+func TestToJSON_TypedAttributes_MutatesAfterAdd(t *testing.T) {
+	stack := config.NewStack("test")
+	payload := &typedMonitor{Name: strPtr("initial")}
+	if err := stack.AddResourcePtr(&config.Resource{
+		Type:            "datadog_monitor",
+		Name:            "cpu",
+		TypedAttributes: payload,
+	}); err != nil {
+		t.Fatalf("AddResourcePtr error = %v", err)
+	}
+
+	// Mutate the payload after adding — render must see the new value.
+	payload.Name = strPtr("updated")
+
+	data, err := ToJSON(stack, "test")
+	if err != nil {
+		t.Fatalf("ToJSON error = %v", err)
+	}
+	var out map[string]any
+	if err := json.Unmarshal(data, &out); err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	cpu := mustMap(t, mustMap(t, mustMap(t, out, "resource"), "datadog_monitor"), "cpu")
+	if cpu["name"] != "updated" {
+		t.Errorf("post-mutation name = %v, want \"updated\"", cpu["name"])
+	}
+}
+
+func TestToJSON_BothAttributesAndTypedAttributes_Error(t *testing.T) {
+	stack := config.NewStack("test")
+	if err := stack.AddResourcePtr(&config.Resource{
+		Type:            "datadog_monitor",
+		Name:            "cpu",
+		Attributes:      map[string]any{"name": "untyped"},
+		TypedAttributes: &typedMonitor{Name: strPtr("typed")},
+	}); err != nil {
+		t.Fatalf("AddResourcePtr error = %v", err)
+	}
+
+	if _, err := ToJSON(stack, "test"); err == nil {
+		t.Fatal("ToJSON should error when both Attributes and TypedAttributes are set")
+	}
+}

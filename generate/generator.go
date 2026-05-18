@@ -210,12 +210,13 @@ func (g *Generator) generateProvider() error {
 // generateResources generates resource files.
 //
 // For each resource (e.g., "datadog_monitor"), it generates:
-//  1. A struct type         → type Monitor struct { ... }
+//  1. A struct type         → type Monitor struct { ... ; resource *config.Resource }
 //  2. Nested block types    → type MonitorThresholds struct { ... }
 //  3. A functional option   → type MonitorOption func(*Monitor)
 //  4. Set* option functions → func Monitor_SetName(v string) MonitorOption { ... }
 //  5. A From* bridge        → func FromMonitor(cfg Monitor) MonitorOption { ... }
-//  6. A New* constructor    → func NewMonitor(stack, name, opts...) error { ... }
+//  6. A New* constructor    → func NewMonitor(stack, name) (*Monitor, error) { ... }
+//  7. Apply / ApplyResourceOptions methods on *Monitor.
 func (g *Generator) generateResources() error {
 	resources := sortedSchemas(g.schema.ResourceSchemas)
 	if len(resources) == 0 {
@@ -237,6 +238,9 @@ func (g *Generator) generateResources() error {
 			if res.Schema != nil && res.Schema.Block != nil {
 				g.generateBlockFields(s, res.Schema.Block, structName)
 			}
+			// Unexported back-pointer to the stack-owned Resource.
+			// Lowercase → skipped by encoding/json so it never appears in the rendered config.
+			s.Id("resource").Op("*").Qual("github.com/DataDog/tforge/config", "Resource")
 		})
 		f.Line()
 
@@ -250,10 +254,10 @@ func (g *Generator) generateResources() error {
 		if res.Schema != nil && res.Schema.Block != nil {
 			g.generateOptionFunctions(f, structName, res.Schema.Block)
 		}
-		g.generateConfigBridge(f, structName)
+		g.generateConfigBridge(f, structName, true /* hasBackPointer */)
 
-		// Generate typed constructor: NewXxx(stack, name, opts ...XxxOption) error
-		g.generateConstructor(f, structName, res.Name, "AddResource")
+		// Generate typed constructor and Apply* methods.
+		g.generateConstructor(f, structName, res.Name, true /* isResource */)
 	}
 
 	return g.writeFile(f, "resources_gen.go")
@@ -283,6 +287,8 @@ func (g *Generator) generateDataSources() error {
 			if ds.Schema != nil && ds.Schema.Block != nil {
 				g.generateBlockFields(s, ds.Schema.Block, structName)
 			}
+			// Unexported back-pointer to the stack-owned DataSource.
+			s.Id("resource").Op("*").Qual("github.com/DataDog/tforge/config", "DataSource")
 		})
 		f.Line()
 
@@ -296,10 +302,10 @@ func (g *Generator) generateDataSources() error {
 		if ds.Schema != nil && ds.Schema.Block != nil {
 			g.generateOptionFunctions(f, structName, ds.Schema.Block)
 		}
-		g.generateConfigBridge(f, structName)
+		g.generateConfigBridge(f, structName, true /* hasBackPointer */)
 
-		// Generate typed constructor: NewXxx(stack, name, opts ...XxxOption) error
-		g.generateConstructor(f, structName, ds.Name, "AddDataSource")
+		// Generate typed constructor and Apply method.
+		g.generateConstructor(f, structName, ds.Name, false /* isResource */)
 	}
 
 	return g.writeFile(f, "data_sources_gen.go")
@@ -566,136 +572,121 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 // generateConfigBridge generates the FromXxx bridge function for struct-based migration.
 // The "From" prefix avoids collisions with field option functions (which use "Set").
 //
-// Output:
+// When hasBackPointer is true, the closure preserves the unexported `resource`
+// field across the struct assignment so the handle stays attached to the stack:
 //
 //	func FromMonitor(cfg Monitor) MonitorOption {
-//	    return func(o *Monitor) { *o = cfg }
+//	    return func(o *Monitor) {
+//	        save := o.resource
+//	        *o = cfg
+//	        o.resource = save
+//	    }
 //	}
-func (g *Generator) generateConfigBridge(f *jen.File, structName string) {
+func (g *Generator) generateConfigBridge(f *jen.File, structName string, hasBackPointer bool) {
 	short := g.shortName(structName)
 	optionType := short + "Option"
 	funcName := "From" + short
 
+	var body []jen.Code
+	if hasBackPointer {
+		body = []jen.Code{
+			jen.Id("save").Op(":=").Id("o").Dot("resource"),
+			jen.Op("*").Id("o").Op("=").Id("cfg"),
+			jen.Id("o").Dot("resource").Op("=").Id("save"),
+		}
+	} else {
+		body = []jen.Code{jen.Op("*").Id("o").Op("=").Id("cfg")}
+	}
+
 	f.Func().Id(funcName).Params(
 		jen.Id("cfg").Id(structName),
 	).Id(optionType).Block(
-		jen.Return(jen.Func().Params(jen.Id("o").Op("*").Id(structName)).Block(
-			jen.Op("*").Id("o").Op("=").Id("cfg"),
-		)),
+		jen.Return(jen.Func().Params(jen.Id("o").Op("*").Id(structName)).Block(body...)),
 	)
 	f.Line()
 }
 
-// generateConstructor generates a typed constructor function for a resource or data source.
+// generateConstructor generates a typed constructor + Apply method(s) for a
+// top-level resource or data source.
 //
-// For resources, the generated function accepts optional config.ResourceOption arguments
-// to configure resource-level meta-arguments (Lifecycle, Provider, etc.):
+// For resources (isResource=true), it emits:
 //
-//	func NewMonitor(stack *config.Stack, name string, resourceOpts []config.ResourceOption, opts ...MonitorOption) error {
-//	    var cfg Monitor
-//	    for _, opt := range opts { opt(&cfg) }
-//	    data, err := json.Marshal(cfg)
-//	    ...
-//	    r := config.Resource{Type: "datadog_monitor", Name: name, MetaArguments: config.MetaArguments{Config: m}}
-//	    for _, ro := range resourceOpts { ro(&r) }
-//	    return stack.AddResource(r)
+//	func NewMonitor(stack *config.Stack, name string) (*Monitor, error) {
+//	    m := &Monitor{}
+//	    r := &config.Resource{Type: "datadog_monitor", Name: name, TypedAttributes: m}
+//	    if err := stack.AddResourcePtr(r); err != nil { return nil, err }
+//	    m.resource = r
+//	    return m, nil
 //	}
+//	func (m *Monitor) Apply(opts ...MonitorOption) *Monitor { ... }
+//	func (m *Monitor) ApplyResourceOptions(opts ...config.ResourceOption) { ... }
 //
-// For data sources, the signature omits resourceOpts:
-//
-//	func NewMonitorData(stack *config.Stack, name string, opts ...MonitorDataOption) error { ... }
-func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName, addMethod string) {
+// For data sources (isResource=false), it emits the same New + Apply pair
+// minus ApplyResourceOptions (DataSource has no meta-option helpers today).
+func (g *Generator) generateConstructor(f *jen.File, structName, tfTypeName string, isResource bool) {
 	funcName := "New" + structName
 	short := g.shortName(structName)
 	optionType := short + "Option"
 
-	isResource := addMethod == "AddResource"
 	configType := "Resource"
+	addMethod := "AddResourcePtr"
+	kind := "resource"
 	if !isResource {
 		configType = "DataSource"
+		addMethod = "AddDataSourcePtr"
+		kind = "data source"
 	}
 
-	// Step 1: Apply functional options to a zero-value struct.
-	applyOpts := []jen.Code{
-		jen.Var().Id("cfg").Id(structName),
-		jen.For(jen.List(jen.Id("_"), jen.Id("opt")).Op(":=").Range().Id("opts")).Block(
-			jen.Id("opt").Call(jen.Op("&").Id("cfg")),
-		),
-	}
-
-	// Step 2: Marshal struct → JSON bytes.
-	marshal := []jen.Code{
-		jen.List(jen.Id("data"), jen.Id("err")).Op(":=").Qual("encoding/json", "Marshal").Call(jen.Id("cfg")),
-		jen.If(jen.Id("err").Op("!=").Nil()).Block(
-			jen.Return(jen.Qual("fmt", "Errorf").Call(jen.Lit("marshaling "+tfTypeName+" config: %w"), jen.Id("err"))),
-		),
-	}
-
-	// Step 3: Unmarshal JSON → map[string]any for the config object.
-	unmarshal := []jen.Code{
-		jen.Var().Id("m").Map(jen.String()).Any(),
+	// Constructor: build the handle, attach the typed payload, add to stack.
+	f.Commentf("%s creates a %s %s, attaches it to the stack, and returns a", funcName, tfTypeName, kind)
+	f.Comment("handle whose Apply method configures the resource's attributes.")
+	f.Func().Id(funcName).Params(
+		jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
+		jen.Id("name").String(),
+	).Params(jen.Op("*").Id(structName), jen.Error()).Block(
+		jen.Id("h").Op(":=").Op("&").Id(structName).Values(),
+		jen.Id("r").Op(":=").Op("&").Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
+			jen.Id("Type"):            jen.Lit(tfTypeName),
+			jen.Id("Name"):            jen.Id("name"),
+			jen.Id("TypedAttributes"): jen.Id("h"),
+		}),
 		jen.If(
-			jen.Id("err").Op(":=").Qual("encoding/json", "Unmarshal").Call(jen.Id("data"), jen.Op("&").Id("m")),
+			jen.Id("err").Op(":=").Id("stack").Dot(addMethod).Call(jen.Id("r")),
 			jen.Id("err").Op("!=").Nil(),
 		).Block(
-			jen.Return(jen.Qual("fmt", "Errorf").Call(jen.Lit("converting "+tfTypeName+" config: %w"), jen.Id("err"))),
+			jen.Return(jen.Nil(), jen.Id("err")),
 		),
-	}
-
-	// Step 4: Build the resource/data source. For resources, bind it to `r`
-	// so the resource-options loop below can mutate it; for data sources, add
-	// directly to the stack.
-	var addToStack jen.Code
-	if isResource {
-		addToStack = jen.Id("r").Op(":=").Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
-			jen.Id("Type"):       jen.Lit(tfTypeName),
-			jen.Id("Name"):       jen.Id("name"),
-			jen.Id("Attributes"): jen.Id("m"),
-		})
-	} else {
-		addToStack = jen.Return(jen.Id("stack").Dot(addMethod).Call(
-			jen.Qual("github.com/DataDog/tforge/config", configType).Values(jen.Dict{
-				jen.Id("Type"):       jen.Lit(tfTypeName),
-				jen.Id("Name"):       jen.Id("name"),
-				jen.Id("Attributes"): jen.Id("m"),
-			}),
-		))
-	}
-
-	// Assemble the function body from all steps.
-	var body []jen.Code
-	body = append(body, applyOpts...)
-	body = append(body, marshal...)
-	body = append(body, unmarshal...)
-	body = append(body, addToStack)
-
-	if isResource {
-		// Apply resource-level options (Lifecycle, Provider, etc.)
-		body = append(body,
-			jen.For(jen.List(jen.Id("_"), jen.Id("ro")).Op(":=").Range().Id("resourceOpts")).Block(
-				jen.Id("ro").Call(jen.Op("&").Id("r")),
-			),
-			jen.Return(jen.Id("stack").Dot(addMethod).Call(jen.Id("r"))),
-		)
-	}
-
-	f.Commentf("%s creates a %s %s and adds it to the stack.", funcName, tfTypeName, configType)
-
-	if isResource {
-		f.Func().Id(funcName).Params(
-			jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
-			jen.Id("name").String(),
-			jen.Id("resourceOpts").Index().Qual("github.com/DataDog/tforge/config", "ResourceOption"),
-			jen.Id("opts").Op("...").Id(optionType),
-		).Error().Block(body...)
-	} else {
-		f.Func().Id(funcName).Params(
-			jen.Id("stack").Op("*").Qual("github.com/DataDog/tforge/config", "Stack"),
-			jen.Id("name").String(),
-			jen.Id("opts").Op("...").Id(optionType),
-		).Error().Block(body...)
-	}
+		jen.Id("h").Dot("resource").Op("=").Id("r"),
+		jen.Return(jen.Id("h"), jen.Nil()),
+	)
 	f.Line()
+
+	// Apply method.
+	f.Commentf("Apply sets attribute fields on the %s. Safe to call multiple times;", tfTypeName)
+	f.Comment("each call mutates the typed payload in place. Returns the receiver for chaining.")
+	f.Func().Params(jen.Id("h").Op("*").Id(structName)).Id("Apply").Params(
+		jen.Id("opts").Op("...").Id(optionType),
+	).Op("*").Id(structName).Block(
+		jen.For(jen.List(jen.Id("_"), jen.Id("opt")).Op(":=").Range().Id("opts")).Block(
+			jen.Id("opt").Call(jen.Id("h")),
+		),
+		jen.Return(jen.Id("h")),
+	)
+	f.Line()
+
+	if isResource {
+		// ApplyResourceOptions method (meta-arguments).
+		f.Commentf("ApplyResourceOptions sets meta-arguments (Lifecycle, Provider, DependsOn,")
+		f.Comment("Timeouts) on the underlying resource. Safe to call multiple times.")
+		f.Func().Params(jen.Id("h").Op("*").Id(structName)).Id("ApplyResourceOptions").Params(
+			jen.Id("opts").Op("...").Qual("github.com/DataDog/tforge/config", "ResourceOption"),
+		).Block(
+			jen.For(jen.List(jen.Id("_"), jen.Id("opt")).Op(":=").Range().Id("opts")).Block(
+				jen.Id("opt").Call(jen.Id("h").Dot("resource")),
+			),
+		)
+		f.Line()
+	}
 }
 
 // generateNestedConstructor generates a constructor for a nested block type.

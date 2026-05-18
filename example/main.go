@@ -32,8 +32,14 @@ func main() {
 		},
 	})
 
-	// Create a Datadog monitor using functional options
-	if err := datadog.NewMonitor(stack, "cpu_alert", nil,
+	// Create a Datadog monitor: the constructor attaches it to the stack
+	// and returns a handle. Apply configures the attributes; the handle
+	// can be reused later to add more attributes or meta-arguments.
+	m, err := datadog.NewMonitor(stack, "cpu_alert")
+	if err != nil {
+		log.Fatal(err)
+	}
+	m.Apply(
 		datadog.Monitor_SetName("High CPU Usage Alert"),
 		datadog.Monitor_SetType("metric alert"),
 		datadog.Monitor_SetMessage("CPU usage is above threshold. @slack-alerts"),
@@ -47,9 +53,7 @@ func main() {
 		datadog.Monitor_SetNoDataTimeframe(10),
 		datadog.Monitor_SetRenotifyInterval(60),
 		datadog.Monitor_SetRequireFullWindow(true),
-	); err != nil {
-		log.Fatal(err)
-	}
+	)
 
 	// Render to JSON
 	data, err := render.ToJSON(stack, "")

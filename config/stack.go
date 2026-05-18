@@ -30,10 +30,13 @@ type Stack struct {
 	Providers []Provider
 
 	// Resources contains managed resource configurations.
-	Resources []Resource
+	// Stored by pointer so that generated typed handles can mutate the
+	// resource in place after construction (e.g., via Apply / ApplyResourceOptions).
+	Resources []*Resource
 
 	// DataSources contains data source configurations.
-	DataSources []DataSource
+	// Stored by pointer for the same reason as Resources.
+	DataSources []*DataSource
 
 	// Modules contains module call configurations.
 	Modules []Module
@@ -76,10 +79,22 @@ func (s *Stack) AddProvider(p Provider) {
 }
 
 // AddResource adds a managed resource to the stack.
-// It returns an error if the resource type or name is empty,
-// or if a resource with the same type and name already exists.
+// The resource value is copied into the stack; subsequent mutations to r
+// are not visible to the stack. For mutation-after-add semantics, use
+// AddResourcePtr (the path used by generated typed constructors).
+// Returns an error if Type or Name is empty, or on duplicate address.
 func (s *Stack) AddResource(r Resource) error {
-	// Validate resource has required fields
+	return s.AddResourcePtr(&r)
+}
+
+// AddResourcePtr adds a managed resource by pointer. Mutations to the
+// pointed-to Resource after AddResourcePtr returns are reflected in the
+// stack and the rendered output. Used by generated typed constructors.
+// Returns an error if Type or Name is empty, or on duplicate address.
+func (s *Stack) AddResourcePtr(r *Resource) error {
+	if r == nil {
+		return fmt.Errorf("resource is nil")
+	}
 	if r.Type == "" {
 		return fmt.Errorf("resource type is required")
 	}
@@ -87,7 +102,6 @@ func (s *Stack) AddResource(r Resource) error {
 		return fmt.Errorf("resource name is required")
 	}
 
-	// Check for duplicates
 	addr := r.Address()
 	for _, existing := range s.Resources {
 		if existing.Address() == addr {
@@ -100,9 +114,19 @@ func (s *Stack) AddResource(r Resource) error {
 }
 
 // AddDataSource adds a data source to the stack.
-// It returns an error if the data source type or name is empty,
-// or if a data source with the same type and name already exists.
+// Value-copy semantics — see AddResource. Use AddDataSourcePtr for
+// mutation-after-add (used by generated typed constructors).
+// Returns an error if Type or Name is empty, or on duplicate address.
 func (s *Stack) AddDataSource(d DataSource) error {
+	return s.AddDataSourcePtr(&d)
+}
+
+// AddDataSourcePtr adds a data source by pointer. Mutations after add
+// propagate to the stack. Used by generated typed constructors.
+func (s *Stack) AddDataSourcePtr(d *DataSource) error {
+	if d == nil {
+		return fmt.Errorf("data source is nil")
+	}
 	if d.Type == "" {
 		return fmt.Errorf("data source type is required")
 	}
@@ -110,7 +134,6 @@ func (s *Stack) AddDataSource(d DataSource) error {
 		return fmt.Errorf("data source name is required")
 	}
 
-	// Check for duplicates
 	addr := d.Address()
 	for _, existing := range s.DataSources {
 		if existing.Address() == addr {

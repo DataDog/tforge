@@ -224,6 +224,39 @@ func TestAddResourceDuplicate(t *testing.T) {
 	}
 }
 
+func TestAddResourcePtr_MutationPropagates(t *testing.T) {
+	s := NewStack("test")
+	r := &Resource{Type: "aws_instance", Name: "web"}
+	if err := s.AddResourcePtr(r); err != nil {
+		t.Fatalf("AddResourcePtr error = %v", err)
+	}
+	r.Attributes = map[string]any{"ami": "ami-123"}
+
+	if s.Resources[0].Attributes["ami"] != "ami-123" {
+		t.Fatalf("post-add mutation not visible: got %v", s.Resources[0].Attributes)
+	}
+}
+
+func TestAddResourcePtr_NilRejected(t *testing.T) {
+	s := NewStack("test")
+	if err := s.AddResourcePtr(nil); err == nil {
+		t.Fatal("AddResourcePtr(nil) should return an error")
+	}
+}
+
+func TestAddResource_ValueDoesNotPropagate(t *testing.T) {
+	s := NewStack("test")
+	r := Resource{Type: "aws_instance", Name: "web"}
+	if err := s.AddResource(r); err != nil {
+		t.Fatalf("AddResource error = %v", err)
+	}
+	r.Attributes = map[string]any{"ami": "ami-123"}
+
+	if s.Resources[0].Attributes != nil {
+		t.Fatalf("AddResource should value-copy; mutation leaked: %v", s.Resources[0].Attributes)
+	}
+}
+
 func TestAddDataSourceDuplicate(t *testing.T) {
 	s := NewStack("test")
 	err := s.AddDataSource(DataSource{Type: "aws_ami", Name: "latest", Attributes: map[string]any{"filter": "first"}})
