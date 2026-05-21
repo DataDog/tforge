@@ -23,6 +23,7 @@ package generate
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -183,11 +184,11 @@ func (g *Generator) shortName(structName string) string {
 //
 // Output (example with Datadog provider):
 //
-//	const (
-//	    ProviderName    = "datadog"
-//	    ProviderSource  = "DataDog/datadog"
-//	    ProviderVersion = "3.39.0"
-//	)
+//	var Provider = config.ProviderMetadata{
+//	    Name:    "datadog",
+//	    Source:  "DataDog/datadog",
+//	    Version: "3.39.0",
+//	}
 //
 //	type ProviderConfig struct {
 //	    APIKey  string `json:"api_key"`
@@ -196,7 +197,7 @@ func (g *Generator) shortName(structName string) string {
 //	}
 //
 //	func NewProvider(stack *config.Stack, opts ...config.ProviderOption) {
-//	    p := config.Provider{Name: ProviderName, Source: ProviderSource, Version: ProviderVersion}
+//	    p := config.Provider{Name: Provider.Name, Source: Provider.Source, Version: Provider.Version}
 //	    for _, opt := range opts { opt(&p) }
 //	    stack.AddProvider(p)
 //	}
@@ -233,56 +234,84 @@ func (g *Generator) generateProvider() error {
 	return g.writeFile(f, "provider_gen.go")
 }
 
-// providerLocalName returns the conventional Terraform-local name for the
-// provider (the segment after "/" in "namespace/name"). Falls back to the
-// detected provider prefix (lowercased) when ProviderSource is unset.
+// providerLocalName returns the Terraform-local name for the provider —
+// the name resources implicitly bind to via their type prefix (e.g.
+// `google_compute_instance` -> `google`). Prefers the prefix derived from
+// resource type names; falls back to the last segment of ProviderSource for
+// schemas that have no resources or data sources. The fallback uses the
+// LAST '/'-segment so hostname-qualified sources like
+// `registry.opentofu.org/hashicorp/aws` resolve to `aws`, not `hashicorp/aws`.
 func (g *Generator) providerLocalName() string {
+	if g.providerPrefix != "" {
+		return strings.ToLower(g.providerPrefix)
+	}
 	if g.config.ProviderSource != "" {
-		if idx := strings.IndexByte(g.config.ProviderSource, '/'); idx >= 0 {
+		if idx := strings.LastIndexByte(g.config.ProviderSource, '/'); idx >= 0 {
 			return g.config.ProviderSource[idx+1:]
 		}
 		return g.config.ProviderSource
 	}
-	return strings.ToLower(g.providerPrefix)
+	return ""
 }
 
-// generateProviderMetadata emits ProviderName/Source/Version constants when
-// the generator was given the source+version (i.e. via the CLI flags). When
-// either is missing the constants are omitted; old callers that didn't pass
-// the metadata get the previous, constant-less output.
+// generateProviderMetadata emits a `Provider` struct value carrying the
+// Name/Source/Version. Only emitted when the generator was given both
+// ProviderSource and ProviderVersion (typically via the CLI flags). Skipped
+// with a stderr warning when emitting `Provider` would shadow a resource or
+// data source that already short-names to `Provider` — in Go all package-level
+// identifiers share a namespace, so a duplicate declaration would break the
+// build.
 func (g *Generator) generateProviderMetadata(f *jen.File) {
 	if g.config.ProviderSource == "" || g.config.ProviderVersion == "" {
 		return
 	}
-	f.Comment("Provider metadata extracted from the schema at generation time.")
-	f.Const().Defs(
-		jen.Id("ProviderName").Op("=").Lit(g.providerLocalName()),
-		jen.Id("ProviderSource").Op("=").Lit(g.config.ProviderSource),
-		jen.Id("ProviderVersion").Op("=").Lit(g.config.ProviderVersion),
-	)
+	if g.reservedNames["Provider"] {
+		fmt.Fprintf(os.Stderr,
+			"warning: skipping provider metadata for %q: a generated resource or data source "+
+				"shadows the `Provider` identifier (rename the colliding Terraform type or "+
+				"omit -provider/-version to suppress this warning)\n",
+			g.config.ProviderSource)
+		return
+	}
+	cfgPkg := "github.com/DataDog/tforge/config"
+	f.Comment("Provider exposes the provider metadata extracted from the schema at")
+	f.Comment("generation time (Name is the Terraform-local provider name, Source is the")
+	f.Comment("full registry address, Version is the schema's source version).")
+	f.Var().Id("Provider").Op("=").Qual(cfgPkg, "ProviderMetadata").Values(jen.Dict{
+		jen.Id("Name"):    jen.Lit(g.providerLocalName()),
+		jen.Id("Source"):  jen.Lit(g.config.ProviderSource),
+		jen.Id("Version"): jen.Lit(g.config.ProviderVersion),
+	})
 	f.Line()
 }
 
 // generateProviderConstructor emits a NewProvider helper that wires the
-// ProviderName/Source/Version constants automatically so callers only need to
-// pass alias/config overrides via functional options. Skipped when the
-// metadata isn't available (see generateProviderMetadata).
+// Provider struct's fields automatically so callers only need to pass
+// alias/config overrides via functional options. Skipped when the metadata
+// isn't available (see generateProviderMetadata), and when emitting
+// NewProvider would shadow a resource constructor that already short-names
+// to `Provider` (i.e. a `<prefix>_provider` Terraform resource exists).
 func (g *Generator) generateProviderConstructor(f *jen.File) {
 	if g.config.ProviderSource == "" || g.config.ProviderVersion == "" {
 		return
 	}
+	if g.reservedNames["Provider"] {
+		// The metadata var was also skipped (same collision); generateProviderMetadata
+		// already emitted a warning, so stay silent here.
+		return
+	}
 	cfgPkg := "github.com/DataDog/tforge/config"
 	f.Comment("NewProvider adds a provider configuration to the stack using the")
-	f.Comment("ProviderName/Source/Version constants that were baked in at generation")
+	f.Comment("Provider.Name/Source/Version metadata that was baked in at generation")
 	f.Comment("time. Callers override fields like Alias via functional options.")
 	f.Func().Id("NewProvider").Params(
 		jen.Id("stack").Op("*").Qual(cfgPkg, "Stack"),
 		jen.Id("opts").Op("...").Qual(cfgPkg, "ProviderOption"),
 	).Block(
 		jen.Id("p").Op(":=").Qual(cfgPkg, "Provider").Values(jen.Dict{
-			jen.Id("Name"):    jen.Id("ProviderName"),
-			jen.Id("Source"):  jen.Id("ProviderSource"),
-			jen.Id("Version"): jen.Id("ProviderVersion"),
+			jen.Id("Name"):    jen.Id("Provider").Dot("Name"),
+			jen.Id("Source"):  jen.Id("Provider").Dot("Source"),
+			jen.Id("Version"): jen.Id("Provider").Dot("Version"),
 		}),
 		jen.For(jen.List(jen.Id("_"), jen.Id("opt")).Op(":=").Range().Id("opts")).Block(
 			jen.Id("opt").Call(jen.Op("&").Id("p")),

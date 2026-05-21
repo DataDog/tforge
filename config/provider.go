@@ -28,6 +28,23 @@ func (p Provider) Address() string {
 	return p.Name
 }
 
+// ProviderMetadata is the canonical shape used by generated provider packages
+// to expose the Name/Source/Version that were baked in at generation time.
+// Each generated package declares one package-level variable of this type
+// (conventionally `var Provider`) so consumers can read the metadata without
+// having to remember the per-package constant names. The generated
+// `NewProvider` helper reads these fields when populating a `Provider` value.
+type ProviderMetadata struct {
+	// Name is the Terraform-local provider name (e.g., "aws", "google").
+	Name string
+
+	// Source is the full provider source address (e.g., "hashicorp/aws").
+	Source string
+
+	// Version is the schema's source version (e.g., "5.0.0").
+	Version string
+}
+
 // ProviderOption mutates a Provider as part of a functional-options
 // constructor (see the generated `NewProvider` in each provider package). It
 // lets callers override fields like Alias or Config without having to repeat

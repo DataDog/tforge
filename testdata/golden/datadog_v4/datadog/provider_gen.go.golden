@@ -2,6 +2,17 @@
 
 package datadog
 
+import config "github.com/DataDog/tforge/config"
+
+// Provider exposes the provider metadata extracted from the schema at
+// generation time (Name is the Terraform-local provider name, Source is the
+// full registry address, Version is the schema's source version).
+var Provider = config.ProviderMetadata{
+	Name:    "datadog",
+	Source:  "datadog/datadog",
+	Version: "4.4.0",
+}
+
 // ProviderConfig represents the provider configuration.
 type ProviderConfig struct {
 	APIKey                           string                     `json:"api_key,omitempty"`
@@ -43,4 +54,19 @@ func NewProviderConfigDefaultTags(opts ...ProviderConfigDefaultTagsOption) *Prov
 		opt(&cfg)
 	}
 	return &cfg
+}
+
+// NewProvider adds a provider configuration to the stack using the
+// Provider.Name/Source/Version metadata that was baked in at generation
+// time. Callers override fields like Alias via functional options.
+func NewProvider(stack *config.Stack, opts ...config.ProviderOption) {
+	p := config.Provider{
+		Name:    Provider.Name,
+		Source:  Provider.Source,
+		Version: Provider.Version,
+	}
+	for _, opt := range opts {
+		opt(&p)
+	}
+	stack.AddProvider(p)
 }
