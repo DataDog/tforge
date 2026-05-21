@@ -338,6 +338,30 @@ func TestAddModuleDuplicate(t *testing.T) {
 	}
 }
 
+// TestAddModule_PreservesCallerName verifies the no-mutation contract:
+// AddModule must not rewrite m.Name. The sanitized form is reachable only
+// through Module.SanitizedName(). This closes the codex feedback at PR #15.
+func TestAddModule_PreservesCallerName(t *testing.T) {
+	s := NewStack("test")
+	const raw = "1-bad/leading"
+	m := Module{Name: raw, Source: "terraform-aws-modules/eks/aws"}
+	if err := s.AddModule(m); err != nil {
+		t.Fatalf("AddModule: %v", err)
+	}
+	// The caller-visible value must not be touched.
+	if m.Name != raw {
+		t.Errorf("caller m.Name = %q, want %q (unchanged)", m.Name, raw)
+	}
+	// The stored copy also keeps the raw Name; only SanitizedName() applies the rule.
+	stored := s.Modules[0]
+	if stored.Name != raw {
+		t.Errorf("stored Name = %q, want %q", stored.Name, raw)
+	}
+	if got, want := stored.SanitizedName(), SanitizeName(raw); got != want {
+		t.Errorf("stored SanitizedName() = %q, want %q", got, want)
+	}
+}
+
 func TestModuleAddress(t *testing.T) {
 	m := Module{Name: "eks", Source: "terraform-aws-modules/eks/aws"}
 	if got := m.Address(); got != "module.eks" {

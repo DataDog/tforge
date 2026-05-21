@@ -48,16 +48,22 @@ func TestSanitizeName(t *testing.T) {
 
 func TestAddResource_SanitizesName(t *testing.T) {
 	s := NewStack("test")
-	err := s.AddResource(&Resource{
+	r := &Resource{
 		Type: "datadog_monitor",
 		Name: "mcnulty_api/v2/{path:path}_GET",
-	})
+	}
+	err := s.AddResource(r)
 	if err != nil {
 		t.Fatalf("AddResource: unexpected error: %v", err)
 	}
+	// Raw Name is preserved on the underlying Resource.
+	if r.Name != "mcnulty_api/v2/{path:path}_GET" {
+		t.Errorf("caller r.Name = %q, want it unchanged", r.Name)
+	}
+	// SanitizedName() exposes the Terraform-valid form.
 	want := "mcnulty_api--v2--pathpath_GET"
-	if got := s.Resources[0].AsResource().Name; got != want {
-		t.Errorf("stored Name = %q, want %q", got, want)
+	if got := s.Resources[0].AsResource().SanitizedName(); got != want {
+		t.Errorf("stored SanitizedName() = %q, want %q", got, want)
 	}
 }
 
@@ -71,16 +77,20 @@ func TestAddResource_RejectsNameWithOnlyInvalidChars(t *testing.T) {
 
 func TestAddDataSource_SanitizesName(t *testing.T) {
 	s := NewStack("test")
-	err := s.AddDataSource(&DataSource{
+	d := &DataSource{
 		Type: "datadog_synthetics_test",
 		Name: "team/web/{id}",
-	})
+	}
+	err := s.AddDataSource(d)
 	if err != nil {
 		t.Fatalf("AddDataSource: unexpected error: %v", err)
 	}
+	if d.Name != "team/web/{id}" {
+		t.Errorf("caller d.Name = %q, want it unchanged", d.Name)
+	}
 	want := "team--web--id"
-	if got := s.DataSources[0].AsDataSource().Name; got != want {
-		t.Errorf("stored Name = %q, want %q", got, want)
+	if got := s.DataSources[0].AsDataSource().SanitizedName(); got != want {
+		t.Errorf("stored SanitizedName() = %q, want %q", got, want)
 	}
 }
 
@@ -94,7 +104,7 @@ func TestAddModule_SanitizesName(t *testing.T) {
 		t.Fatalf("AddModule: unexpected error: %v", err)
 	}
 	want := "platform--networking--region"
-	if got := s.Modules[0].Name; got != want {
-		t.Errorf("stored Name = %q, want %q", got, want)
+	if got := s.Modules[0].SanitizedName(); got != want {
+		t.Errorf("stored SanitizedName() = %q, want %q", got, want)
 	}
 }

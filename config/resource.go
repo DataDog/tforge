@@ -52,14 +52,21 @@ type Resource struct {
 	Timeouts *Timeouts
 }
 
-// Address returns the resource address (type.name).
+// SanitizedName returns the Terraform-identifier-valid form of r.Name. The
+// raw Name field is preserved as the caller provided it; this getter is the
+// canonical way to obtain the identifier used in rendered Terraform output.
+func (r Resource) SanitizedName() string {
+	return SanitizeName(r.Name)
+}
+
+// Address returns the resource address (type.sanitized_name).
 func (r Resource) Address() string {
-	return fmt.Sprintf("%s.%s", r.Type, r.Name)
+	return fmt.Sprintf("%s.%s", r.Type, r.SanitizedName())
 }
 
 // Ref returns a reference expression to this resource.
 func (r Resource) Ref(attr string) string {
-	return fmt.Sprintf("${%s.%s.%s}", r.Type, r.Name, attr)
+	return fmt.Sprintf("${%s.%s.%s}", r.Type, r.SanitizedName(), attr)
 }
 
 // Resourcer is implemented by anything that can be added to Stack.Resources.
@@ -97,14 +104,20 @@ type DataSource struct {
 	MetaArguments
 }
 
-// Address returns the data source address (data.type.name).
+// SanitizedName returns the Terraform-identifier-valid form of d.Name. See
+// Resource.SanitizedName for the rationale.
+func (d DataSource) SanitizedName() string {
+	return SanitizeName(d.Name)
+}
+
+// Address returns the data source address (data.type.sanitized_name).
 func (d DataSource) Address() string {
-	return fmt.Sprintf("data.%s.%s", d.Type, d.Name)
+	return fmt.Sprintf("data.%s.%s", d.Type, d.SanitizedName())
 }
 
 // Ref returns a reference expression to this data source.
 func (d DataSource) Ref(attr string) string {
-	return fmt.Sprintf("${data.%s.%s.%s}", d.Type, d.Name, attr)
+	return fmt.Sprintf("${data.%s.%s.%s}", d.Type, d.SanitizedName(), attr)
 }
 
 // DataSourcer is implemented by anything that can be added to

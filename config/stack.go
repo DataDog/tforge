@@ -82,7 +82,10 @@ func (s *Stack) AddProvider(p Provider) {
 // commonly *Resource for untyped callers, or a generated typed handle (e.g.
 // *Monitor) which carries a back-pointer to the underlying *Resource.
 // Mutations to the pointed-to Resource after AddResource returns are reflected
-// in the stack and the rendered output. Name is normalized via SanitizeName.
+// in the stack and the rendered output. The caller-provided `Name` is retained
+// as-is on the underlying *Resource; callers should use `Resource.SanitizedName()`
+// (or `Address()` / `Ref()`, which already sanitize) when they need the
+// Terraform-valid identifier.
 // Returns an error if r is nil, the underlying *Resource is nil, Type or Name
 // is empty, the name has no valid characters after sanitization, or there is
 // a duplicate address.
@@ -100,8 +103,7 @@ func (s *Stack) AddResource(r Resourcer) error {
 	if res.Name == "" {
 		return fmt.Errorf("resource name is required")
 	}
-	res.Name = SanitizeName(res.Name)
-	if res.Name == "" {
+	if SanitizeName(res.Name) == "" {
 		return fmt.Errorf("resource name has no valid characters after sanitization")
 	}
 
@@ -117,7 +119,10 @@ func (s *Stack) AddResource(r Resourcer) error {
 }
 
 // AddDataSource adds a data source to the stack. See AddResource for the
-// rationale of the interface parameter type. Name is normalized via SanitizeName.
+// rationale of the interface parameter type. The caller-provided `Name` is
+// retained as-is; callers should use `DataSource.SanitizedName()` (or
+// `Address()` / `Ref()`, which already sanitize) when they need the
+// Terraform-valid identifier.
 func (s *Stack) AddDataSource(d DataSourcer) error {
 	if d == nil {
 		return fmt.Errorf("data source is nil")
@@ -132,8 +137,7 @@ func (s *Stack) AddDataSource(d DataSourcer) error {
 	if ds.Name == "" {
 		return fmt.Errorf("data source name is required")
 	}
-	ds.Name = SanitizeName(ds.Name)
-	if ds.Name == "" {
+	if SanitizeName(ds.Name) == "" {
 		return fmt.Errorf("data source name has no valid characters after sanitization")
 	}
 
@@ -148,8 +152,10 @@ func (s *Stack) AddDataSource(d DataSourcer) error {
 	return nil
 }
 
-// AddModule adds a module call to the stack. Name normalization follows the
-// same rules as AddResource (see SanitizeName).
+// AddModule adds a module call to the stack. The caller-provided `m.Name` is
+// retained as-is on the stored Module; callers should use `Module.SanitizedName()`
+// (or `Address()` / `Ref()`, which already sanitize) when they need the
+// Terraform-valid identifier.
 func (s *Stack) AddModule(m Module) error {
 	if m.Name == "" {
 		return fmt.Errorf("module name is required")
@@ -157,14 +163,14 @@ func (s *Stack) AddModule(m Module) error {
 	if m.Source == "" {
 		return fmt.Errorf("module source is required")
 	}
-	m.Name = SanitizeName(m.Name)
-	if m.Name == "" {
+	if SanitizeName(m.Name) == "" {
 		return fmt.Errorf("module name has no valid characters after sanitization")
 	}
 
+	sanitized := m.SanitizedName()
 	for _, existing := range s.Modules {
-		if existing.Name == m.Name {
-			return fmt.Errorf("duplicate module: %s", m.Name)
+		if existing.SanitizedName() == sanitized {
+			return fmt.Errorf("duplicate module: %s", sanitized)
 		}
 	}
 
