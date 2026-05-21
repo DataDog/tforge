@@ -204,3 +204,70 @@ func TestRunSchema_UnknownFlag(t *testing.T) {
 		t.Fatal("expected error for unknown flag")
 	}
 }
+
+func TestRunGenerate_ProviderZipFileWithoutProvider(t *testing.T) {
+	var stderr bytes.Buffer
+	err := runGenerate([]string{"-provider-zip-file", "/tmp/foo.zip"}, &stderr)
+	if err == nil {
+		t.Fatal("expected error for -provider-zip-file without -provider")
+	}
+	if !strings.Contains(err.Error(), "-provider is required") {
+		t.Errorf("expected '-provider is required' error, got: %v", err)
+	}
+}
+
+func TestRunGenerate_ProviderZipFileWithVersion(t *testing.T) {
+	var stderr bytes.Buffer
+	err := runGenerate([]string{
+		"-provider-zip-file", "/tmp/foo.zip",
+		"-provider", "datadog/datadog",
+		"-version", "3.39.0",
+	}, &stderr)
+	if err == nil {
+		t.Fatal("expected error for -provider-zip-file with -version")
+	}
+	if !strings.Contains(err.Error(), "-version is incompatible") {
+		t.Errorf("expected '-version is incompatible' error, got: %v", err)
+	}
+}
+
+func TestRunGenerate_ProviderZipFileWithSchema(t *testing.T) {
+	var stderr bytes.Buffer
+	err := runGenerate([]string{
+		"-provider-zip-file", "/tmp/foo.zip",
+		"-provider", "datadog/datadog",
+		"-schema", "/tmp/schema.json",
+	}, &stderr)
+	if err == nil {
+		t.Fatal("expected error for -provider-zip-file with -schema")
+	}
+	if !strings.Contains(err.Error(), "mutually exclusive") {
+		t.Errorf("expected 'mutually exclusive' error, got: %v", err)
+	}
+}
+
+func TestRunSchema_ProviderZipFileWithoutProvider(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	err := runSchema([]string{"-provider-zip-file", "/tmp/foo.zip"}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected error for -provider-zip-file without -provider")
+	}
+	if !strings.Contains(err.Error(), "-provider is required") {
+		t.Errorf("expected '-provider is required' error, got: %v", err)
+	}
+}
+
+func TestRunSchema_ProviderZipFileWithVersion(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	err := runSchema([]string{
+		"-provider-zip-file", "/tmp/foo.zip",
+		"-provider", "datadog/datadog",
+		"-version", "3.39.0",
+	}, &stdout, &stderr)
+	if err == nil {
+		t.Fatal("expected error for -provider-zip-file with -version")
+	}
+	if !strings.Contains(err.Error(), "-version is incompatible") {
+		t.Errorf("expected '-version is incompatible' error, got: %v", err)
+	}
+}
