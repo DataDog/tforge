@@ -57,8 +57,10 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          go build -ldflags "-s -w" -o tforge-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/tforge
+          go build \
+            -ldflags "-s -w -X github.com/DataDog/tforge.injectedVersion=${GITHUB_REF_NAME}" \
+            -o tforge-${{ matrix.goos }}-${{ matrix.goarch }} \
+            ./cmd/tforge
 
       - name: Upload artifact
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0

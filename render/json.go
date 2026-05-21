@@ -17,8 +17,12 @@
 //	data, err := render.ToJSON(stack)
 //
 // The tforge version stamped into the JSON metadata comes from the
-// tforge.Version variable — set it at link time via
-// `-ldflags '-X github.com/DataDog/tforge.Version=…'`.
+// tforge.Version variable, which resolves at package init via (in priority
+// order) the link-time override
+// `-ldflags '-X github.com/DataDog/tforge.injectedVersion=…'`, the
+// module-cache version from `runtime/debug.ReadBuildInfo`, the VCS revision
+// for in-tree builds, then the `"dev"` sentinel. See the doc on
+// `tforge.Version` for details.
 package render
 
 import (
