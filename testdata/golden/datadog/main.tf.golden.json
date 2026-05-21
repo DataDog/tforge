@@ -32,12 +32,10 @@
         },
         "locked": true,
         "message": "CPU usage is above threshold. @slack-alerts",
-        "monitor_thresholds": [
-          {
-            "critical": "80",
-            "warning": "60"
-          }
-        ],
+        "monitor_thresholds": {
+          "critical": "80",
+          "warning": "60"
+        },
         "name": "High CPU Usage Alert",
         "no_data_timeframe": 10,
         "notify_no_data": true,
