@@ -162,8 +162,14 @@ jobs:
       - name: Get PR version
         if: steps.changes.outputs.go == 'true'
         id: pr
+        # Empty when the PR removes the VERSION file (rare). The Compare step
+        # treats empty as "skip with warning" rather than failing.
         run: |
-          VERSION=$(sed -n 's/^const version = "\(.*\)"/\1/p' cmd/tforge/main.go)
+          if [ -f VERSION ]; then
+            VERSION=$(tr -d '[:space:]' < VERSION)
+          else
+            VERSION=""
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Checkout base branch
@@ -176,20 +182,30 @@ jobs:
       - name: Get base version
         if: steps.changes.outputs.go == 'true'
         id: base
+        # Empty when this PR is the one introducing the VERSION file (the base
+        # branch doesn't have it yet). Handled in the Compare step.
         run: |
-          VERSION=$(sed -n 's/^const version = "\(.*\)"/\1/p' base/cmd/tforge/main.go)
+          if [ -f base/VERSION ]; then
+            VERSION=$(tr -d '[:space:]' < base/VERSION)
+          else
+            VERSION=""
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Compare versions
         if: steps.changes.outputs.go == 'true'
-        # Advisory only: emits a warning annotation when the version wasn't
-        # bumped, but never fails the job. The check is informational, not a
-        # merge gate.
+        # Advisory only: emits a warning annotation when the VERSION file
+        # wasn't bumped, but never fails the job. The check is informational,
+        # not a merge gate.
         run: |
           PR="${{ steps.pr.outputs.version }}"
           BASE="${{ steps.base.outputs.version }}"
+          if [ -z "$PR" ] || [ -z "$BASE" ]; then
+            echo "::warning::Skipping version-bump comparison: VERSION file missing on $([ -z "$PR" ] && echo PR)$([ -z "$PR" ] && [ -z "$BASE" ] && echo " and ")$([ -z "$BASE" ] && echo "base branch (likely the PR that introduces the file)")."
+            exit 0
+          fi
           if [ "$PR" = "$BASE" ]; then
-            echo "::warning::Version was not bumped. PR version ($PR) == base version ($BASE). Consider bumping the version in cmd/tforge/main.go."
+            echo "::warning::Version was not bumped. PR version ($PR) == base version ($BASE). Consider bumping the VERSION file."
             exit 0
           fi
           HIGHER=$(printf '%s\n%s' "$BASE" "$PR" | sort -V | tail -1)
@@ -217,7 +233,7 @@ jobs:
       - name: Extract version and check tag
         id: version
         run: |
-          VERSION=$(sed -n 's/^const version = "\(.*\)"/\1/p' cmd/tforge/main.go)
+          VERSION=$(tr -d '[:space:]' < VERSION)
           TAG="v${VERSION}"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"

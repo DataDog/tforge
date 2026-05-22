@@ -42,7 +42,7 @@ func main() {
 		datadog.Monitor_SetLocked(true), // removed in v4 — validates that ~> 3.39 constraint matters
 	)
 
-	data, err := render.ToJSON(stack, "")
+	data, err := render.ToJSON(stack)
 	if err != nil {
 		log.Fatal(err)
 	}

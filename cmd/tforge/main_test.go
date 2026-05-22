@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/DataDog/tforge"
 )
 
 func TestRun_NoArgs(t *testing.T) {
@@ -35,7 +37,7 @@ func TestRun_VersionFlags(t *testing.T) {
 		var stdout, stderr bytes.Buffer
 		code := run([]string{"tforge", flag}, &stdout, &stderr)
 		require.Equal(t, 0, code, "%s: expected exit code 0, got %d", flag, code)
-		require.Contains(t, stdout.String(), version, "%s: expected version %q in output, got: %s", flag, version, stdout.String())
+		require.Contains(t, stdout.String(), tforge.Version, "%s: expected version %q in output, got: %s", flag, tforge.Version, stdout.String())
 	}
 }
 

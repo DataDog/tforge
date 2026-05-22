@@ -109,7 +109,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	data, err := render.ToJSON(stack, "")
+	data, err := render.ToJSON(stack)
 	if err != nil {
 		log.Fatal(err)
 	}

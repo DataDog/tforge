@@ -56,7 +56,7 @@ func main() {
 	)
 
 	// Render to JSON
-	data, err := render.ToJSON(stack, "")
+	data, err := render.ToJSON(stack)
 	if err != nil {
 		log.Fatal(err)
 	}

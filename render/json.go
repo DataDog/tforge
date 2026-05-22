@@ -9,12 +9,20 @@
 //	// ... add providers, resources, etc.
 //
 //	// Write to file
-//	if err := render.ToFile(stack, "main.tf.json", "1.0.0"); err != nil {
+//	if err := render.ToFile(stack, "main.tf.json"); err != nil {
 //	    log.Fatal(err)
 //	}
 //
 //	// Or get JSON bytes
-//	data, err := render.ToJSON(stack, "1.0.0")
+//	data, err := render.ToJSON(stack)
+//
+// The tforge version stamped into the JSON metadata comes from the
+// tforge.Version variable, which resolves at package init via (in priority
+// order) the link-time override
+// `-ldflags '-X github.com/DataDog/tforge.injectedVersion=…'`, the
+// module-cache version from `runtime/debug.ReadBuildInfo`, the VCS revision
+// for in-tree builds, then the `"dev"` sentinel. See the doc on
+// `tforge.Version` for details.
 package render
 
 import (
@@ -24,6 +32,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/DataDog/tforge"
 	"github.com/DataDog/tforge/config"
 )
 
@@ -51,22 +60,15 @@ func marshalNoEscape(v any) ([]byte, error) {
 	return b, nil
 }
 
-// DefaultVersion is the fallback version stamped into generated JSON when
-// no explicit version is supplied.
-const DefaultVersion = "dev"
-
-// ToJSON renders a stack to JSON bytes.
-// The version string is embedded in the metadata comment block.
-func ToJSON(stack *config.Stack, version string) ([]byte, error) {
+// ToJSON renders a stack to JSON bytes. The tforge version stamped into the
+// metadata comment block comes from tforge.Version — see that variable's doc
+// for how to override it at link time.
+func ToJSON(stack *config.Stack) ([]byte, error) {
 	if stack == nil {
 		return nil, fmt.Errorf("nil stack")
 	}
 
-	if version == "" {
-		version = DefaultVersion
-	}
-
-	tf, err := buildTerraformJSON(stack, version)
+	tf, err := buildTerraformJSON(stack, tforge.Version)
 	if err != nil {
 		return nil, err
 	}
@@ -85,9 +87,8 @@ func ToJSON(stack *config.Stack, version string) ([]byte, error) {
 }
 
 // ToFile renders a stack to a JSON file.
-// The version string is embedded in the metadata comment block.
-func ToFile(stack *config.Stack, path, version string) error {
-	data, err := ToJSON(stack, version)
+func ToFile(stack *config.Stack, path string) error {
+	data, err := ToJSON(stack)
 	if err != nil {
 		return err
 	}

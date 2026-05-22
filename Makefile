@@ -13,7 +13,7 @@ TOFU_VERSIONS = 1.8 latest
 EXCLUDED = /cmd/ /example /testdata /internal/handletest
 PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)'))
 # Lint needs relative paths, not module-prefixed
-LINT_PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)') | sed "s|^$$(go list -m)/|./|")
+LINT_PKGS = $(shell go list ./... $(foreach e,$(EXCLUDED),| grep -v '$(e)') | sed -e "s|^$$(go list -m)$$|.|" -e "s|^$$(go list -m)/|./|")
 
 # Source directories to check formatting (excludes .claude/, .git/, generated files)
 FMT_DIRS = ./cmd ./config ./generate ./provider ./render
