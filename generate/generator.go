@@ -395,14 +395,53 @@ func (g *Generator) generateAttributeField(s *jen.Group, attr attributeEntry) {
 	field.Tag(map[string]string{"json": jsonTag})
 }
 
+// nestedBlockKind is the Go-shape classification of a Terraform nested block.
+// It abstracts the (NestingMode × MaxItems) decision so the struct-field and
+// option-setter code paths agree on a single rule. In particular, list/set
+// blocks with `MaxItems = 1` collapse to kindSingle, matching cdktf's
+// JSON-collapse behavior for the same schema.
+type nestedBlockKind int
+
+const (
+	// kindSingle emits `*T` (struct field) / `v *T` (setter parameter).
+	kindSingle nestedBlockKind = iota
+	// kindSlice emits `[]*T` (struct field) / `v ...*T` (setter parameter).
+	kindSlice
+	// kindMap emits `map[string]*T` (struct field and setter parameter).
+	kindMap
+)
+
+// classifyNestedBlock returns the Go shape that should be used to represent a
+// nested block. Terraform's `MaxItems = 1` on a list/set is the schema-level
+// way providers say "this block is logically a single object even though HCL
+// spells it as a repeated block"; we collapse those to kindSingle so generated
+// configs are byte-compatible with cdktf.
+func classifyNestedBlock(nb *provider.NestedBlock) nestedBlockKind {
+	if nb == nil {
+		return kindSingle
+	}
+	switch nb.NestingMode {
+	case provider.NestingModeSingle, provider.NestingModeGroup:
+		return kindSingle
+	case provider.NestingModeList, provider.NestingModeSet:
+		if nb.MaxItems == 1 {
+			return kindSingle
+		}
+		return kindSlice
+	case provider.NestingModeMap:
+		return kindMap
+	}
+	return kindSingle
+}
+
 // generateNestedBlockField generates a struct field for a nested block.
 // The type name is prefixed with the parent type name to avoid collisions.
 //
-// Output varies by nesting mode:
+// Output varies by classified kind:
 //
-//	single/group: Filter  *MonitorFilter            `json:"filter,omitempty"`
-//	list/set:     Widget  []*DashboardWidget        `json:"widget,omitempty"`
-//	map:          Entries map[string]*ConfigEntries  `json:"entries,omitempty"`
+//	kindSingle: Filter  *MonitorFilter            `json:"filter,omitempty"`
+//	kindSlice:  Widget  []*DashboardWidget        `json:"widget,omitempty"`
+//	kindMap:    Entries map[string]*ConfigEntries `json:"entries,omitempty"`
 func (g *Generator) generateNestedBlockField(s *jen.Group, nb nestedBlockEntry, parentTypeName string) {
 	fieldName := g.toGoName(nb.Name)
 	// Prefix with parent type name to make unique
@@ -411,15 +450,13 @@ func (g *Generator) generateNestedBlockField(s *jen.Group, nb nestedBlockEntry, 
 
 	field := s.Id(fieldName)
 
-	switch nb.Block.NestingMode {
-	case provider.NestingModeSingle, provider.NestingModeGroup:
+	switch classifyNestedBlock(nb.Block) {
+	case kindSingle:
 		field.Op("*").Id(typeName)
-	case provider.NestingModeList, provider.NestingModeSet:
+	case kindSlice:
 		field.Index().Op("*").Id(typeName)
-	case provider.NestingModeMap:
+	case kindMap:
 		field.Map(jen.String()).Op("*").Id(typeName)
-	default:
-		field.Op("*").Id(typeName)
 	}
 
 	field.Tag(map[string]string{"json": jsonTag})
@@ -522,11 +559,11 @@ func (g *Generator) emitOptionFunc(f *jen.File, funcName, optionType, structName
 //
 //	func Monitor_SetName(v string) MonitorOption { ... }
 //
-// Output for nested blocks (parameter varies by nesting mode):
+// Output for nested blocks (parameter varies by classified kind):
 //
-//	single/group: func Monitor_SetFilter(v *MonitorFilter) MonitorOption { ... }
-//	list/set:     func Dashboard_SetWidget(v ...*DashboardWidget) DashboardOption { ... }
-//	map:          func Config_SetEntries(v map[string]*ConfigEntries) ConfigOption { ... }
+//	kindSingle: func Monitor_SetFilter(v *MonitorFilter) MonitorOption { ... }
+//	kindSlice:  func Dashboard_SetWidget(v ...*DashboardWidget) DashboardOption { ... }
+//	kindMap:    func Config_SetEntries(v map[string]*ConfigEntries) ConfigOption { ... }
 func (g *Generator) generateOptionFunctions(f *jen.File, structName string, block *provider.BlockType) {
 	if block == nil {
 		return
@@ -555,15 +592,13 @@ func (g *Generator) generateOptionFunctions(f *jen.File, structName string, bloc
 		funcName := structName + "_Set" + fieldName
 
 		var param *jen.Statement
-		switch nb.Block.NestingMode {
-		case provider.NestingModeSingle, provider.NestingModeGroup:
+		switch classifyNestedBlock(nb.Block) {
+		case kindSingle:
 			param = jen.Id("v").Op("*").Id(typeName)
-		case provider.NestingModeList, provider.NestingModeSet:
+		case kindSlice:
 			param = jen.Id("v").Op("...").Op("*").Id(typeName)
-		case provider.NestingModeMap:
+		case kindMap:
 			param = jen.Id("v").Map(jen.String()).Op("*").Id(typeName)
-		default:
-			param = jen.Id("v").Op("*").Id(typeName)
 		}
 		g.emitOptionFunc(f, funcName, optionType, structName, fieldName, param, false)
 	}

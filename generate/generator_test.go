@@ -423,6 +423,82 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
+// TestGenerateMaxItemsOneCollapse verifies the cdktf-compatible collapse of
+// `MaxItems = 1` list/set nested blocks into single-pointer fields and setters.
+// A sibling nested block without MaxItems must remain a slice/variadic so the
+// rule only applies where the schema explicitly requests it.
+func TestGenerateMaxItemsOneCollapse(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "tforge-gen-maxitems-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	g := New(Config{PackageName: "testpkg", OutputDir: tmpDir})
+
+	ps := &provider.ProviderSchema{
+		ConfigSchema: &provider.SchemaBlock{Block: &provider.BlockType{}},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"test_monitor": {
+				Block: &provider.BlockType{
+					Attributes: map[string]*provider.Attribute{
+						"name": {Type: json.RawMessage(`"string"`), Required: true},
+					},
+					BlockTypes: map[string]*provider.NestedBlock{
+						"monitor_thresholds": {
+							NestingMode: provider.NestingModeList,
+							MaxItems:    1,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"critical": {Type: json.RawMessage(`"string"`), Required: true},
+								},
+							},
+						},
+						"singleton_set": {
+							NestingMode: provider.NestingModeSet,
+							MaxItems:    1,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"key": {Type: json.RawMessage(`"string"`), Required: true},
+								},
+							},
+						},
+						"tag": {
+							NestingMode: provider.NestingModeSet,
+							Block: &provider.BlockType{
+								Attributes: map[string]*provider.Attribute{
+									"key": {Type: json.RawMessage(`"string"`), Required: true},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, g.Generate(ps))
+
+	data, err := os.ReadFile(filepath.Join(tmpDir, "resources_gen.go"))
+	require.NoError(t, err)
+	content := string(data)
+
+	// gofmt aligns struct field columns with arbitrary whitespace, so match shapes via regex.
+	require.Regexp(t, `MonitorThresholds\s+\*MonitorMonitorThresholds\s`, content,
+		"MaxItems=1 list block should be a single pointer field")
+	require.Regexp(t, `SingletonSet\s+\*MonitorSingletonSet\s`, content,
+		"MaxItems=1 set block should be a single pointer field")
+	require.Regexp(t, `Tag\s+\[\]\*MonitorTag\s`, content,
+		"set block without MaxItems should remain a slice field")
+
+	require.Contains(t, content, "func Monitor_SetMonitorThresholds(v *MonitorMonitorThresholds)",
+		"MaxItems=1 setter should take a single pointer, not variadic")
+	require.Contains(t, content, "func Monitor_SetSingletonSet(v *MonitorSingletonSet)",
+		"MaxItems=1 setter should take a single pointer, not variadic")
+	require.Contains(t, content, "func Monitor_SetTag(v ...*MonitorTag)",
+		"plain set setter should remain variadic")
+
+	compileGeneratedCode(t, tmpDir, "testpkg")
+}
+
 func TestGenerateWithComments(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-comments-*")
 	require.NoError(t, err)
