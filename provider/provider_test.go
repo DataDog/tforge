@@ -153,6 +153,47 @@ func TestLoadSchemaFromFileNotFound(t *testing.T) {
 }
 
 // ---------------------------------------------------------------------------
+// writeTerraformConfig tests
+// ---------------------------------------------------------------------------
+
+func TestWriteTerraformConfig_PreservesHostname(t *testing.T) {
+	tests := []struct {
+		name     string
+		src      Source
+		version  string
+		wantLine string
+	}{
+		{
+			name:     "default registry omits hostname",
+			src:      Source{Namespace: "datadog", Name: "datadog"},
+			version:  "3.50.0",
+			wantLine: `source  = "datadog/datadog"`,
+		},
+		{
+			name:     "hostname-qualified source",
+			src:      Source{Hostname: "registry.opentofu.org", Namespace: "hashicorp", Name: "aws"},
+			version:  "5.0.0",
+			wantLine: `source  = "registry.opentofu.org/hashicorp/aws"`,
+		},
+		{
+			name:     "internal mirror",
+			src:      Source{Hostname: "mirror.corp.internal", Namespace: "datadog", Name: "datadog"},
+			version:  "3.50.0",
+			wantLine: `source  = "mirror.corp.internal/datadog/datadog"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			require.NoError(t, writeTerraformConfig(dir, tt.src, tt.version))
+			data, err := os.ReadFile(filepath.Join(dir, "main.tf"))
+			require.NoError(t, err)
+			require.Contains(t, string(data), tt.wantLine, "main.tf source line missing %q\nfull contents:\n%s", tt.wantLine, string(data))
+		})
+	}
+}
+
+// ---------------------------------------------------------------------------
 // parseSchemaOutput tests
 // ---------------------------------------------------------------------------
 

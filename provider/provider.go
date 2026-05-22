@@ -252,14 +252,14 @@ func writeTerraformConfig(dir string, src Source, version string) error {
 terraform {
   required_providers {
     %s = {
-      source  = "%s/%s"
+      source  = "%s"
       version = "%s"
     }
   }
 }
 
 provider "%s" {}
-`, src.Name, src.Namespace, src.Name, version, src.Name)
+`, src.Name, src.String(), version, src.Name)
 	if err := os.WriteFile(filepath.Join(dir, "main.tf"), []byte(tfConfig), filePerm); err != nil {
 		return fmt.Errorf("writing config: %w", err)
 	}
