@@ -16,18 +16,26 @@ import (
 func TestParseSourceValid(t *testing.T) {
 	tests := []struct {
 		input     string
+		hostname  string
 		namespace string
 		name      string
 	}{
-		{"datadog/datadog", "datadog", "datadog"},
-		{"hashicorp/aws", "hashicorp", "aws"},
+		// Default registry (two-segment).
+		{"datadog/datadog", "", "datadog", "datadog"},
+		{"hashicorp/aws", "", "hashicorp", "aws"},
+
+		// Hostname-qualified (three-segment): explicit registry.
+		{"registry.opentofu.org/hashicorp/aws", "registry.opentofu.org", "hashicorp", "aws"},
+		{"registry.terraform.io/datadog/datadog", "registry.terraform.io", "datadog", "datadog"},
+		{"mirror.corp.internal/team/myprovider", "mirror.corp.internal", "team", "myprovider"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			src, err := ParseSource(tt.input)
 			require.NoError(t, err, "ParseSource(%q) returned error", tt.input)
-			require.Equal(t, tt.namespace, src.Namespace, "Namespace = %q, want %q", src.Namespace, tt.namespace)
-			require.Equal(t, tt.name, src.Name, "Name = %q, want %q", src.Name, tt.name)
+			require.Equal(t, tt.hostname, src.Hostname, "Hostname")
+			require.Equal(t, tt.namespace, src.Namespace, "Namespace")
+			require.Equal(t, tt.name, src.Name, "Name")
 		})
 	}
 }
@@ -39,8 +47,12 @@ func TestParseSourceInvalid(t *testing.T) {
 	}{
 		{"no slash", "invalid"},
 		{"empty string", ""},
-		{"empty namespace", "/name"},
-		{"empty name", "ns/"},
+		{"empty namespace (2-part)", "/name"},
+		{"empty name (2-part)", "ns/"},
+		{"empty hostname (3-part)", "/ns/name"},
+		{"empty namespace (3-part)", "host//name"},
+		{"empty name (3-part)", "host/ns/"},
+		{"four segments", "a/b/c/d"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -51,8 +63,28 @@ func TestParseSourceInvalid(t *testing.T) {
 }
 
 func TestSourceString(t *testing.T) {
-	src := Source{Namespace: "dd", Name: "dd"}
-	require.Equal(t, "dd/dd", src.String())
+	t.Run("default registry (no hostname)", func(t *testing.T) {
+		src := Source{Namespace: "dd", Name: "dd"}
+		require.Equal(t, "dd/dd", src.String())
+	})
+
+	t.Run("hostname-qualified", func(t *testing.T) {
+		src := Source{Hostname: "registry.opentofu.org", Namespace: "hashicorp", Name: "aws"}
+		require.Equal(t, "registry.opentofu.org/hashicorp/aws", src.String())
+	})
+
+	t.Run("round-trip ParseSource -> String", func(t *testing.T) {
+		for _, addr := range []string{
+			"datadog/datadog",
+			"hashicorp/aws",
+			"registry.opentofu.org/hashicorp/aws",
+			"mirror.corp.internal/team/myprovider",
+		} {
+			src, err := ParseSource(addr)
+			require.NoError(t, err)
+			require.Equal(t, addr, src.String(), "round-trip mismatch for %q", addr)
+		}
+	})
 }
 
 func TestLoadSchemaFromJSONValid(t *testing.T) {

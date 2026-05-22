@@ -56,24 +56,68 @@ func findCLI() (string, error) {
 	return "", ErrCLINotFound
 }
 
-// Source represents a provider source address (e.g., "datadog/datadog").
+// Source represents a Terraform provider source address. Two forms are
+// recognized, matching the syntax in Terraform's `required_providers` block:
+//
+//   - `<namespace>/<name>` for the default registry (registry.terraform.io),
+//     e.g. "hashicorp/aws", "datadog/datadog".
+//   - `<hostname>/<namespace>/<name>` for an explicit registry, e.g.
+//     "registry.opentofu.org/hashicorp/aws" or
+//     "mirror.corp.internal/datadog/datadog".
+//
+// For default-registry sources Hostname is left empty and String() returns
+// just "namespace/name", preserving the original two-segment behavior for
+// existing consumers (dev_overrides keys, required_providers source fields,
+// etc.). For hostname-qualified sources String() returns the full
+// three-segment address.
 type Source struct {
-	Namespace string // e.g., "datadog"
-	Name      string // e.g., "datadog"
+	// Hostname is optional. When empty the source resolves through
+	// registry.terraform.io. When set it is the explicit registry host.
+	Hostname string
+
+	// Namespace is the provider publisher's namespace (e.g. "hashicorp").
+	Namespace string
+
+	// Name is the provider type (e.g. "aws"). This is the local name that
+	// Terraform binds resources to by default (e.g. `aws_instance` -> the
+	// provider named `aws`), regardless of which Hostname/Namespace served
+	// the schema.
+	Name string
 }
 
-// String returns the full source address.
+// String returns the full source address. Two-segment form when Hostname is
+// empty (the historic shape), three-segment form when Hostname is set.
 func (s Source) String() string {
+	if s.Hostname != "" {
+		return fmt.Sprintf("%s/%s/%s", s.Hostname, s.Namespace, s.Name)
+	}
 	return fmt.Sprintf("%s/%s", s.Namespace, s.Name)
 }
 
-// ParseSource parses a provider source string like "datadog/datadog".
+// ParseSource parses a Terraform provider source string. Both
+// `<namespace>/<name>` (default registry) and
+// `<hostname>/<namespace>/<name>` (explicit registry) are accepted. Returns
+// an error for any other shape, including extra slashes or empty segments.
 func ParseSource(src string) (Source, error) {
-	parts := strings.SplitN(src, "/", 2)
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return Source{}, fmt.Errorf("invalid provider source: %q (expected namespace/name)", src)
+	parts := strings.Split(src, "/")
+	switch len(parts) {
+	case 2:
+		if parts[0] == "" || parts[1] == "" {
+			return Source{}, invalidSourceError(src)
+		}
+		return Source{Namespace: parts[0], Name: parts[1]}, nil
+	case 3:
+		if parts[0] == "" || parts[1] == "" || parts[2] == "" {
+			return Source{}, invalidSourceError(src)
+		}
+		return Source{Hostname: parts[0], Namespace: parts[1], Name: parts[2]}, nil
+	default:
+		return Source{}, invalidSourceError(src)
 	}
-	return Source{Namespace: parts[0], Name: parts[1]}, nil
+}
+
+func invalidSourceError(src string) error {
+	return fmt.Errorf("invalid provider source: %q (expected namespace/name or hostname/namespace/name)", src)
 }
 
 // Schema wraps provider schema with metadata.
