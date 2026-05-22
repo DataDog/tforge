@@ -24,14 +24,20 @@ type Module struct {
 	MetaArguments
 }
 
-// Address returns the module address (module.name).
+// SanitizedName returns the Terraform-identifier-valid form of m.Name. See
+// Resource.SanitizedName for the rationale.
+func (m Module) SanitizedName() string {
+	return SanitizeName(m.Name)
+}
+
+// Address returns the module address (module.sanitized_name).
 func (m Module) Address() string {
-	return fmt.Sprintf("module.%s", m.Name)
+	return fmt.Sprintf("module.%s", m.SanitizedName())
 }
 
 // Ref returns a reference expression to this module's output.
 func (m Module) Ref(output string) string {
-	return fmt.Sprintf("${module.%s.%s}", m.Name, output)
+	return fmt.Sprintf("${module.%s.%s}", m.SanitizedName(), output)
 }
 
 // TerraformHclModuleConfig holds the user-facing configuration for a Terraform HCL module call.

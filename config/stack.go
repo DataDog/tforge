@@ -82,9 +82,13 @@ func (s *Stack) AddProvider(p Provider) {
 // commonly *Resource for untyped callers, or a generated typed handle (e.g.
 // *Monitor) which carries a back-pointer to the underlying *Resource.
 // Mutations to the pointed-to Resource after AddResource returns are reflected
-// in the stack and the rendered output.
+// in the stack and the rendered output. The caller-provided `Name` is retained
+// as-is on the underlying *Resource; callers should use `Resource.SanitizedName()`
+// (or `Address()` / `Ref()`, which already sanitize) when they need the
+// Terraform-valid identifier.
 // Returns an error if r is nil, the underlying *Resource is nil, Type or Name
-// is empty, or on duplicate address.
+// is empty, the name has no valid characters after sanitization, or there is
+// a duplicate address.
 func (s *Stack) AddResource(r Resourcer) error {
 	if r == nil {
 		return fmt.Errorf("resource is nil")
@@ -99,6 +103,9 @@ func (s *Stack) AddResource(r Resourcer) error {
 	if res.Name == "" {
 		return fmt.Errorf("resource name is required")
 	}
+	if SanitizeName(res.Name) == "" {
+		return fmt.Errorf("resource name has no valid characters after sanitization")
+	}
 
 	addr := res.Address()
 	for _, existing := range s.Resources {
@@ -112,7 +119,10 @@ func (s *Stack) AddResource(r Resourcer) error {
 }
 
 // AddDataSource adds a data source to the stack. See AddResource for the
-// rationale of the interface parameter type.
+// rationale of the interface parameter type. The caller-provided `Name` is
+// retained as-is; callers should use `DataSource.SanitizedName()` (or
+// `Address()` / `Ref()`, which already sanitize) when they need the
+// Terraform-valid identifier.
 func (s *Stack) AddDataSource(d DataSourcer) error {
 	if d == nil {
 		return fmt.Errorf("data source is nil")
@@ -127,6 +137,9 @@ func (s *Stack) AddDataSource(d DataSourcer) error {
 	if ds.Name == "" {
 		return fmt.Errorf("data source name is required")
 	}
+	if SanitizeName(ds.Name) == "" {
+		return fmt.Errorf("data source name has no valid characters after sanitization")
+	}
 
 	addr := ds.Address()
 	for _, existing := range s.DataSources {
@@ -139,9 +152,10 @@ func (s *Stack) AddDataSource(d DataSourcer) error {
 	return nil
 }
 
-// AddModule adds a module call to the stack.
-// It returns an error if the module name or source is empty,
-// or if a module with the same name already exists.
+// AddModule adds a module call to the stack. The caller-provided `m.Name` is
+// retained as-is on the stored Module; callers should use `Module.SanitizedName()`
+// (or `Address()` / `Ref()`, which already sanitize) when they need the
+// Terraform-valid identifier.
 func (s *Stack) AddModule(m Module) error {
 	if m.Name == "" {
 		return fmt.Errorf("module name is required")
@@ -149,11 +163,14 @@ func (s *Stack) AddModule(m Module) error {
 	if m.Source == "" {
 		return fmt.Errorf("module source is required")
 	}
+	if SanitizeName(m.Name) == "" {
+		return fmt.Errorf("module name has no valid characters after sanitization")
+	}
 
-	// Check for duplicates
+	sanitized := m.SanitizedName()
 	for _, existing := range s.Modules {
-		if existing.Name == m.Name {
-			return fmt.Errorf("duplicate module: %s", m.Name)
+		if existing.SanitizedName() == sanitized {
+			return fmt.Errorf("duplicate module: %s", sanitized)
 		}
 	}
 

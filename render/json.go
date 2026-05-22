@@ -274,7 +274,7 @@ func buildResources(resources []config.Resourcer) (map[string]map[string]any, er
 		if err != nil {
 			return nil, err
 		}
-		result[r.Type][r.Name] = cfg
+		result[r.Type][r.SanitizedName()] = cfg
 	}
 
 	return result, nil
@@ -521,7 +521,7 @@ func buildDataSources(dataSources []config.DataSourcer) (map[string]map[string]a
 			return nil, err
 		}
 
-		result[d.Type][d.Name] = dataSourceConfigJSON{
+		result[d.Type][d.SanitizedName()] = dataSourceConfigJSON{
 			Config:    attrs,
 			Provider:  d.Provider,
 			DependsOn: d.DependsOn,
@@ -538,7 +538,7 @@ func buildModules(modules []config.Module) map[string]any {
 	result := make(map[string]any, len(modules))
 
 	for _, m := range modules {
-		result[m.Name] = moduleConfigJSON{
+		result[m.SanitizedName()] = moduleConfigJSON{
 			Source:    m.Source,
 			Version:   m.Version,
 			Config:    m.Variables,
