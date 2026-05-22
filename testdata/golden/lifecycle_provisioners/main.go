@@ -20,7 +20,7 @@ func main() {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "app",
 		Lifecycle: &config.Lifecycle{
@@ -70,7 +70,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_db_instance",
 		Name: "primary",
 		Lifecycle: &config.Lifecycle{

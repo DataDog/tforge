@@ -26,8 +26,16 @@ type Resource struct {
 	// Format: "provider.alias" (e.g., "aws.west")
 	Provider string
 
-	// Attributes contains the resource attributes.
+	// Attributes contains the resource attributes as a map.
+	// Used by untyped callers (stack.AddResource with a literal map).
+	// Mutually exclusive with TypedAttributes — setting both is an error at render time.
 	Attributes map[string]any
+
+	// TypedAttributes holds a typed payload (e.g., a generated *Monitor)
+	// that is JSON-marshaled at render time. Used by generated typed constructors
+	// so that post-construction mutation is reflected in the output.
+	// Mutually exclusive with Attributes.
+	TypedAttributes any
 
 	MetaArguments
 
@@ -54,6 +62,19 @@ func (r Resource) Ref(attr string) string {
 	return fmt.Sprintf("${%s.%s.%s}", r.Type, r.Name, attr)
 }
 
+// Resourcer is implemented by anything that can be added to Stack.Resources.
+// The single method returns the underlying Resource that the stack and renderer
+// inspect. *Resource implements it via identity; generated typed handles (e.g.
+// *Monitor) implement it by returning their back-pointer to the stack-owned
+// Resource. The pointer-receiver method ensures callers cannot pass a Resource
+// value to AddResource — the compiler enforces pointer use.
+type Resourcer interface {
+	AsResource() *Resource
+}
+
+// AsResource implements Resourcer: a *Resource is its own underlying Resource.
+func (r *Resource) AsResource() *Resource { return r }
+
 // DataSource represents a Terraform data source.
 type DataSource struct {
 	// Type is the data source type (e.g., "aws_ami").
@@ -65,8 +86,13 @@ type DataSource struct {
 	// Provider specifies a non-default provider configuration.
 	Provider string
 
-	// Attributes contains the data source filter/query attributes.
+	// Attributes contains the data source filter/query attributes as a map.
+	// Used by untyped callers. Mutually exclusive with TypedAttributes.
 	Attributes map[string]any
+
+	// TypedAttributes holds a typed payload that is JSON-marshaled at render time.
+	// Used by generated typed constructors. Mutually exclusive with Attributes.
+	TypedAttributes any
 
 	MetaArguments
 }
@@ -80,6 +106,15 @@ func (d DataSource) Address() string {
 func (d DataSource) Ref(attr string) string {
 	return fmt.Sprintf("${data.%s.%s.%s}", d.Type, d.Name, attr)
 }
+
+// DataSourcer is implemented by anything that can be added to
+// Stack.DataSources. See Resourcer for the parallel rationale.
+type DataSourcer interface {
+	AsDataSource() *DataSource
+}
+
+// AsDataSource implements DataSourcer: a *DataSource is its own underlying DataSource.
+func (d *DataSource) AsDataSource() *DataSource { return d }
 
 // Lifecycle contains resource lifecycle customizations.
 type Lifecycle struct {
@@ -184,4 +219,36 @@ type Timeouts struct {
 	Read   string `json:"read,omitempty"`
 	Update string `json:"update,omitempty"`
 	Delete string `json:"delete,omitempty"`
+}
+
+// ResourceOption configures resource-level meta-arguments (Lifecycle, Provider, etc.)
+// on resources created by generated constructors.
+type ResourceOption func(*Resource)
+
+// WithLifecycle sets lifecycle customizations on a resource.
+func WithLifecycle(l Lifecycle) ResourceOption {
+	return func(r *Resource) {
+		r.Lifecycle = &l
+	}
+}
+
+// WithProvider sets a non-default provider configuration on a resource.
+func WithProvider(provider string) ResourceOption {
+	return func(r *Resource) {
+		r.Provider = provider
+	}
+}
+
+// WithDependsOn sets explicit dependencies on a resource.
+func WithDependsOn(deps ...string) ResourceOption {
+	return func(r *Resource) {
+		r.DependsOn = deps
+	}
+}
+
+// WithTimeouts sets operation timeouts on a resource.
+func WithTimeouts(t Timeouts) ResourceOption {
+	return func(r *Resource) {
+		r.Timeouts = &t
+	}
 }

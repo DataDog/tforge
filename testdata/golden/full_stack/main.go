@@ -32,7 +32,7 @@ func main() {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Attributes: map[string]any{
@@ -47,7 +47,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type: "aws_ami",
 		Name: "ubuntu",
 		Attributes: map[string]any{

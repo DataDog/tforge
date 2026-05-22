@@ -21,7 +21,11 @@ func main() {
 		},
 	})
 
-	if err := datadog.NewMonitor(stack, "cpu_alert",
+	m, err := datadog.NewMonitor(stack, "cpu_alert")
+	if err != nil {
+		log.Fatal(err)
+	}
+	m.Configure(
 		datadog.Monitor_SetName("High CPU Usage Alert"),
 		datadog.Monitor_SetType("metric alert"),
 		datadog.Monitor_SetMessage("CPU usage is above threshold. @slack-alerts"),
@@ -36,9 +40,7 @@ func main() {
 		datadog.Monitor_SetRenotifyInterval(60),
 		datadog.Monitor_SetRequireFullWindow(true),
 		datadog.Monitor_SetLocked(true), // removed in v4 — validates that ~> 3.39 constraint matters
-	); err != nil {
-		log.Fatal(err)
-	}
+	)
 
 	data, err := render.ToJSON(stack, "")
 	if err != nil {

@@ -32,7 +32,7 @@ func main() {
 		Version: "~> 3.5",
 	})
 
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "random_pet",
 		Name: "name",
 		Attributes: map[string]any{
@@ -42,7 +42,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:     "aws_instance",
 		Name:     "east",
 		Provider: "aws",
@@ -60,7 +60,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type:     "aws_instance",
 		Name:     "west",
 		Provider: "aws.west",
@@ -78,7 +78,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := stack.AddResource(config.Resource{
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_s3_bucket",
 		Name: "logs",
 		Attributes: map[string]any{
@@ -98,7 +98,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := stack.AddDataSource(config.DataSource{
+	if err := stack.AddDataSource(&config.DataSource{
 		Type:     "aws_availability_zones",
 		Name:     "available",
 		Provider: "aws.west",

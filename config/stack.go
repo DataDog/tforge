@@ -7,7 +7,7 @@
 //
 //	stack := config.NewStack("my-infrastructure")
 //	stack.AddProvider(config.Provider{Name: "aws", Version: "~> 5.0"})
-//	stack.AddResource(config.Resource{Type: "aws_instance", Name: "web"})
+//	stack.AddResource(&config.Resource{Type: "aws_instance", Name: "web"})
 package config
 
 import (
@@ -30,10 +30,13 @@ type Stack struct {
 	Providers []Provider
 
 	// Resources contains managed resource configurations.
-	Resources []Resource
+	// Stored as Resourcer (an interface) so generated typed handles can be
+	// added directly and so callers are compiler-enforced to pass pointers.
+	// Iterate via .AsResource() to read the underlying *Resource.
+	Resources []Resourcer
 
-	// DataSources contains data source configurations.
-	DataSources []DataSource
+	// DataSources contains data source configurations. See Resources.
+	DataSources []DataSourcer
 
 	// Modules contains module call configurations.
 	Modules []Module
@@ -75,22 +78,31 @@ func (s *Stack) AddProvider(p Provider) {
 	}
 }
 
-// AddResource adds a managed resource to the stack.
-// It returns an error if the resource type or name is empty,
-// or if a resource with the same type and name already exists.
-func (s *Stack) AddResource(r Resource) error {
-	// Validate resource has required fields
-	if r.Type == "" {
+// AddResource adds a managed resource to the stack. Accepts any Resourcer:
+// commonly *Resource for untyped callers, or a generated typed handle (e.g.
+// *Monitor) which carries a back-pointer to the underlying *Resource.
+// Mutations to the pointed-to Resource after AddResource returns are reflected
+// in the stack and the rendered output.
+// Returns an error if r is nil, the underlying *Resource is nil, Type or Name
+// is empty, or on duplicate address.
+func (s *Stack) AddResource(r Resourcer) error {
+	if r == nil {
+		return fmt.Errorf("resource is nil")
+	}
+	res := r.AsResource()
+	if res == nil {
+		return fmt.Errorf("resource is nil")
+	}
+	if res.Type == "" {
 		return fmt.Errorf("resource type is required")
 	}
-	if r.Name == "" {
+	if res.Name == "" {
 		return fmt.Errorf("resource name is required")
 	}
 
-	// Check for duplicates
-	addr := r.Address()
+	addr := res.Address()
 	for _, existing := range s.Resources {
-		if existing.Address() == addr {
+		if existing.AsResource().Address() == addr {
 			return fmt.Errorf("duplicate resource: %s", addr)
 		}
 	}
@@ -99,21 +111,26 @@ func (s *Stack) AddResource(r Resource) error {
 	return nil
 }
 
-// AddDataSource adds a data source to the stack.
-// It returns an error if the data source type or name is empty,
-// or if a data source with the same type and name already exists.
-func (s *Stack) AddDataSource(d DataSource) error {
-	if d.Type == "" {
+// AddDataSource adds a data source to the stack. See AddResource for the
+// rationale of the interface parameter type.
+func (s *Stack) AddDataSource(d DataSourcer) error {
+	if d == nil {
+		return fmt.Errorf("data source is nil")
+	}
+	ds := d.AsDataSource()
+	if ds == nil {
+		return fmt.Errorf("data source is nil")
+	}
+	if ds.Type == "" {
 		return fmt.Errorf("data source type is required")
 	}
-	if d.Name == "" {
+	if ds.Name == "" {
 		return fmt.Errorf("data source name is required")
 	}
 
-	// Check for duplicates
-	addr := d.Address()
+	addr := ds.Address()
 	for _, existing := range s.DataSources {
-		if existing.Address() == addr {
+		if existing.AsDataSource().Address() == addr {
 			return fmt.Errorf("duplicate data source: %s", addr)
 		}
 	}

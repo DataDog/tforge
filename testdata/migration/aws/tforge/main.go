@@ -22,11 +22,13 @@ func NewExampleCdktfGoAwsStack() *config.Stack {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
-	must(aws.NewInstance(stack, "Hello",
+	inst, err := aws.NewInstance(stack, "Hello")
+	must(err)
+	inst.Configure(
 		aws.Instance_SetAmi("ami-2757f631"),
 		aws.Instance_SetInstanceType("t2.micro"),
 		aws.Instance_SetTags(map[string]string{"environment": "development"}),
-	))
+	)
 
 	must(stack.AddModule(config.Module{
 		Name:    "EKS",

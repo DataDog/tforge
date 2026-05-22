@@ -66,7 +66,10 @@ func ToJSON(stack *config.Stack, version string) ([]byte, error) {
 		version = DefaultVersion
 	}
 
-	tf := buildTerraformJSON(stack, version)
+	tf, err := buildTerraformJSON(stack, version)
+	if err != nil {
+		return nil, err
+	}
 
 	// Use deterministic JSON output
 	var buf bytes.Buffer
@@ -150,7 +153,7 @@ type outputJSON struct {
 }
 
 // buildTerraformJSON converts a Stack to the terraform JSON structure.
-func buildTerraformJSON(stack *config.Stack, version string) *terraformJSON {
+func buildTerraformJSON(stack *config.Stack, version string) (*terraformJSON, error) {
 	tf := &terraformJSON{
 		Comment: map[string]any{
 			"metadata": map[string]any{
@@ -173,12 +176,20 @@ func buildTerraformJSON(stack *config.Stack, version string) *terraformJSON {
 
 	// Build resources
 	if len(stack.Resources) > 0 {
-		tf.Resource = buildResources(stack.Resources)
+		res, err := buildResources(stack.Resources)
+		if err != nil {
+			return nil, err
+		}
+		tf.Resource = res
 	}
 
 	// Build data sources
 	if len(stack.DataSources) > 0 {
-		tf.Data = buildDataSources(stack.DataSources)
+		data, err := buildDataSources(stack.DataSources)
+		if err != nil {
+			return nil, err
+		}
+		tf.Data = data
 	}
 
 	// Build modules
@@ -201,7 +212,7 @@ func buildTerraformJSON(stack *config.Stack, version string) *terraformJSON {
 		tf.Locals = stack.Locals
 	}
 
-	return tf
+	return tf, nil
 }
 
 // needsTerraformBlock returns true if the terraform block is needed.
@@ -250,18 +261,23 @@ func buildProviders(providers []config.Provider) map[string][]any {
 }
 
 // buildResources builds the resource configurations.
-func buildResources(resources []config.Resource) map[string]map[string]any {
+func buildResources(resources []config.Resourcer) (map[string]map[string]any, error) {
 	result := make(map[string]map[string]any)
 
-	for _, r := range resources {
+	for _, rr := range resources {
+		r := rr.AsResource()
 		if result[r.Type] == nil {
 			result[r.Type] = make(map[string]any)
 		}
 
-		result[r.Type][r.Name] = buildResourceConfig(r)
+		cfg, err := buildResourceConfig(r)
+		if err != nil {
+			return nil, err
+		}
+		result[r.Type][r.Name] = cfg
 	}
 
-	return result
+	return result, nil
 }
 
 // resourceConfigJSON represents a single resource block in JSON output.
@@ -429,7 +445,15 @@ func (p providerConfigJSON) MarshalJSON() ([]byte, error) {
 }
 
 // buildResourceConfig builds a single resource configuration.
-func buildResourceConfig(r config.Resource) resourceConfigJSON {
+// If r.TypedAttributes is set, it is JSON-marshaled and used as the attribute
+// payload. Otherwise r.Attributes (the untyped map) is used.
+// Setting both is an error.
+func buildResourceConfig(r *config.Resource) (resourceConfigJSON, error) {
+	attrs, err := resolveAttributes(r.Attributes, r.TypedAttributes, r.Type, r.Name)
+	if err != nil {
+		return resourceConfigJSON{}, err
+	}
+
 	var conn *connectionJSON
 	if r.Connection != nil {
 		c := buildConnection(r.Connection)
@@ -445,7 +469,7 @@ func buildResourceConfig(r config.Resource) resourceConfigJSON {
 	}
 
 	return resourceConfigJSON{
-		Config:       r.Attributes,
+		Config:       attrs,
 		Provider:     r.Provider,
 		DependsOn:    r.DependsOn,
 		Count:        r.Count,
@@ -454,20 +478,51 @@ func buildResourceConfig(r config.Resource) resourceConfigJSON {
 		Timeouts:     r.Timeouts,
 		Connection:   conn,
 		Provisioners: provs,
+	}, nil
+}
+
+// resolveAttributes returns the attribute map for a resource or data source.
+// It enforces that Attributes and TypedAttributes are mutually exclusive
+// (a non-nil Attributes map alongside TypedAttributes is an error, even if
+// the map is empty — that's still an explicit assignment by the caller),
+// and marshals the typed payload to a map when present.
+func resolveAttributes(untyped map[string]any, typed any, kindType, kindName string) (map[string]any, error) {
+	hasTyped := typed != nil
+	hasUntyped := untyped != nil
+	if hasTyped && hasUntyped {
+		return nil, fmt.Errorf("%s.%s: Attributes and TypedAttributes are mutually exclusive", kindType, kindName)
 	}
+	if !hasTyped {
+		return untyped, nil
+	}
+	data, err := json.Marshal(typed)
+	if err != nil {
+		return nil, fmt.Errorf("%s.%s: marshaling TypedAttributes: %w", kindType, kindName, err)
+	}
+	var attrs map[string]any
+	if err := json.Unmarshal(data, &attrs); err != nil {
+		return nil, fmt.Errorf("%s.%s: converting TypedAttributes: %w", kindType, kindName, err)
+	}
+	return attrs, nil
 }
 
 // buildDataSources builds the data source configurations.
-func buildDataSources(dataSources []config.DataSource) map[string]map[string]any {
+func buildDataSources(dataSources []config.DataSourcer) (map[string]map[string]any, error) {
 	result := make(map[string]map[string]any)
 
-	for _, d := range dataSources {
+	for _, dd := range dataSources {
+		d := dd.AsDataSource()
 		if result[d.Type] == nil {
 			result[d.Type] = make(map[string]any)
 		}
 
+		attrs, err := resolveAttributes(d.Attributes, d.TypedAttributes, d.Type, d.Name)
+		if err != nil {
+			return nil, err
+		}
+
 		result[d.Type][d.Name] = dataSourceConfigJSON{
-			Config:    d.Attributes,
+			Config:    attrs,
 			Provider:  d.Provider,
 			DependsOn: d.DependsOn,
 			Count:     d.Count,
@@ -475,7 +530,7 @@ func buildDataSources(dataSources []config.DataSource) map[string]map[string]any
 		}
 	}
 
-	return result
+	return result, nil
 }
 
 // buildModules builds the module configurations.

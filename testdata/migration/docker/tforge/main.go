@@ -22,19 +22,23 @@ func NewExampleCdktfGoDockerStack() *config.Stack {
 	})
 
 	nginxImage := config.Resource{Type: "docker_image", Name: "nginxImage"}
-	must(docker.NewImage(stack, "nginxImage",
+	img, err := docker.NewImage(stack, "nginxImage")
+	must(err)
+	img.Configure(
 		docker.Image_SetName("nginx:latest"),
 		docker.Image_SetKeepLocally(false),
-	))
+	)
 
-	must(docker.NewContainer(stack, "nginxContainer",
+	container, err := docker.NewContainer(stack, "nginxContainer")
+	must(err)
+	container.Configure(
 		docker.Container_SetImage(nginxImage.Ref("image_id")),
 		docker.Container_SetName("tutorial"),
 		docker.Container_SetPorts(docker.NewContainerPorts(
 			docker.ContainerPorts_SetInternal(80),
 			docker.ContainerPorts_SetExternal(8000),
 		)),
-	))
+	)
 
 	return stack
 }

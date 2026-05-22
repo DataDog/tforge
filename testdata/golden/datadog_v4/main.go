@@ -54,9 +54,11 @@ func main() {
 		},
 	}
 
-	if err := datadog.NewComplianceCustomFramework(stack, "security", datadog.FromComplianceCustomFramework(framework)); err != nil {
+	cf, err := datadog.NewComplianceCustomFramework(stack, "security")
+	if err != nil {
 		log.Fatal(err)
 	}
+	cf.Configure(datadog.FromComplianceCustomFramework(framework))
 
 	data, err := render.ToJSON(stack, "")
 	if err != nil {
