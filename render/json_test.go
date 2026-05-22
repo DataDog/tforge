@@ -722,6 +722,35 @@ func TestToJSON_Locals(t *testing.T) {
 	require.Equal(t, "platform", tags["team"], "unexpected tags: %v", tags)
 }
 
+// TestToJSON_RequiredVersion verifies that Stack.RequiredVersion is emitted
+// as `terraform.required_version` and that setting it alone is enough to
+// materialize the `terraform` block (no backend, no required_providers).
+func TestToJSON_RequiredVersion(t *testing.T) {
+	stack := config.NewStack("test")
+	stack.RequiredVersion = ">= 1.3.7"
+
+	data, err := ToJSON(stack)
+	require.NoError(t, err)
+
+	var obj map[string]any
+	require.NoError(t, json.Unmarshal(data, &obj))
+	tf := mustMap(t, obj, "terraform")
+	require.Equal(t, ">= 1.3.7", tf["required_version"],
+		"required_version not stamped into terraform block")
+}
+
+// TestToJSON_NoTerraformBlockWhenEmpty verifies an empty Stack still skips
+// the terraform block — RequiredVersion is the only new way to materialize it.
+func TestToJSON_NoTerraformBlockWhenEmpty(t *testing.T) {
+	data, err := ToJSON(config.NewStack("test"))
+	require.NoError(t, err)
+
+	var obj map[string]any
+	require.NoError(t, json.Unmarshal(data, &obj))
+	_, hasTF := obj["terraform"]
+	require.False(t, hasTF, "terraform block should be omitted on an empty stack")
+}
+
 func TestToJSON_Backend(t *testing.T) {
 	stack := config.NewStack("test")
 	stack.SetBackend(config.Backend{
