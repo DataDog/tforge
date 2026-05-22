@@ -176,7 +176,7 @@ func buildTerraformJSON(stack *config.Stack, version string) (*terraformJSON, er
 
 	// Build resources
 	if len(stack.Resources) > 0 {
-		res, err := buildResources(stack.Resources)
+		res, err := buildResources(stack.Name, stack.Resources)
 		if err != nil {
 			return nil, err
 		}
@@ -185,7 +185,7 @@ func buildTerraformJSON(stack *config.Stack, version string) (*terraformJSON, er
 
 	// Build data sources
 	if len(stack.DataSources) > 0 {
-		data, err := buildDataSources(stack.DataSources)
+		data, err := buildDataSources(stack.Name, stack.DataSources)
 		if err != nil {
 			return nil, err
 		}
@@ -194,7 +194,7 @@ func buildTerraformJSON(stack *config.Stack, version string) (*terraformJSON, er
 
 	// Build modules
 	if len(stack.Modules) > 0 {
-		tf.Module = buildModules(stack.Modules)
+		tf.Module = buildModules(stack.Name, stack.Modules)
 	}
 
 	// Build variables
@@ -260,8 +260,13 @@ func buildProviders(providers []config.Provider) map[string][]any {
 	return result
 }
 
-// buildResources builds the resource configurations.
-func buildResources(resources []config.Resourcer) (map[string]map[string]any, error) {
+// buildResources builds the resource configurations. stackName is threaded
+// through so each resource's "//.metadata.path" can be set to match cdktf's
+// per-resource metadata layout: `<stackName>/<pathified-original>` (forward
+// slashes replaced with `--` but `{}`, `:`, etc. preserved — the same shape
+// cdktf produced via construct-tree node paths). `uniqueId` is the
+// SanitizeName'd identifier used as the Terraform resource key.
+func buildResources(stackName string, resources []config.Resourcer) (map[string]map[string]any, error) {
 	result := make(map[string]map[string]any)
 
 	for _, rr := range resources {
@@ -274,6 +279,8 @@ func buildResources(resources []config.Resourcer) (map[string]map[string]any, er
 		if err != nil {
 			return nil, err
 		}
+		cfg.Path = stackName + "/" + config.PathifyName(r.Name)
+		cfg.UniqueID = r.SanitizedName()
 		result[r.Type][r.SanitizedName()] = cfg
 	}
 
@@ -285,6 +292,8 @@ func buildResources(resources []config.Resourcer) (map[string]map[string]any, er
 // via a custom MarshalJSON, giving compile-time safety for the meta keys
 // while preserving the arbitrary user-supplied configuration.
 type resourceConfigJSON struct {
+	Path         string            `json:"-"` // <stackName>/<name>; emitted under "//"
+	UniqueID     string            `json:"-"` // <name>; emitted under "//"
 	Config       map[string]any    `json:"-"` // flattened into top level
 	Provider     string            `json:"provider,omitempty"`
 	DependsOn    []string          `json:"depends_on,omitempty"`
@@ -297,8 +306,14 @@ type resourceConfigJSON struct {
 }
 
 // MarshalJSON flattens Config alongside the typed meta-argument fields.
+// A leading "//" metadata block carrying the resource's path and uniqueId is
+// emitted first when Path/UniqueID are set — matching cdktf's per-resource
+// metadata layout so existing consumers can parse tforge output unchanged.
 func (r resourceConfigJSON) MarshalJSON() ([]byte, error) {
-	m := make(map[string]any, len(r.Config)+8)
+	m := make(map[string]any, len(r.Config)+9)
+	if md := buildResourceMetadata(r.Path, r.UniqueID); md != nil {
+		m["//"] = md
+	}
 	for k, v := range r.Config {
 		m[k] = v
 	}
@@ -327,6 +342,23 @@ func (r resourceConfigJSON) MarshalJSON() ([]byte, error) {
 		m["provisioner"] = r.Provisioners
 	}
 	return marshalNoEscape(m)
+}
+
+// buildResourceMetadata returns the per-resource "//.metadata" block matching
+// cdktf's layout. Returns nil when neither field is set so the "//" key is
+// omitted entirely.
+func buildResourceMetadata(path, uniqueID string) map[string]any {
+	if path == "" && uniqueID == "" {
+		return nil
+	}
+	meta := map[string]any{}
+	if path != "" {
+		meta["path"] = path
+	}
+	if uniqueID != "" {
+		meta["uniqueId"] = uniqueID
+	}
+	return map[string]any{"metadata": meta}
 }
 
 // provisionerJSON represents a single provisioner block in JSON output.
@@ -361,6 +393,8 @@ func (p provisionerJSON) MarshalJSON() ([]byte, error) {
 // dataSourceConfigJSON represents a single data source block in JSON output.
 // Same pattern as resourceConfigJSON but without lifecycle/timeouts/provisioners.
 type dataSourceConfigJSON struct {
+	Path      string         `json:"-"` // <stackName>/<name>; emitted under "//"
+	UniqueID  string         `json:"-"` // <name>; emitted under "//"
 	Config    map[string]any `json:"-"` // flattened into top level
 	Provider  string         `json:"provider,omitempty"`
 	DependsOn []string       `json:"depends_on,omitempty"`
@@ -370,7 +404,10 @@ type dataSourceConfigJSON struct {
 
 // MarshalJSON flattens Config alongside the typed meta-argument fields.
 func (d dataSourceConfigJSON) MarshalJSON() ([]byte, error) {
-	m := make(map[string]any, len(d.Config)+4)
+	m := make(map[string]any, len(d.Config)+5)
+	if md := buildResourceMetadata(d.Path, d.UniqueID); md != nil {
+		m["//"] = md
+	}
 	for k, v := range d.Config {
 		m[k] = v
 	}
@@ -391,6 +428,8 @@ func (d dataSourceConfigJSON) MarshalJSON() ([]byte, error) {
 
 // moduleConfigJSON represents a single module block in JSON output.
 type moduleConfigJSON struct {
+	Path      string            `json:"-"` // <stackName>/<name>; emitted under "//"
+	UniqueID  string            `json:"-"` // <name>; emitted under "//"
 	Source    string            `json:"-"` // always set, but serialized in MarshalJSON
 	Version   string            `json:"-"`
 	Config    map[string]any    `json:"-"` // flattened into top level
@@ -402,7 +441,10 @@ type moduleConfigJSON struct {
 
 // MarshalJSON flattens Config alongside the typed meta-argument fields.
 func (mc moduleConfigJSON) MarshalJSON() ([]byte, error) {
-	m := make(map[string]any, len(mc.Config)+6)
+	m := make(map[string]any, len(mc.Config)+7)
+	if md := buildResourceMetadata(mc.Path, mc.UniqueID); md != nil {
+		m["//"] = md
+	}
 	m["source"] = mc.Source
 	if mc.Version != "" {
 		m["version"] = mc.Version
@@ -506,8 +548,10 @@ func resolveAttributes(untyped map[string]any, typed any, kindType, kindName str
 	return attrs, nil
 }
 
-// buildDataSources builds the data source configurations.
-func buildDataSources(dataSources []config.DataSourcer) (map[string]map[string]any, error) {
+// buildDataSources builds the data source configurations. stackName is
+// threaded through so each data source's "//.metadata.path" can be set to
+// match cdktf's per-resource metadata layout.
+func buildDataSources(stackName string, dataSources []config.DataSourcer) (map[string]map[string]any, error) {
 	result := make(map[string]map[string]any)
 
 	for _, dd := range dataSources {
@@ -522,6 +566,8 @@ func buildDataSources(dataSources []config.DataSourcer) (map[string]map[string]a
 		}
 
 		result[d.Type][d.SanitizedName()] = dataSourceConfigJSON{
+			Path:      stackName + "/" + config.PathifyName(d.Name),
+			UniqueID:  d.SanitizedName(),
 			Config:    attrs,
 			Provider:  d.Provider,
 			DependsOn: d.DependsOn,
@@ -534,11 +580,13 @@ func buildDataSources(dataSources []config.DataSourcer) (map[string]map[string]a
 }
 
 // buildModules builds the module configurations.
-func buildModules(modules []config.Module) map[string]any {
+func buildModules(stackName string, modules []config.Module) map[string]any {
 	result := make(map[string]any, len(modules))
 
 	for _, m := range modules {
 		result[m.SanitizedName()] = moduleConfigJSON{
+			Path:      stackName + "/" + config.PathifyName(m.Name),
+			UniqueID:  m.SanitizedName(),
 			Source:    m.Source,
 			Version:   m.Version,
 			Config:    m.Variables,

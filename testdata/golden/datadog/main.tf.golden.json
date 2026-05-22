@@ -24,6 +24,12 @@
   "resource": {
     "datadog_monitor": {
       "cpu_alert": {
+        "//": {
+          "metadata": {
+            "path": "datadog-golden/cpu_alert",
+            "uniqueId": "cpu_alert"
+          }
+        },
         "locked": true,
         "message": "CPU usage is above threshold. @slack-alerts",
         "monitor_thresholds": [

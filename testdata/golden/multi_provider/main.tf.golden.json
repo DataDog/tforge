@@ -35,6 +35,12 @@
   "resource": {
     "aws_instance": {
       "east": {
+        "//": {
+          "metadata": {
+            "path": "multi-provider-golden/east",
+            "uniqueId": "east"
+          }
+        },
         "ami": "ami-east-123",
         "depends_on": [
           "random_pet.name"
@@ -46,6 +52,12 @@
         }
       },
       "west": {
+        "//": {
+          "metadata": {
+            "path": "multi-provider-golden/west",
+            "uniqueId": "west"
+          }
+        },
         "ami": "ami-west-456",
         "count": 3,
         "instance_type": "t3.micro",
@@ -57,6 +69,12 @@
     },
     "aws_s3_bucket": {
       "logs": {
+        "//": {
+          "metadata": {
+            "path": "multi-provider-golden/logs",
+            "uniqueId": "logs"
+          }
+        },
         "bucket": "${each.key}-${random_pet.name.id}",
         "for_each": {
           "access-logs": "access-logs",
@@ -70,6 +88,12 @@
     },
     "random_pet": {
       "name": {
+        "//": {
+          "metadata": {
+            "path": "multi-provider-golden/name",
+            "uniqueId": "name"
+          }
+        },
         "length": 2
       }
     }
@@ -77,6 +101,12 @@
   "data": {
     "aws_availability_zones": {
       "available": {
+        "//": {
+          "metadata": {
+            "path": "multi-provider-golden/available",
+            "uniqueId": "available"
+          }
+        },
         "provider": "aws.west",
         "state": "available"
       }

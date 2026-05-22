@@ -33,6 +33,12 @@
   "resource": {
     "aws_instance": {
       "web": {
+        "//": {
+          "metadata": {
+            "path": "full-stack-golden/web",
+            "uniqueId": "web"
+          }
+        },
         "ami": "ami-0c55b159cbfafe1f0",
         "instance_type": "t3.micro",
         "tags": {
@@ -45,6 +51,12 @@
   "data": {
     "aws_ami": {
       "ubuntu": {
+        "//": {
+          "metadata": {
+            "path": "full-stack-golden/ubuntu",
+            "uniqueId": "ubuntu"
+          }
+        },
         "filter": [
           {
             "name": "name",

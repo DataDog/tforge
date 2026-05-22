@@ -24,6 +24,12 @@
   "resource": {
     "aws_db_instance": {
       "primary": {
+        "//": {
+          "metadata": {
+            "path": "lifecycle-provisioners-golden/primary",
+            "uniqueId": "primary"
+          }
+        },
         "allocated_storage": 50,
         "db_name": "myapp",
         "depends_on": [
@@ -48,6 +54,12 @@
     },
     "aws_instance": {
       "app": {
+        "//": {
+          "metadata": {
+            "path": "lifecycle-provisioners-golden/app",
+            "uniqueId": "app"
+          }
+        },
         "ami": "ami-0c55b159cbfafe1f0",
         "instance_type": "t3.medium",
         "lifecycle": {

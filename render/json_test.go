@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/DataDog/tforge/config"
 )
 
@@ -240,6 +242,87 @@ func TestToJSON_ResourceBasic(t *testing.T) {
 	if res["ami"] != "ami-123" {
 		t.Errorf("expected ami ami-123, got %v", res["ami"])
 	}
+}
+
+func TestToJSON_ResourceMetadataComment(t *testing.T) {
+	stack := config.NewStack("my-stack")
+	require.NoError(t, stack.AddResource(&config.Resource{
+		Type:       "aws_instance",
+		Name:       "web",
+		Attributes: map[string]any{"ami": "ami-123"},
+	}))
+
+	meta := metadataCommentFor(t, stack, "resource", "aws_instance", "web")
+	require.Equal(t, "my-stack/web", meta["path"])
+	require.Equal(t, "web", meta["uniqueId"])
+}
+
+// TestToJSON_ResourceMetadataPath_MatchesCdktf verifies that metadata.path
+// uses cdktf's exact shape: forward slashes in the caller-supplied name are
+// replaced with `--` (cdktf's construct-tree separator convention), but
+// other characters like `{`, `}`, `:` are preserved. uniqueId is the
+// SanitizeName'd identifier used as the Terraform resource key.
+func TestToJSON_ResourceMetadataPath_MatchesCdktf(t *testing.T) {
+	stack := config.NewStack("cdktf_monitoring")
+	const rawName = "monitor_api/v2/users/{id}_GET"
+	const pathified = "monitor_api--v2--users--{id}_GET"
+	const sanitized = "monitor_api--v2--users--id_GET"
+	require.NoError(t, stack.AddResource(&config.Resource{
+		Type:       "datadog_monitor",
+		Name:       rawName,
+		Attributes: map[string]any{"name": "test"},
+	}))
+
+	meta := metadataCommentFor(t, stack, "resource", "datadog_monitor", sanitized)
+	require.Equal(t, "cdktf_monitoring/"+pathified, meta["path"])
+	require.Equal(t, sanitized, meta["uniqueId"])
+}
+
+func TestToJSON_DataSourceMetadataComment(t *testing.T) {
+	stack := config.NewStack("my-stack")
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
+		Type:       "aws_ami",
+		Name:       "ubuntu",
+		Attributes: map[string]any{"most_recent": true},
+	}))
+
+	meta := metadataCommentFor(t, stack, "data", "aws_ami", "ubuntu")
+	require.Equal(t, "my-stack/ubuntu", meta["path"])
+	require.Equal(t, "ubuntu", meta["uniqueId"])
+}
+
+func TestToJSON_ModuleMetadataComment(t *testing.T) {
+	stack := config.NewStack("my-stack")
+	require.NoError(t, stack.AddModule(config.Module{
+		Name:      "vpc",
+		Source:    "./modules/vpc",
+		Variables: map[string]any{"cidr": "10.0.0.0/16"},
+	}))
+
+	meta := metadataCommentFor(t, stack, "module", "", "vpc")
+	require.Equal(t, "my-stack/vpc", meta["path"])
+	require.Equal(t, "vpc", meta["uniqueId"])
+}
+
+// metadataCommentFor renders stack to JSON and extracts the per-resource
+// "//.metadata" block at the given location. For resources/data sources pass
+// (kind, type, name) — e.g. ("resource", "aws_instance", "web"); for modules
+// the type is unused so pass ("module", "", name).
+func metadataCommentFor(t *testing.T, stack *config.Stack, kind, typ, name string) map[string]any {
+	t.Helper()
+
+	data, err := ToJSON(stack, "")
+	require.NoError(t, err)
+	var obj map[string]any
+	require.NoError(t, json.Unmarshal(data, &obj))
+
+	var entry map[string]any
+	if kind == "module" {
+		entry = mustMap(t, mustMap(t, obj, "module"), name)
+	} else {
+		entry = mustMap(t, mustMap(t, mustMap(t, obj, kind), typ), name)
+	}
+	return mustMap(t, mustMap(t, entry, "//"), "metadata")
 }
 
 func TestToJSON_ResourceProvider(t *testing.T) {
