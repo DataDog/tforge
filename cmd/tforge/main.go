@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/DataDog/tforge"
 	"github.com/DataDog/tforge/generate"
@@ -106,19 +105,6 @@ Examples:
 
   # Generate from a cached schema file
   tforge generate -schema ./schema.json -package mypackage -output ./generated`)
-}
-
-// providerNamesCompatible reports whether a provider source name pairs
-// sensibly with a schema's resource prefix. Exact match always works
-// (`hashicorp/aws` vs `aws_*` schema). Otherwise the source must be a
-// prefix-`-`-variant: `hashicorp/google-beta` is OK for `google_*` resources
-// because Terraform binds those resources to the `google` local name
-// regardless of which registry source provides the schema.
-func providerNamesCompatible(srcName, prefix string) bool {
-	if srcName == prefix {
-		return true
-	}
-	return strings.HasPrefix(srcName, prefix+"-")
 }
 
 func runGenerate(args []string, stderr io.Writer) error {
@@ -238,23 +224,16 @@ Examples:
 		resolvedVersion = *providerVersion
 	}
 
-	// Validate that the source's name plausibly matches the schema's resource
-	// prefix. In registry/binary modes this is true by construction (the schema
-	// was fetched from that source). In schema-file mode the user can pair a
-	// cached schema with an unrelated -provider flag — that produces a generated
-	// package whose `Provider.Source` points at one provider while its resource
-	// constructors emit Terraform types from another, breaking apply-time
-	// provider binding.
+	// Validate the source syntactically so a malformed -provider flag fails
+	// here instead of being baked verbatim into the generated metadata. The
+	// source's `Name` segment intentionally does not have to match the schema's
+	// resource prefix: Terraform binds resources to the local key in
+	// `required_providers` (derived from the resource prefix by this generator,
+	// see Generator.providerLocalName), not the source address. Fork and mirror
+	// sources like `mycorp/googlebeta` for a `google_*` schema are legitimate.
 	if providerSourceStr != "" {
-		src, parseErr := provider.ParseSource(providerSourceStr)
-		if parseErr != nil {
+		if _, parseErr := provider.ParseSource(providerSourceStr); parseErr != nil {
 			return fmt.Errorf("invalid -provider %q: %w", providerSourceStr, parseErr)
-		}
-		if prefix := ps.ResourcePrefix(); prefix != "" && !providerNamesCompatible(src.Name, prefix) {
-			return fmt.Errorf(
-				"-provider %q does not match schema's resource prefix %q "+
-					"(resources in this schema are %s_*); pass the matching -provider, or omit it",
-				providerSourceStr, prefix, prefix)
 		}
 	}
 

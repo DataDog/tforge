@@ -120,36 +120,6 @@ func invalidSourceError(src string) error {
 	return fmt.Errorf("invalid provider source: %q (expected namespace/name or hostname/namespace/name)", src)
 }
 
-// ResourcePrefix returns the first underscore-delimited segment of any
-// resource (or, failing that, data source) name in the schema. For a Datadog
-// schema this returns "datadog"; for an AWS schema, "aws"; for `google_*`
-// resources, "google" — regardless of whether the source address is
-// "hashicorp/google" or "hashicorp/google-beta". Returns "" when the schema
-// has no resources or data sources, or when none of them carry a `_`-prefixed
-// type.
-//
-// This is the local provider name Terraform binds default-providered
-// resources to: when a `.tf.json` declares `google_compute_instance` without
-// an explicit `provider` meta-argument, Terraform looks up the local provider
-// named `google`. Use this to validate that a `-provider <ns>/<name>` flag
-// agrees with the schema it's paired with.
-func (ps *ProviderSchema) ResourcePrefix() string {
-	if ps == nil {
-		return ""
-	}
-	for name := range ps.ResourceSchemas {
-		if idx := strings.IndexByte(name, '_'); idx > 0 {
-			return name[:idx]
-		}
-	}
-	for name := range ps.DataSourceSchemas {
-		if idx := strings.IndexByte(name, '_'); idx > 0 {
-			return name[:idx]
-		}
-	}
-	return ""
-}
-
 // Schema wraps provider schema with metadata.
 type Schema struct {
 	Source   Source
