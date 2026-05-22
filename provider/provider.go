@@ -175,23 +175,8 @@ func FetchSchema(ctx context.Context, source, version string) (*Schema, error) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	// Write minimal tofu configuration
-	tfConfig := fmt.Sprintf(`
-terraform {
-  required_providers {
-    %s = {
-      source  = "%s/%s"
-      version = "%s"
-    }
-  }
-}
-
-provider "%s" {}
-`, src.Name, src.Namespace, src.Name, version, src.Name)
-
-	configPath := filepath.Join(tmpDir, "main.tf")
-	if err := os.WriteFile(configPath, []byte(tfConfig), filePerm); err != nil {
-		return nil, fmt.Errorf("writing config: %w", err)
+	if err := writeTerraformConfig(tmpDir, src, version); err != nil {
+		return nil, err
 	}
 
 	// Set up provider plugin cache to avoid re-downloading providers
@@ -214,10 +199,35 @@ provider "%s" {}
 		return nil, fmt.Errorf("init failed: %w\n%s", err, initOut)
 	}
 
-	// Run providers schema -json
+	return runProvidersSchema(ctx, cliPath, tmpDir, cmdEnv, src, version)
+}
+
+// writeTerraformConfig writes a minimal `main.tf` declaring src@version into dir.
+func writeTerraformConfig(dir string, src Source, version string) error {
+	tfConfig := fmt.Sprintf(`
+terraform {
+  required_providers {
+    %s = {
+      source  = "%s/%s"
+      version = "%s"
+    }
+  }
+}
+
+provider "%s" {}
+`, src.Name, src.Namespace, src.Name, version, src.Name)
+	if err := os.WriteFile(filepath.Join(dir, "main.tf"), []byte(tfConfig), filePerm); err != nil {
+		return fmt.Errorf("writing config: %w", err)
+	}
+	return nil
+}
+
+// runProvidersSchema runs `tofu providers schema -json` in workDir and parses
+// the schema for src. workDir must already contain a valid `main.tf`.
+func runProvidersSchema(ctx context.Context, cliPath, workDir string, env []string, src Source, version string) (*Schema, error) {
 	schemaCmd := exec.CommandContext(ctx, cliPath, "providers", "schema", "-json")
-	schemaCmd.Dir = tmpDir
-	schemaCmd.Env = cmdEnv
+	schemaCmd.Dir = workDir
+	schemaCmd.Env = env
 	var stdout, stderr bytes.Buffer
 	schemaCmd.Stdout = &stdout
 	schemaCmd.Stderr = &stderr
@@ -225,12 +235,10 @@ provider "%s" {}
 		return nil, fmt.Errorf("providers schema failed: %w\n%s", err, stderr.String())
 	}
 
-	// Parse the schema JSON
 	providerSchema, err := parseSchemaOutput(stdout.Bytes(), src)
 	if err != nil {
 		return nil, fmt.Errorf("parsing schema: %w", err)
 	}
-
 	return &Schema{
 		Source:   src,
 		Version:  version,
