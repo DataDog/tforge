@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/stretchr/testify/require"
 
 	"github.com/DataDog/tforge/provider"
 )
@@ -37,9 +37,7 @@ func TestNeedsPointer(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := needsPointer(tt.attr, tt.goType)
-			if got != tt.want {
-				t.Errorf("needsPointer(%q) = %v, want %v", tt.name, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "needsPointer(%q) = %v, want %v", tt.name, got, tt.want)
 		})
 	}
 }
@@ -52,55 +50,37 @@ func compileGeneratedCode(t *testing.T, dir, pkgName string) {
 	// Write a go.mod that can resolve github.com/DataDog/tforge/config (used by generated constructors)
 	tforgeRoot, _ := filepath.Abs(filepath.Join("..", "."))
 	goMod := fmt.Sprintf("module testcompile\n\ngo 1.25.9\n\nrequire github.com/DataDog/tforge v0.0.0\nreplace github.com/DataDog/tforge => %s\n", tforgeRoot)
-	if err := os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644); err != nil {
-		t.Fatalf("writing go.mod: %v", err)
-	}
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "go.mod"), []byte(goMod), 0644), "writing go.mod")
 
 	ctx := context.Background()
 	cmd := exec.CommandContext(ctx, "go", "build", "./...")
 	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Fatalf("generated code does not compile:\n%s\n%v", out, err)
-	}
+	require.NoError(t, err, "generated code does not compile:\n%s", out)
 }
 
 func TestNewDefaults(t *testing.T) {
 	g := New(Config{})
-	if g.config.PackageName != "generated" {
-		t.Errorf("default PackageName = %q, want %q", g.config.PackageName, "generated")
-	}
-	if g.config.OutputDir != "./generated" {
-		t.Errorf("default OutputDir = %q, want %q", g.config.OutputDir, "./generated")
-	}
+	require.Equal(t, "generated", g.config.PackageName, "default PackageName = %q, want %q", g.config.PackageName, "generated")
+	require.Equal(t, "./generated", g.config.OutputDir, "default OutputDir = %q, want %q", g.config.OutputDir, "./generated")
 }
 
 func TestNewCustomValues(t *testing.T) {
 	g := New(Config{PackageName: "foo", OutputDir: "/tmp"})
-	if g.config.PackageName != "foo" {
-		t.Errorf("PackageName = %q, want %q", g.config.PackageName, "foo")
-	}
-	if g.config.OutputDir != "/tmp" {
-		t.Errorf("OutputDir = %q, want %q", g.config.OutputDir, "/tmp")
-	}
+	require.Equal(t, "foo", g.config.PackageName, "PackageName = %q, want %q", g.config.PackageName, "foo")
+	require.Equal(t, "/tmp", g.config.OutputDir, "OutputDir = %q, want %q", g.config.OutputDir, "/tmp")
 }
 
 func TestGenerateNilSchema(t *testing.T) {
 	g := New(Config{})
 	err := g.Generate(nil)
-	if err == nil {
-		t.Fatal("expected error for nil schema, got nil")
-	}
-	if err.Error() != "nil provider schema" {
-		t.Errorf("error = %q, want %q", err.Error(), "nil provider schema")
-	}
+	require.Error(t, err)
+	require.Equal(t, "nil provider schema", err.Error(), "error = %q, want %q", err.Error(), "nil provider schema")
 }
 
 func TestGenerateEmptySchema(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-test-*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
@@ -115,14 +95,11 @@ func TestGenerateEmptySchema(t *testing.T) {
 		},
 	}
 
-	if err := g.Generate(ps); err != nil {
-		t.Fatalf("Generate failed: %v", err)
-	}
+	require.NoError(t, g.Generate(ps), "Generate failed")
 
 	// provider_gen.go should exist
-	if _, err := os.Stat(filepath.Join(tmpDir, "provider_gen.go")); err != nil {
-		t.Errorf("provider_gen.go not found: %v", err)
-	}
+	_, err = os.Stat(filepath.Join(tmpDir, "provider_gen.go"))
+	require.NoError(t, err, "provider_gen.go not found")
 
 	// Verify generated code compiles
 	compileGeneratedCode(t, tmpDir, "testpkg")
@@ -130,9 +107,7 @@ func TestGenerateEmptySchema(t *testing.T) {
 
 func TestGenerateWithResources(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-test-*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
@@ -161,21 +136,14 @@ func TestGenerateWithResources(t *testing.T) {
 		},
 	}
 
-	if err := g.Generate(ps); err != nil {
-		t.Fatalf("Generate failed: %v", err)
-	}
+	require.NoError(t, g.Generate(ps), "Generate failed")
 
 	// Verify generated files exist
 	for _, name := range []string{"provider_gen.go", "resources_gen.go"} {
 		path := filepath.Join(tmpDir, name)
 		info, err := os.Stat(path)
-		if err != nil {
-			t.Errorf("%s not found: %v", name, err)
-			continue
-		}
-		if info.Size() == 0 {
-			t.Errorf("%s is empty", name)
-		}
+		require.NoError(t, err, "%s not found", name)
+		require.NotEqual(t, int64(0), info.Size(), "%s is empty", name)
 	}
 
 	// Verify generated code compiles
@@ -190,14 +158,10 @@ func TestJsonTagBehavior(t *testing.T) {
 	})
 
 	got := g.jsonTag("name", false)
-	if got != "name" {
-		t.Errorf("jsonTag(name, false) = %q, want %q", got, "name")
-	}
+	require.Equal(t, "name", got, "jsonTag(name, false) = %q, want %q", got, "name")
 
 	got = g.jsonTag("name", true)
-	if got != "name,omitempty" {
-		t.Errorf("jsonTag(name, true) = %q, want %q", got, "name,omitempty")
-	}
+	require.Equal(t, "name,omitempty", got, "jsonTag(name, true) = %q, want %q", got, "name,omitempty")
 }
 
 func TestGoTypeForAttribute(t *testing.T) {
@@ -268,13 +232,9 @@ func TestGoTypeForAttribute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotType := attributeType(tt.attr)
-			if gotType != tt.wantType {
-				t.Errorf("attributeType() = %q, want %q", gotType, tt.wantType)
-			}
+			require.Equal(t, tt.wantType, gotType, "attributeType() = %q, want %q", gotType, tt.wantType)
 			gotGo := goTypeName(gotType)
-			if gotGo != tt.wantGo {
-				t.Errorf("goTypeName(%q) = %q, want %q", gotType, gotGo, tt.wantGo)
-			}
+			require.Equal(t, tt.wantGo, gotGo, "goTypeName(%q) = %q, want %q", gotType, gotGo, tt.wantGo)
 		})
 	}
 }
@@ -296,18 +256,14 @@ func TestApplyGoTypePointer(t *testing.T) {
 		t.Run(tt.goType, func(t *testing.T) {
 			stmt := applyGoType(jen.Null(), tt.goType)
 			got := fmt.Sprintf("%#v", stmt)
-			if got != tt.want {
-				t.Errorf("applyGoType(%q) rendered %q, want %q", tt.goType, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "applyGoType(%q) rendered %q, want %q", tt.goType, got, tt.want)
 		})
 	}
 }
 
 func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-nested-*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
@@ -367,60 +323,41 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 		},
 	}
 
-	if err := g.Generate(ps); err != nil {
-		t.Fatalf("Generate failed: %v", err)
-	}
+	require.NoError(t, g.Generate(ps), "Generate failed")
 
 	// Verify all generated files exist
 	for _, name := range []string{"provider_gen.go", "resources_gen.go", "data_sources_gen.go"} {
 		path := filepath.Join(tmpDir, name)
 		info, err := os.Stat(path)
-		if err != nil {
-			t.Errorf("%s not found: %v", name, err)
-			continue
-		}
-		if info.Size() == 0 {
-			t.Errorf("%s is empty", name)
-		}
+		require.NoError(t, err, "%s not found", name)
+		require.NotEqual(t, int64(0), info.Size(), "%s is empty", name)
 	}
 
 	// Verify provider_gen.go contains nested block type
 	providerData, err := os.ReadFile(filepath.Join(tmpDir, "provider_gen.go"))
-	if err != nil {
-		t.Fatalf("reading provider_gen.go: %v", err)
-	}
+	require.NoError(t, err, "reading provider_gen.go")
 	providerContent := string(providerData)
 	for _, want := range []string{"ProviderConfig", "Settings", "ProviderConfigSettings"} {
-		if !strings.Contains(providerContent, want) {
-			t.Errorf("provider_gen.go does not contain %q", want)
-		}
+		require.Contains(t, providerContent, want, "provider_gen.go does not contain %q", want)
 	}
 
 	// Verify resources_gen.go contains nested block type
 	resourceData, err := os.ReadFile(filepath.Join(tmpDir, "resources_gen.go"))
-	if err != nil {
-		t.Fatalf("reading resources_gen.go: %v", err)
-	}
+	require.NoError(t, err, "reading resources_gen.go")
 	resourceContent := string(resourceData)
 	for _, want := range []string{
 		"Thing", "Config", "ThingConfig",
 		"ThingConfigOption", "NewThingConfig", "ThingConfig_SetKey",
 	} {
-		if !strings.Contains(resourceContent, want) {
-			t.Errorf("resources_gen.go does not contain %q", want)
-		}
+		require.Contains(t, resourceContent, want, "resources_gen.go does not contain %q", want)
 	}
 
 	// Verify data_sources_gen.go content
 	dsData, err := os.ReadFile(filepath.Join(tmpDir, "data_sources_gen.go"))
-	if err != nil {
-		t.Fatalf("reading data_sources_gen.go: %v", err)
-	}
+	require.NoError(t, err, "reading data_sources_gen.go")
 	dsContent := string(dsData)
 	for _, want := range []string{"DataData", "Filter", "ID"} {
-		if !strings.Contains(dsContent, want) {
-			t.Errorf("data_sources_gen.go does not contain %q", want)
-		}
+		require.Contains(t, dsContent, want, "data_sources_gen.go does not contain %q", want)
 	}
 
 	// Verify generated code compiles
@@ -429,9 +366,7 @@ func TestGenerateWithNestedBlocksAndDataSources(t *testing.T) {
 
 func TestGenerateWithSetAndMapNesting(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-nesting-*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
@@ -473,21 +408,15 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 		},
 	}
 
-	if err := g.Generate(ps); err != nil {
-		t.Fatalf("Generate failed: %v", err)
-	}
+	require.NoError(t, g.Generate(ps), "Generate failed")
 
 	resourceData, err := os.ReadFile(filepath.Join(tmpDir, "resources_gen.go"))
-	if err != nil {
-		t.Fatalf("reading resources_gen.go: %v", err)
-	}
+	require.NoError(t, err, "reading resources_gen.go")
 	resourceContent := string(resourceData)
 
 	// Check that set and map nesting modes produce correct types
 	for _, want := range []string{"Multi", "MultiTags", "MultiMetadata"} {
-		if !strings.Contains(resourceContent, want) {
-			t.Errorf("resources_gen.go does not contain %q", want)
-		}
+		require.Contains(t, resourceContent, want, "resources_gen.go does not contain %q", want)
 	}
 
 	// Verify generated code compiles
@@ -496,9 +425,7 @@ func TestGenerateWithSetAndMapNesting(t *testing.T) {
 
 func TestGenerateWithComments(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-comments-*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
@@ -538,9 +465,7 @@ func TestGenerateWithComments(t *testing.T) {
 		},
 	}
 
-	if err := g.Generate(ps); err != nil {
-		t.Fatalf("Generate failed: %v", err)
-	}
+	require.NoError(t, g.Generate(ps), "Generate failed")
 
 	// Verify all three files exist and contain expected comments
 	checks := []struct {
@@ -563,15 +488,10 @@ func TestGenerateWithComments(t *testing.T) {
 
 	for _, tc := range checks {
 		data, err := os.ReadFile(filepath.Join(tmpDir, tc.file))
-		if err != nil {
-			t.Errorf("%s not found: %v", tc.file, err)
-			continue
-		}
+		require.NoError(t, err, "%s not found", tc.file)
 		content := string(data)
 		for _, exp := range tc.expected {
-			if !strings.Contains(content, exp) {
-				t.Errorf("%s: expected comment %q not found in generated output", tc.file, exp)
-			}
+			require.Contains(t, content, exp, "%s: expected comment %q not found in generated output", tc.file, exp)
 		}
 	}
 
@@ -585,9 +505,7 @@ func TestGenerateWithComments(t *testing.T) {
 // but type-incorrect Go code.
 func TestGenerateCompilationComplex(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-compile-*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
@@ -719,15 +637,12 @@ func TestGenerateCompilationComplex(t *testing.T) {
 		},
 	}
 
-	if err := g.Generate(ps); err != nil {
-		t.Fatalf("Generate failed: %v", err)
-	}
+	require.NoError(t, g.Generate(ps), "Generate failed")
 
 	// Verify all expected files exist
 	for _, name := range []string{"provider_gen.go", "resources_gen.go", "data_sources_gen.go"} {
-		if _, err := os.Stat(filepath.Join(tmpDir, name)); err != nil {
-			t.Errorf("%s not found: %v", name, err)
-		}
+		_, err := os.Stat(filepath.Join(tmpDir, name))
+		require.NoError(t, err, "%s not found", name)
 	}
 
 	// The critical check: verify the generated code actually compiles
@@ -741,9 +656,7 @@ func TestGenerateCompilationComplex(t *testing.T) {
 // attributes (e.g., emitting flat map[string]any instead of typed structs).
 func TestGenerateNestedTypeAttributes(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-nestedtype-*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
@@ -813,16 +726,12 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 		},
 	}
 
-	if err := g.Generate(ps); err != nil {
-		t.Fatalf("Generate failed: %v", err)
-	}
+	require.NoError(t, g.Generate(ps), "Generate failed")
 
 	// Verify resources_gen.go exists
 	resourcePath := filepath.Join(tmpDir, "resources_gen.go")
 	data, err := os.ReadFile(resourcePath)
-	if err != nil {
-		t.Fatalf("resources_gen.go not found: %v", err)
-	}
+	require.NoError(t, err, "resources_gen.go not found")
 
 	content := string(data)
 
@@ -839,9 +748,7 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 		"EmptyNested",   // field from empty_nested attribute
 		"json:\"name\"", // required field has no omitempty
 	} {
-		if !strings.Contains(content, want) {
-			t.Errorf("resources_gen.go does not contain %q", want)
-		}
+		require.Contains(t, content, want, "resources_gen.go does not contain %q", want)
 	}
 
 	// Optional nested type attributes should have omitempty
@@ -852,9 +759,7 @@ func TestGenerateNestedTypeAttributes(t *testing.T) {
 		"json:\"map_nested,omitempty\"",
 		"json:\"empty_nested,omitempty\"",
 	} {
-		if !strings.Contains(content, want) {
-			t.Errorf("resources_gen.go does not contain %q", want)
-		}
+		require.Contains(t, content, want, "resources_gen.go does not contain %q", want)
 	}
 
 	// The critical check: verify the generated code actually compiles.
@@ -911,9 +816,7 @@ func TestDetectProviderPrefix(t *testing.T) {
 				DataSourceSchemas: tt.dataSrcs,
 			}
 			got := g.detectProviderPrefix()
-			if got != tt.wantPrefix {
-				t.Errorf("detectProviderPrefix() = %q, want %q", got, tt.wantPrefix)
-			}
+			require.Equal(t, tt.wantPrefix, got, "detectProviderPrefix() = %q, want %q", got, tt.wantPrefix)
 		})
 	}
 }
@@ -962,9 +865,7 @@ func TestShortName(t *testing.T) {
 			g := New(Config{PackageName: "test", OutputDir: t.TempDir()})
 			g.providerPrefix = tt.prefix
 			got := g.shortName(tt.structName)
-			if got != tt.want {
-				t.Errorf("shortName(%q) = %q, want %q", tt.structName, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "shortName(%q) = %q, want %q", tt.structName, got, tt.want)
 		})
 	}
 }
@@ -979,9 +880,7 @@ func TestShortName(t *testing.T) {
 // This is a broader smoke test using the same fixture as schema_test.go.
 func TestGenerateNestedTypeFullFixture(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-fullfixture-*")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer os.RemoveAll(tmpDir)
 
 	g := New(Config{
@@ -991,15 +890,12 @@ func TestGenerateNestedTypeFullFixture(t *testing.T) {
 
 	ps := newTestProviderSchema()
 
-	if err := g.Generate(ps); err != nil {
-		t.Fatalf("Generate failed: %v", err)
-	}
+	require.NoError(t, g.Generate(ps), "Generate failed")
 
 	// Verify all expected files
 	for _, name := range []string{"provider_gen.go", "resources_gen.go", "data_sources_gen.go"} {
-		if _, err := os.Stat(filepath.Join(tmpDir, name)); err != nil {
-			t.Errorf("%s not found: %v", name, err)
-		}
+		_, err := os.Stat(filepath.Join(tmpDir, name))
+		require.NoError(t, err, "%s not found", name)
 	}
 
 	// Verify generated code compiles (including all NestedType attributes)

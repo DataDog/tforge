@@ -2,6 +2,8 @@ package config
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestResourceAddress(t *testing.T) {
@@ -25,9 +27,7 @@ func TestResourceAddress(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.res.Address()
-			if got != tt.want {
-				t.Fatalf("Address() = %q, want %q", got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "Address() = %q, want %q", got, tt.want)
 		})
 	}
 }
@@ -62,9 +62,7 @@ func TestResourceRef(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.res.Ref(tt.attr)
-			if got != tt.want {
-				t.Fatalf("Ref(%q) = %q, want %q", tt.attr, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "Ref(%q) = %q, want %q", tt.attr, got, tt.want)
 		})
 	}
 }
@@ -90,9 +88,7 @@ func TestDataSourceAddress(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.ds.Address()
-			if got != tt.want {
-				t.Fatalf("Address() = %q, want %q", got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "Address() = %q, want %q", got, tt.want)
 		})
 	}
 }
@@ -121,9 +117,7 @@ func TestDataSourceRef(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.ds.Ref(tt.attr)
-			if got != tt.want {
-				t.Fatalf("Ref(%q) = %q, want %q", tt.attr, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "Ref(%q) = %q, want %q", tt.attr, got, tt.want)
 		})
 	}
 }

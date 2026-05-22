@@ -4,20 +4,17 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestRunMigrate_NoCdktfJson(t *testing.T) {
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err == nil {
-		t.Fatal("expected error for missing cdktf.json")
-	}
-	if !strings.Contains(err.Error(), "cdktf.json") {
-		t.Errorf("expected cdktf.json error, got: %v", err)
-	}
+	require.Error(t, err, "expected error for missing cdktf.json")
+	require.Contains(t, err.Error(), "cdktf.json", "expected cdktf.json error, got: %v", err)
 }
 
 func TestRunMigrate_InvalidJson(t *testing.T) {
@@ -26,9 +23,7 @@ func TestRunMigrate_InvalidJson(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err == nil {
-		t.Fatal("expected error for invalid JSON")
-	}
+	require.Error(t, err, "expected error for invalid JSON")
 }
 
 func TestRunMigrate_NoProviders(t *testing.T) {
@@ -37,12 +32,8 @@ func TestRunMigrate_NoProviders(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err == nil {
-		t.Fatal("expected error for no providers")
-	}
-	if !strings.Contains(err.Error(), "no terraformProviders") {
-		t.Errorf("expected no providers error, got: %v", err)
-	}
+	require.Error(t, err, "expected error for no providers")
+	require.Contains(t, err.Error(), "no terraformProviders", "expected no providers error, got: %v", err)
 }
 
 func TestRunMigrate_DryRun(t *testing.T) {
@@ -55,26 +46,18 @@ func TestRunMigrate_DryRun(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir, "-dry-run"}, &stdout, &stderr)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err, "unexpected error")
 
 	out := stdout.String()
-	if !strings.Contains(out, "aws/generate.go") {
-		t.Errorf("expected aws/generate.go in output, got: %s", out)
-	}
-	if !strings.Contains(out, "modules") {
-		t.Errorf("expected module warning in output, got: %s", out)
-	}
+	require.Contains(t, out, "aws/generate.go", "expected aws/generate.go in output, got: %s", out)
+	require.Contains(t, out, "modules", "expected module warning in output, got: %s", out)
 
 	// cdktf.json should still exist (dry run)
-	if _, err := os.Stat(filepath.Join(dir, "cdktf.json")); err != nil {
-		t.Error("cdktf.json should not be deleted in dry-run mode")
-	}
+	_, err = os.Stat(filepath.Join(dir, "cdktf.json"))
+	require.NoError(t, err, "cdktf.json should not be deleted in dry-run mode")
 	// aws/ subdir should not be created (dry run)
-	if _, err := os.Stat(filepath.Join(dir, "aws")); err == nil {
-		t.Error("aws/ should not be created in dry-run mode")
-	}
+	_, err = os.Stat(filepath.Join(dir, "aws"))
+	require.True(t, os.IsNotExist(err), "aws/ should not be created in dry-run mode")
 }
 
 func TestRunMigrate_GitignoreWriteError(t *testing.T) {
@@ -84,18 +67,12 @@ func TestRunMigrate_GitignoreWriteError(t *testing.T) {
 
 	// Create .gitignore as a read-only directory to provoke a write error.
 	gitignorePath := filepath.Join(dir, ".gitignore")
-	if err := os.Mkdir(gitignorePath, 0755); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, os.Mkdir(gitignorePath, 0755))
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err == nil {
-		t.Fatal("expected error when .gitignore cannot be written, got nil")
-	}
-	if !strings.Contains(err.Error(), ".gitignore") {
-		t.Errorf("expected .gitignore error, got: %v", err)
-	}
+	require.Error(t, err, "expected error when .gitignore cannot be written, got nil")
+	require.Contains(t, err.Error(), ".gitignore", "expected .gitignore error, got: %v", err)
 }
 
 func TestRunMigrate_StringProvider(t *testing.T) {
@@ -107,42 +84,28 @@ func TestRunMigrate_StringProvider(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err, "unexpected error")
 
 	// cdktf.json deleted
-	if _, err := os.Stat(filepath.Join(dir, "cdktf.json")); !os.IsNotExist(err) {
-		t.Error("cdktf.json should be deleted")
-	}
+	_, err = os.Stat(filepath.Join(dir, "cdktf.json"))
+	require.True(t, os.IsNotExist(err), "cdktf.json should be deleted")
 
 	// package.json deleted
-	if _, err := os.Stat(filepath.Join(dir, "package.json")); !os.IsNotExist(err) {
-		t.Error("package.json should be deleted")
-	}
+	_, err = os.Stat(filepath.Join(dir, "package.json"))
+	require.True(t, os.IsNotExist(err), "package.json should be deleted")
 
 	// aws/generate.go created
 	genData, err := os.ReadFile(filepath.Join(dir, "aws", "generate.go"))
-	if err != nil {
-		t.Fatalf("aws/generate.go not created: %v", err)
-	}
+	require.NoError(t, err, "aws/generate.go not created")
 	genContent := string(genData)
-	if !strings.Contains(genContent, "//go:generate tforge generate -provider hashicorp/aws -version 5.0 -package aws -output .") {
-		t.Errorf("wrong generate directive: %s", genContent)
-	}
-	if !strings.Contains(genContent, "package aws") {
-		t.Errorf("wrong package name: %s", genContent)
-	}
+	require.Contains(t, genContent, "//go:generate tforge generate -provider hashicorp/aws -version 5.0 -package aws -output .", "wrong generate directive: %s", genContent)
+	require.Contains(t, genContent, "package aws", "wrong package name: %s", genContent)
 
 	// .gitignore updated (only appends, does not remove existing entries)
 	gitignore, _ := os.ReadFile(filepath.Join(dir, ".gitignore"))
 	gi := string(gitignore)
-	if !strings.Contains(gi, "cdktf.out") {
-		t.Error(".gitignore should still contain original cdktf.out entry")
-	}
-	if !strings.Contains(gi, "*_gen.go") {
-		t.Error(".gitignore should contain *_gen.go")
-	}
+	require.Contains(t, gi, "cdktf.out", ".gitignore should still contain original cdktf.out entry")
+	require.Contains(t, gi, "*_gen.go", ".gitignore should contain *_gen.go")
 }
 
 func TestRunMigrate_ObjectProvider(t *testing.T) {
@@ -152,14 +115,10 @@ func TestRunMigrate_ObjectProvider(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err, "unexpected error")
 
 	genData, _ := os.ReadFile(filepath.Join(dir, "aws", "generate.go"))
-	if !strings.Contains(string(genData), "-provider hashicorp/aws -version 3.22") {
-		t.Errorf("wrong generate directive: %s", string(genData))
-	}
+	require.Contains(t, string(genData), "-provider hashicorp/aws -version 3.22", "wrong generate directive: %s", string(genData))
 }
 
 func TestRunMigrate_ProviderWithoutVersion(t *testing.T) {
@@ -169,17 +128,11 @@ func TestRunMigrate_ProviderWithoutVersion(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err, "unexpected error")
 
 	genData, _ := os.ReadFile(filepath.Join(dir, "random", "generate.go"))
-	if !strings.Contains(string(genData), "-version latest") {
-		t.Errorf("expected 'latest' version: %s", string(genData))
-	}
-	if !strings.Contains(string(genData), "package random") {
-		t.Errorf("expected package random: %s", string(genData))
-	}
+	require.Contains(t, string(genData), "-version latest", "expected 'latest' version: %s", string(genData))
+	require.Contains(t, string(genData), "package random", "expected package random: %s", string(genData))
 }
 
 func TestRunMigrate_MultipleProviders(t *testing.T) {
@@ -189,26 +142,18 @@ func TestRunMigrate_MultipleProviders(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err, "unexpected error")
 
 	// Both provider packages created
-	if _, err := os.Stat(filepath.Join(dir, "aws", "generate.go")); err != nil {
-		t.Error("aws/generate.go not created")
-	}
-	if _, err := os.Stat(filepath.Join(dir, "datadog", "generate.go")); err != nil {
-		t.Error("datadog/generate.go not created")
-	}
+	_, err = os.Stat(filepath.Join(dir, "aws", "generate.go"))
+	require.NoError(t, err, "aws/generate.go not created")
+	_, err = os.Stat(filepath.Join(dir, "datadog", "generate.go"))
+	require.NoError(t, err, "datadog/generate.go not created")
 
 	awsGen, _ := os.ReadFile(filepath.Join(dir, "aws", "generate.go"))
-	if !strings.Contains(string(awsGen), "package aws") {
-		t.Error("aws package should be named aws")
-	}
+	require.Contains(t, string(awsGen), "package aws", "aws package should be named aws")
 	ddGen, _ := os.ReadFile(filepath.Join(dir, "datadog", "generate.go"))
-	if !strings.Contains(string(ddGen), "package datadog") {
-		t.Error("datadog package should be named datadog")
-	}
+	require.Contains(t, string(ddGen), "package datadog", "datadog package should be named datadog")
 }
 
 func TestRunMigrate_ThirdPartyProvider(t *testing.T) {
@@ -218,18 +163,12 @@ func TestRunMigrate_ThirdPartyProvider(t *testing.T) {
 
 	var stdout, stderr bytes.Buffer
 	err := runMigrate([]string{"-dir", dir}, &stdout, &stderr)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err, "unexpected error")
 
 	genData, _ := os.ReadFile(filepath.Join(dir, "docker", "generate.go"))
 	content := string(genData)
-	if !strings.Contains(content, "-provider kreuzwerker/docker") {
-		t.Errorf("expected kreuzwerker/docker provider: %s", content)
-	}
-	if !strings.Contains(content, "package docker") {
-		t.Errorf("expected package docker: %s", content)
-	}
+	require.Contains(t, content, "-provider kreuzwerker/docker", "expected kreuzwerker/docker provider: %s", content)
+	require.Contains(t, content, "package docker", "expected package docker: %s", content)
 }
 
 func TestParseProviderString(t *testing.T) {
@@ -251,18 +190,10 @@ func TestParseProviderString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			p, err := parseProviderString(tt.input)
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if p.Source != tt.source {
-				t.Errorf("source = %q, want %q", p.Source, tt.source)
-			}
-			if p.Name != tt.name {
-				t.Errorf("name = %q, want %q", p.Name, tt.name)
-			}
-			if p.Version != tt.version {
-				t.Errorf("version = %q, want %q", p.Version, tt.version)
-			}
+			require.NoError(t, err, "unexpected error")
+			require.Equal(t, tt.source, p.Source, "source = %q, want %q", p.Source, tt.source)
+			require.Equal(t, tt.name, p.Name, "name = %q, want %q", p.Name, tt.name)
+			require.Equal(t, tt.version, p.Version, "version = %q, want %q", p.Version, tt.version)
 		})
 	}
 }

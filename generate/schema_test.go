@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/DataDog/tforge/provider"
 )
 
@@ -264,18 +266,14 @@ func TestParseTypeJSON(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := parseTypeJSON(json.RawMessage(tt.json))
-			if got != tt.want {
-				t.Errorf("parseTypeJSON(%s) = %q, want %q", tt.json, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "parseTypeJSON(%s) = %q, want %q", tt.json, got, tt.want)
 		})
 	}
 }
 
 func TestParseTypeJSONNil(t *testing.T) {
 	got := parseTypeJSON(nil)
-	if got != "dynamic" {
-		t.Errorf("parseTypeJSON(nil) = %q, want %q", got, "dynamic")
-	}
+	require.Equal(t, "dynamic", got, "parseTypeJSON(nil) = %q, want %q", got, "dynamic")
 }
 
 func TestGoTypeName(t *testing.T) {
@@ -297,9 +295,7 @@ func TestGoTypeName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.tfType, func(t *testing.T) {
 			got := goTypeName(tt.tfType)
-			if got != tt.want {
-				t.Errorf("goTypeName(%q) = %q, want %q", tt.tfType, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "goTypeName(%q) = %q, want %q", tt.tfType, got, tt.want)
 		})
 	}
 }
@@ -321,20 +317,15 @@ func TestAttributeType(t *testing.T) {
 	}
 	for _, tt := range tests {
 		attr := block.Attributes[tt.attrName]
-		if attr == nil {
-			t.Errorf("attribute %q not found", tt.attrName)
-			continue
-		}
-		if got := attributeType(attr); got != tt.wantType {
-			t.Errorf("attributeType(%q) = %q, want %q", tt.attrName, got, tt.wantType)
-		}
+		require.NotNil(t, attr, "attribute %q not found", tt.attrName)
+		got := attributeType(attr)
+		require.Equal(t, tt.wantType, got, "attributeType(%q) = %q, want %q", tt.attrName, got, tt.wantType)
 	}
 }
 
 func TestAttributeTypeNil(t *testing.T) {
-	if got := attributeType(nil); got != "dynamic" {
-		t.Errorf("attributeType(nil) = %q, want %q", got, "dynamic")
-	}
+	got := attributeType(nil)
+	require.Equal(t, "dynamic", got, "attributeType(nil) = %q, want %q", got, "dynamic")
 }
 
 func TestAttributeTypeNested(t *testing.T) {
@@ -353,51 +344,31 @@ func TestAttributeTypeNested(t *testing.T) {
 	}
 	for _, tt := range tests {
 		attr := block.Attributes[tt.attrName]
-		if attr == nil {
-			t.Errorf("attribute %q not found", tt.attrName)
-			continue
-		}
-		if got := attributeType(attr); got != tt.wantType {
-			t.Errorf("attributeType(%q) = %q, want %q", tt.attrName, got, tt.wantType)
-		}
+		require.NotNil(t, attr, "attribute %q not found", tt.attrName)
+		got := attributeType(attr)
+		require.Equal(t, tt.wantType, got, "attributeType(%q) = %q, want %q", tt.attrName, got, tt.wantType)
 	}
 }
 
 func TestSortedSchemas_Resources(t *testing.T) {
 	ps := newTestProviderSchema()
 	resources := sortedSchemas(ps.ResourceSchemas)
-	if len(resources) != 3 {
-		t.Fatalf("expected 3 resources, got %d", len(resources))
-	}
-	if resources[0].Name != "example_deep" {
-		t.Errorf("expected first resource %q, got %q", "example_deep", resources[0].Name)
-	}
-	if resources[1].Name != "example_other" {
-		t.Errorf("expected second resource %q, got %q", "example_other", resources[1].Name)
-	}
-	if resources[2].Name != "example_thing" {
-		t.Errorf("expected third resource %q, got %q", "example_thing", resources[2].Name)
-	}
+	require.Len(t, resources, 3, "expected 3 resources, got %d", len(resources))
+	require.Equal(t, "example_deep", resources[0].Name, "expected first resource %q, got %q", "example_deep", resources[0].Name)
+	require.Equal(t, "example_other", resources[1].Name, "expected second resource %q, got %q", "example_other", resources[1].Name)
+	require.Equal(t, "example_thing", resources[2].Name, "expected third resource %q, got %q", "example_thing", resources[2].Name)
 }
 
 func TestSortedSchemas_Nil(t *testing.T) {
-	if sortedSchemas(nil) != nil {
-		t.Error("expected nil for nil map")
-	}
+	require.Nil(t, sortedSchemas(nil), "expected nil for nil map")
 }
 
 func TestSortedSchemas_DataSources(t *testing.T) {
 	ps := newTestProviderSchema()
 	dataSources := sortedSchemas(ps.DataSourceSchemas)
-	if len(dataSources) != 2 {
-		t.Fatalf("expected 2 data sources, got %d", len(dataSources))
-	}
-	if dataSources[0].Name != "example_info" {
-		t.Errorf("expected first data source %q, got %q", "example_info", dataSources[0].Name)
-	}
-	if dataSources[1].Name != "example_things" {
-		t.Errorf("expected second data source %q, got %q", "example_things", dataSources[1].Name)
-	}
+	require.Len(t, dataSources, 2, "expected 2 data sources, got %d", len(dataSources))
+	require.Equal(t, "example_info", dataSources[0].Name, "expected first data source %q, got %q", "example_info", dataSources[0].Name)
+	require.Equal(t, "example_things", dataSources[1].Name, "expected second data source %q, got %q", "example_things", dataSources[1].Name)
 }
 
 func TestSortedAttributes(t *testing.T) {
@@ -405,21 +376,15 @@ func TestSortedAttributes(t *testing.T) {
 	block := ps.ResourceSchemas["example_thing"].Block
 
 	attrs := sortedAttributes(block)
-	if len(attrs) == 0 {
-		t.Fatal("expected attributes, got none")
-	}
+	require.NotEmpty(t, attrs, "expected attributes, got none")
 	// Check sorted order
 	for i := 1; i < len(attrs); i++ {
-		if attrs[i-1].Name >= attrs[i].Name {
-			t.Errorf("attributes not sorted: %q >= %q", attrs[i-1].Name, attrs[i].Name)
-		}
+		require.Less(t, attrs[i-1].Name, attrs[i].Name, "attributes not sorted: %q >= %q", attrs[i-1].Name, attrs[i].Name)
 	}
 }
 
 func TestSortedAttributesNil(t *testing.T) {
-	if sortedAttributes(nil) != nil {
-		t.Error("expected nil for nil block type")
-	}
+	require.Nil(t, sortedAttributes(nil), "expected nil for nil block type")
 }
 
 func TestSortedNestedBlocks(t *testing.T) {
@@ -427,21 +392,13 @@ func TestSortedNestedBlocks(t *testing.T) {
 	block := ps.ResourceSchemas["example_thing"].Block
 
 	nbs := sortedNestedBlocks(block)
-	if len(nbs) != 2 {
-		t.Fatalf("expected 2 nested blocks, got %d", len(nbs))
-	}
-	if nbs[0].Name != "config_block" {
-		t.Errorf("expected first nested block %q, got %q", "config_block", nbs[0].Name)
-	}
-	if nbs[1].Name != "single_block" {
-		t.Errorf("expected second nested block %q, got %q", "single_block", nbs[1].Name)
-	}
+	require.Len(t, nbs, 2, "expected 2 nested blocks, got %d", len(nbs))
+	require.Equal(t, "config_block", nbs[0].Name, "expected first nested block %q, got %q", "config_block", nbs[0].Name)
+	require.Equal(t, "single_block", nbs[1].Name, "expected second nested block %q, got %q", "single_block", nbs[1].Name)
 }
 
 func TestSortedNestedBlocksNil(t *testing.T) {
-	if sortedNestedBlocks(nil) != nil {
-		t.Error("expected nil for nil block type")
-	}
+	require.Nil(t, sortedNestedBlocks(nil), "expected nil for nil block type")
 }
 
 func TestExtractInnerType(t *testing.T) {
@@ -462,9 +419,7 @@ func TestExtractInnerType(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := extractInnerType(tt.input)
-			if got != tt.want {
-				t.Errorf("extractInnerType(%q) = %q, want %q", tt.input, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "extractInnerType(%q) = %q, want %q", tt.input, got, tt.want)
 		})
 	}
 }
@@ -482,13 +437,11 @@ func TestNestedTypeString(t *testing.T) {
 	}
 	for _, tt := range tests {
 		nt := &provider.NestedType{NestingMode: tt.mode}
-		if got := nestedTypeString(nt); got != tt.want {
-			t.Errorf("nestedTypeString(%q) = %q, want %q", tt.mode, got, tt.want)
-		}
+		got := nestedTypeString(nt)
+		require.Equal(t, tt.want, got, "nestedTypeString(%q) = %q, want %q", tt.mode, got, tt.want)
 	}
 
 	// nil nested type
-	if got := nestedTypeString(nil); got != "dynamic" {
-		t.Errorf("nestedTypeString(nil) = %q, want %q", got, "dynamic")
-	}
+	got := nestedTypeString(nil)
+	require.Equal(t, "dynamic", got, "nestedTypeString(nil) = %q, want %q", got, "dynamic")
 }

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/DataDog/tforge/config"
 	"github.com/DataDog/tforge/render"
 )
@@ -12,29 +14,20 @@ func TestExample_GeneratesValidJSON(t *testing.T) {
 	stack := buildExampleStack()
 
 	data, err := render.ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("ToJSON: %v", err)
-	}
+	require.NoError(t, err, "ToJSON")
 
-	if !json.Valid(data) {
-		t.Fatal("output is not valid JSON")
-	}
+	require.True(t, json.Valid(data), "output is not valid JSON")
 
 	var parsed map[string]any
-	if err := json.Unmarshal(data, &parsed); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &parsed), "unmarshal")
 
 	// Verify required Terraform structure
-	if _, ok := parsed["terraform"]; !ok {
-		t.Error("missing terraform block")
-	}
-	if _, ok := parsed["provider"]; !ok {
-		t.Error("missing provider block")
-	}
-	if _, ok := parsed["resource"]; !ok {
-		t.Error("missing resource block")
-	}
+	_, ok := parsed["terraform"]
+	require.True(t, ok, "missing terraform block")
+	_, ok = parsed["provider"]
+	require.True(t, ok, "missing provider block")
+	_, ok = parsed["resource"]
+	require.True(t, ok, "missing resource block")
 }
 
 func buildExampleStack() *config.Stack {

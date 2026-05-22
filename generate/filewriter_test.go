@@ -3,10 +3,10 @@ package generate
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/stretchr/testify/require"
 )
 
 // newTestGenerator returns a Generator with default initialisms for testing.
@@ -81,9 +81,7 @@ func TestToGoName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			got := g.toGoName(tt.input)
-			if got != tt.want {
-				t.Errorf("toGoName(%q) = %q, want %q", tt.input, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "toGoName(%q) = %q, want %q", tt.input, got, tt.want)
 		})
 	}
 }
@@ -106,9 +104,7 @@ func TestToGoNameCustomInitialisms(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			got := g.toGoName(tt.input)
-			if got != tt.want {
-				t.Errorf("toGoName(%q) = %q, want %q", tt.input, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "toGoName(%q) = %q, want %q", tt.input, got, tt.want)
 		})
 	}
 }
@@ -118,9 +114,7 @@ func TestToGoNameEmptyInitialisms(t *testing.T) {
 
 	// With empty initialisms, nothing gets special treatment
 	got := g.toGoName("api_key")
-	if got != "ApiKey" {
-		t.Errorf("toGoName(%q) = %q, want %q", "api_key", got, "ApiKey")
-	}
+	require.Equal(t, "ApiKey", got, "toGoName(%q) = %q, want %q", "api_key", got, "ApiKey")
 }
 
 func TestCapitalizeFirst(t *testing.T) {
@@ -137,9 +131,7 @@ func TestCapitalizeFirst(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.input, func(t *testing.T) {
 			got := capitalizeFirst(tt.input)
-			if got != tt.want {
-				t.Errorf("capitalizeFirst(%q) = %q, want %q", tt.input, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "capitalizeFirst(%q) = %q, want %q", tt.input, got, tt.want)
 		})
 	}
 }
@@ -149,23 +141,17 @@ func TestDefaultInitialisms(t *testing.T) {
 
 	// Go canonical initialisms should be recognized
 	for _, s := range []string{"ID", "API", "URL", "HTTP", "JSON", "SQL"} {
-		if !g.initialisms[s] {
-			t.Errorf("expected %q in default initialisms", s)
-		}
+		require.True(t, g.initialisms[s], "expected %q in default initialisms", s)
 	}
 
 	// Terraform/cloud terms should be recognized
 	for _, s := range []string{"VPC", "ARN", "IAM", "EC2", "S3", "OS"} {
-		if !g.initialisms[s] {
-			t.Errorf("expected %q in default initialisms", s)
-		}
+		require.True(t, g.initialisms[s], "expected %q in default initialisms", s)
 	}
 
 	// Random strings should not be recognized
 	for _, s := range []string{"FOO", "BAR", "CLOUD"} {
-		if g.initialisms[s] {
-			t.Errorf("did not expect %q in default initialisms", s)
-		}
+		require.False(t, g.initialisms[s], "did not expect %q in default initialisms", s)
 	}
 }
 
@@ -178,51 +164,35 @@ func TestWriteFile_HappyPath(t *testing.T) {
 		jen.Return(jen.Lit("hello")),
 	)
 
-	if err := WriteFile(f, path); err != nil {
-		t.Fatalf("WriteFile: %v", err)
-	}
+	require.NoError(t, WriteFile(f, path), "WriteFile")
 
 	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("reading output: %v", err)
-	}
-	if !strings.Contains(string(data), "func Hello()") {
-		t.Error("output does not contain expected function")
-	}
+	require.NoError(t, err, "reading output")
+	require.Contains(t, string(data), "func Hello()", "output does not contain expected function")
 }
 
 func TestWriteFile_MkdirAllFailure(t *testing.T) {
 	// Create a file where a directory is expected, so MkdirAll fails.
 	dir := t.TempDir()
 	blocker := filepath.Join(dir, "blocker")
-	if err := os.WriteFile(blocker, []byte("x"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, os.WriteFile(blocker, []byte("x"), 0644))
 
 	// Try to write under the file (which is not a directory).
 	path := filepath.Join(blocker, "subdir", "out_gen.go")
 
 	f := jen.NewFile("testpkg")
 	err := WriteFile(f, path)
-	if err == nil {
-		t.Fatal("expected error for MkdirAll failure, got nil")
-	}
-	if !strings.Contains(err.Error(), "creating directory") {
-		t.Errorf("expected 'creating directory' in error, got: %v", err)
-	}
+	require.Error(t, err, "expected error for MkdirAll failure, got nil")
+	require.Contains(t, err.Error(), "creating directory", "expected 'creating directory' in error, got: %v", err)
 }
 
 func TestWriteFile_WriteFailure(t *testing.T) {
 	// Create a read-only directory so os.WriteFile fails.
 	dir := t.TempDir()
 	readonlyDir := filepath.Join(dir, "readonly")
-	if err := os.MkdirAll(readonlyDir, 0755); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, os.MkdirAll(readonlyDir, 0755))
 	// Make directory read-only after creation.
-	if err := os.Chmod(readonlyDir, 0555); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, os.Chmod(readonlyDir, 0555))
 	t.Cleanup(func() {
 		// Restore permissions so t.TempDir cleanup can remove it.
 		os.Chmod(readonlyDir, 0755) //nolint:errcheck
@@ -236,12 +206,8 @@ func TestWriteFile_WriteFailure(t *testing.T) {
 	)
 
 	err := WriteFile(f, path)
-	if err == nil {
-		t.Fatal("expected error for write failure, got nil")
-	}
-	if !strings.Contains(err.Error(), "writing file") {
-		t.Errorf("expected 'writing file' in error, got: %v", err)
-	}
+	require.Error(t, err, "expected error for write failure, got nil")
+	require.Contains(t, err.Error(), "writing file", "expected 'writing file' in error, got: %v", err)
 }
 
 func TestCleanDescription(t *testing.T) {
@@ -258,9 +224,7 @@ func TestCleanDescription(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := cleanDescription(tt.input)
-			if got != tt.want {
-				t.Errorf("cleanDescription(%q) = %q, want %q", tt.input, got, tt.want)
-			}
+			require.Equal(t, tt.want, got, "cleanDescription(%q) = %q, want %q", tt.input, got, tt.want)
 		})
 	}
 }

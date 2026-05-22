@@ -17,13 +17,9 @@ import (
 func mustMap(t *testing.T, m map[string]any, key string) map[string]any {
 	t.Helper()
 	v, ok := m[key]
-	if !ok {
-		t.Fatalf("key %q not found in map (keys: %v)", key, keys(m))
-	}
+	require.True(t, ok, "key %q not found in map (keys: %v)", key, keys(m))
 	typed, ok := v.(map[string]any)
-	if !ok {
-		t.Fatalf("key %q: expected map[string]any, got %T", key, v)
-	}
+	require.True(t, ok, "key %q: expected map[string]any, got %T", key, v)
 	return typed
 }
 
@@ -31,26 +27,18 @@ func mustMap(t *testing.T, m map[string]any, key string) map[string]any {
 func mustSlice(t *testing.T, m map[string]any, key string) []any {
 	t.Helper()
 	v, ok := m[key]
-	if !ok {
-		t.Fatalf("key %q not found in map (keys: %v)", key, keys(m))
-	}
+	require.True(t, ok, "key %q not found in map (keys: %v)", key, keys(m))
 	typed, ok := v.([]any)
-	if !ok {
-		t.Fatalf("key %q: expected []any, got %T", key, v)
-	}
+	require.True(t, ok, "key %q: expected []any, got %T", key, v)
 	return typed
 }
 
 // mustIndexMap extracts a map[string]any from a slice at the given index.
 func mustIndexMap(t *testing.T, s []any, idx int) map[string]any {
 	t.Helper()
-	if idx >= len(s) {
-		t.Fatalf("index %d out of range (len %d)", idx, len(s))
-	}
+	require.Less(t, idx, len(s), "index %d out of range (len %d)", idx, len(s))
 	typed, ok := s[idx].(map[string]any)
-	if !ok {
-		t.Fatalf("index %d: expected map[string]any, got %T", idx, s[idx])
-	}
+	require.True(t, ok, "index %d: expected map[string]any, got %T", idx, s[idx])
 	return typed
 }
 
@@ -65,64 +53,39 @@ func keys(m map[string]any) []string {
 
 func TestToJSON_NilStack(t *testing.T) {
 	_, err := ToJSON(nil, "")
-	if err == nil {
-		t.Fatal("expected error for nil stack, got nil")
-	}
+	require.Error(t, err)
 }
 
 func TestToJSON_EmptyStack(t *testing.T) {
 	stack := config.NewStack("empty")
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !json.Valid(data) {
-		t.Fatal("output is not valid JSON")
-	}
+	require.NoError(t, err)
+	require.True(t, json.Valid(data), "output is not valid JSON")
 	// An empty stack should produce only the "//" comment metadata block
 	// and no terraform, provider, resource, data, module, variable, output, or locals keys.
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatalf("failed to unmarshal: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj), "failed to unmarshal")
 
 	// The only key should be "//"
-	if len(obj) != 1 {
-		t.Errorf("expected 1 top-level key, got %d: %v", len(obj), keys(obj))
-	}
+	require.Len(t, obj, 1, "expected 1 top-level key, got %d: %v", len(obj), keys(obj))
 	comment, ok := obj["//"]
-	if !ok {
-		t.Fatal("expected '//' key in output")
-	}
+	require.True(t, ok, "expected '//' key in output")
 
 	// Verify metadata structure
 	commentMap, ok := comment.(map[string]any)
-	if !ok {
-		t.Fatalf("'//' value: expected map[string]any, got %T", comment)
-	}
+	require.True(t, ok, "'//' value: expected map[string]any, got %T", comment)
 	metadata, ok := commentMap["metadata"]
-	if !ok {
-		t.Fatal("expected 'metadata' key inside '//'")
-	}
+	require.True(t, ok, "expected 'metadata' key inside '//'")
 	metaMap, ok := metadata.(map[string]any)
-	if !ok {
-		t.Fatalf("'metadata' value: expected map[string]any, got %T", metadata)
-	}
-	if metaMap["tool"] != "tforge" {
-		t.Errorf("metadata.tool = %v, want %q", metaMap["tool"], "tforge")
-	}
-	if metaMap["version"] != DefaultVersion {
-		t.Errorf("metadata.version = %v, want %q", metaMap["version"], DefaultVersion)
-	}
-	if metaMap["stackName"] != "empty" {
-		t.Errorf("metadata.stackName = %v, want %q", metaMap["stackName"], "empty")
-	}
+	require.True(t, ok, "'metadata' value: expected map[string]any, got %T", metadata)
+	require.Equal(t, "tforge", metaMap["tool"], "metadata.tool = %v, want %q", metaMap["tool"], "tforge")
+	require.Equal(t, DefaultVersion, metaMap["version"], "metadata.version = %v, want %q", metaMap["version"], DefaultVersion)
+	require.Equal(t, "empty", metaMap["stackName"], "metadata.stackName = %v, want %q", metaMap["stackName"], "empty")
 
 	// Ensure no infrastructure keys are present
 	for _, key := range []string{"terraform", "provider", "resource", "data", "module", "variable", "output", "locals"} {
-		if _, exists := obj[key]; exists {
-			t.Errorf("unexpected key %q in empty stack output", key)
-		}
+		_, exists := obj[key]
+		require.False(t, exists, "unexpected key %q in empty stack output", key)
 	}
 }
 
@@ -135,30 +98,19 @@ func TestToJSON_ProviderNoAlias(t *testing.T) {
 	})
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !json.Valid(data) {
-		t.Fatal("output is not valid JSON")
-	}
+	require.NoError(t, err)
+	require.True(t, json.Valid(data), "output is not valid JSON")
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj), "unmarshal")
 
 	providers := mustMap(t, obj, "provider")
 	awsList := mustSlice(t, providers, "aws")
-	if len(awsList) != 1 {
-		t.Fatalf("expected 1 aws provider, got %d", len(awsList))
-	}
+	require.Len(t, awsList, 1, "expected 1 aws provider, got %d", len(awsList))
 	awsCfg := mustIndexMap(t, awsList, 0)
-	if awsCfg["region"] != "us-east-1" {
-		t.Errorf("expected region us-east-1, got %v", awsCfg["region"])
-	}
-	if _, exists := awsCfg["alias"]; exists {
-		t.Error("alias should not be present when empty")
-	}
+	require.Equal(t, "us-east-1", awsCfg["region"], "expected region us-east-1, got %v", awsCfg["region"])
+	_, exists := awsCfg["alias"]
+	require.False(t, exists, "alias should not be present when empty")
 }
 
 func TestToJSON_ProviderWithAlias(t *testing.T) {
@@ -170,20 +122,14 @@ func TestToJSON_ProviderWithAlias(t *testing.T) {
 	})
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj), "unmarshal")
 
 	awsList := mustSlice(t, mustMap(t, obj, "provider"), "aws")
 	awsCfg := mustIndexMap(t, awsList, 0)
-	if awsCfg["alias"] != "west" {
-		t.Errorf("expected alias west, got %v", awsCfg["alias"])
-	}
+	require.Equal(t, "west", awsCfg["alias"], "expected alias west, got %v", awsCfg["alias"])
 }
 
 func TestToJSON_ProviderWithConfig(t *testing.T) {
@@ -199,49 +145,33 @@ func TestToJSON_ProviderWithConfig(t *testing.T) {
 	})
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj), "unmarshal")
 
 	awsList := mustSlice(t, mustMap(t, obj, "provider"), "aws")
 	awsCfg := mustIndexMap(t, awsList, 0)
-	if awsCfg["region"] != "eu-west-1" {
-		t.Errorf("expected region eu-west-1, got %v", awsCfg["region"])
-	}
-	if awsCfg["profile"] != "dev" {
-		t.Errorf("expected profile dev, got %v", awsCfg["profile"])
-	}
+	require.Equal(t, "eu-west-1", awsCfg["region"], "expected region eu-west-1, got %v", awsCfg["region"])
+	require.Equal(t, "dev", awsCfg["profile"], "expected profile dev, got %v", awsCfg["profile"])
 }
 
 func TestToJSON_ResourceBasic(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123", "instance_type": "t3.micro"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj), "unmarshal")
 
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
-	if res["ami"] != "ami-123" {
-		t.Errorf("expected ami ami-123, got %v", res["ami"])
-	}
+	require.Equal(t, "ami-123", res["ami"], "expected ami ami-123, got %v", res["ami"])
 }
 
 func TestToJSON_ResourceMetadataComment(t *testing.T) {
@@ -327,145 +257,107 @@ func metadataCommentFor(t *testing.T, stack *config.Stack, kind, typ, name strin
 
 func TestToJSON_ResourceProvider(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Provider:   "aws.west",
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
-	if res["provider"] != "aws.west" {
-		t.Errorf("expected provider aws.west, got %v", res["provider"])
-	}
+	require.Equal(t, "aws.west", res["provider"], "expected provider aws.west, got %v", res["provider"])
 }
 
 func TestToJSON_ResourceProviderAbsentWhenEmpty(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
-	if _, exists := res["provider"]; exists {
-		t.Error("provider key should not be present when Provider is empty")
-	}
+	_, exists := res["provider"]
+	require.False(t, exists, "provider key should not be present when Provider is empty")
 }
 
 func TestToJSON_ResourceDependsOn(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"aws_vpc.main"},
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	deps := mustSlice(t, res, "depends_on")
-	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
-		t.Errorf("unexpected depends_on: %v", deps)
-	}
+	require.Len(t, deps, 1)
+	require.Equal(t, "aws_vpc.main", deps[0], "unexpected depends_on: %v", deps)
 }
 
 func TestToJSON_ResourceCount(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			Count: 3,
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	// JSON numbers unmarshal as float64
-	if res["count"] != float64(3) {
-		t.Errorf("expected count 3, got %v", res["count"])
-	}
+	require.Equal(t, float64(3), res["count"], "expected count 3, got %v", res["count"])
 }
 
 func TestToJSON_ResourceForEach(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]any{"a": "1", "b": "2"},
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	forEach := mustMap(t, res, "for_each")
-	if forEach["a"] != "1" {
-		t.Errorf("unexpected for_each: %v", forEach)
-	}
+	require.Equal(t, "1", forEach["a"], "unexpected for_each: %v", forEach)
 }
 
 func TestToJSON_ResourceLifecycle(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Lifecycle: &config.Lifecycle{
@@ -475,36 +367,25 @@ func TestToJSON_ResourceLifecycle(t *testing.T) {
 			ReplaceTriggeredBy:  []string{"null_resource.trigger"},
 		},
 		Attributes: map[string]any{},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	lc := mustMap(t, res, "lifecycle")
-	if lc["create_before_destroy"] != true {
-		t.Error("expected create_before_destroy true")
-	}
-	if lc["prevent_destroy"] != true {
-		t.Error("expected prevent_destroy true")
-	}
+	require.Equal(t, true, lc["create_before_destroy"], "expected create_before_destroy true")
+	require.Equal(t, true, lc["prevent_destroy"], "expected prevent_destroy true")
 	ignoreChanges := mustSlice(t, lc, "ignore_changes")
-	if len(ignoreChanges) != 1 || ignoreChanges[0] != "tags" {
-		t.Errorf("unexpected ignore_changes: %v", ignoreChanges)
-	}
+	require.Len(t, ignoreChanges, 1)
+	require.Equal(t, "tags", ignoreChanges[0], "unexpected ignore_changes: %v", ignoreChanges)
 }
 
 func TestToJSON_ResourceTimeouts(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Timeouts: &config.Timeouts{
@@ -512,35 +393,24 @@ func TestToJSON_ResourceTimeouts(t *testing.T) {
 			Delete: "10m",
 		},
 		Attributes: map[string]any{},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	timeouts := mustMap(t, res, "timeouts")
-	if timeouts["create"] != "30m" {
-		t.Errorf("expected create 30m, got %v", timeouts["create"])
-	}
-	if timeouts["delete"] != "10m" {
-		t.Errorf("expected delete 10m, got %v", timeouts["delete"])
-	}
-	if _, ok := timeouts["read"]; ok {
-		t.Error("read should not be present when empty")
-	}
+	require.Equal(t, "30m", timeouts["create"], "expected create 30m, got %v", timeouts["create"])
+	require.Equal(t, "10m", timeouts["delete"], "expected delete 10m, got %v", timeouts["delete"])
+	_, ok := timeouts["read"]
+	require.False(t, ok, "read should not be present when empty")
 }
 
 func TestToJSON_ResourceProvisioners(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Provisioners: []config.Provisioner{
@@ -552,303 +422,213 @@ func TestToJSON_ResourceProvisioners(t *testing.T) {
 			},
 		},
 		Attributes: map[string]any{},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	provs := mustSlice(t, res, "provisioner")
-	if len(provs) != 1 {
-		t.Fatalf("expected 1 provisioner, got %d", len(provs))
-	}
+	require.Len(t, provs, 1, "expected 1 provisioner, got %d", len(provs))
 	localExec := mustMap(t, mustIndexMap(t, provs, 0), "local-exec")
-	if localExec["command"] != "echo hello" {
-		t.Errorf("expected command 'echo hello', got %v", localExec["command"])
-	}
-	if localExec["when"] != "create" {
-		t.Errorf("expected when 'create', got %v", localExec["when"])
-	}
-	if localExec["on_failure"] != "continue" {
-		t.Errorf("expected on_failure 'continue', got %v", localExec["on_failure"])
-	}
+	require.Equal(t, "echo hello", localExec["command"], "expected command 'echo hello', got %v", localExec["command"])
+	require.Equal(t, "create", localExec["when"], "expected when 'create', got %v", localExec["when"])
+	require.Equal(t, "continue", localExec["on_failure"], "expected on_failure 'continue', got %v", localExec["on_failure"])
 }
 
 func TestToJSON_MultipleResourcesSameType(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-web"},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if err := stack.AddResource(&config.Resource{
+	}))
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "api",
 		Attributes: map[string]any{"ami": "ami-api"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 
 	instances := mustMap(t, mustMap(t, obj, "resource"), "aws_instance")
 
 	web := mustMap(t, instances, "web")
-	if web["ami"] != "ami-web" {
-		t.Errorf("expected web ami 'ami-web', got %v", web["ami"])
-	}
+	require.Equal(t, "ami-web", web["ami"], "expected web ami 'ami-web', got %v", web["ami"])
 
 	api := mustMap(t, instances, "api")
-	if api["ami"] != "ami-api" {
-		t.Errorf("expected api ami 'ami-api', got %v", api["ami"])
-	}
+	require.Equal(t, "ami-api", api["ami"], "expected api ami 'ami-api', got %v", api["ami"])
 }
 
 func TestToJSON_MultipleResourceTypes(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if err := stack.AddResource(&config.Resource{
+	}))
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_vpc",
 		Name:       "main",
 		Attributes: map[string]any{"cidr_block": "10.0.0.0/16"},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if err := stack.AddResource(&config.Resource{
+	}))
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_subnet",
 		Name:       "public",
 		Attributes: map[string]any{"cidr_block": "10.0.1.0/24"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 
 	resources := mustMap(t, obj, "resource")
-	if _, ok := resources["aws_instance"]; !ok {
-		t.Error("missing aws_instance resource type")
-	}
-	if _, ok := resources["aws_vpc"]; !ok {
-		t.Error("missing aws_vpc resource type")
-	}
-	if _, ok := resources["aws_subnet"]; !ok {
-		t.Error("missing aws_subnet resource type")
-	}
+	_, ok := resources["aws_instance"]
+	require.True(t, ok, "missing aws_instance resource type")
+	_, ok = resources["aws_vpc"]
+	require.True(t, ok, "missing aws_vpc resource type")
+	_, ok = resources["aws_subnet"]
+	require.True(t, ok, "missing aws_subnet resource type")
 }
 
 func TestToJSON_MultipleDataSourcesSameType(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(&config.DataSource{
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "ubuntu",
 		Attributes: map[string]any{"most_recent": true},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	if err := stack.AddDataSource(&config.DataSource{
+	}))
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "amazon_linux",
 		Attributes: map[string]any{"most_recent": false},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 
 	amis := mustMap(t, mustMap(t, obj, "data"), "aws_ami")
 
 	ubuntu := mustMap(t, amis, "ubuntu")
-	if ubuntu["most_recent"] != true {
-		t.Errorf("expected ubuntu most_recent true, got %v", ubuntu["most_recent"])
-	}
+	require.Equal(t, true, ubuntu["most_recent"], "expected ubuntu most_recent true, got %v", ubuntu["most_recent"])
 
 	amazonLinux := mustMap(t, amis, "amazon_linux")
-	if amazonLinux["most_recent"] != false {
-		t.Errorf("expected amazon_linux most_recent false, got %v", amazonLinux["most_recent"])
-	}
+	require.Equal(t, false, amazonLinux["most_recent"], "expected amazon_linux most_recent false, got %v", amazonLinux["most_recent"])
 }
 
 func TestToJSON_DataSource(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(&config.DataSource{
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{"most_recent": true},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
-	if ds["most_recent"] != true {
-		t.Errorf("expected most_recent true, got %v", ds["most_recent"])
-	}
+	require.Equal(t, true, ds["most_recent"], "expected most_recent true, got %v", ds["most_recent"])
 }
 
 func TestToJSON_DataSourceProvider(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(&config.DataSource{
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Provider:   "aws.west",
 		Attributes: map[string]any{"most_recent": true},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
-	if ds["provider"] != "aws.west" {
-		t.Errorf("expected provider aws.west, got %v", ds["provider"])
-	}
+	require.Equal(t, "aws.west", ds["provider"], "expected provider aws.west, got %v", ds["provider"])
 }
 
 func TestToJSON_DataSourceDependsOn(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(&config.DataSource{
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			DependsOn: []string{"aws_vpc.main"},
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
 	deps := mustSlice(t, ds, "depends_on")
-	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
-		t.Errorf("unexpected depends_on: %v", deps)
-	}
+	require.Len(t, deps, 1)
+	require.Equal(t, "aws_vpc.main", deps[0], "unexpected depends_on: %v", deps)
 }
 
 func TestToJSON_DataSourceCount(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(&config.DataSource{
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			Count: 3,
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
 	// JSON numbers unmarshal as float64
-	if ds["count"] != float64(3) {
-		t.Errorf("expected count 3, got %v", ds["count"])
-	}
+	require.Equal(t, float64(3), ds["count"], "expected count 3, got %v", ds["count"])
 }
 
 func TestToJSON_DataSourceForEach(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddDataSource(&config.DataSource{
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]any{"a": "1", "b": "2"},
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	ds := mustMap(t, mustMap(t, mustMap(t, obj, "data"), "aws_ami"), "latest")
 	forEach := mustMap(t, ds, "for_each")
-	if forEach["a"] != "1" {
-		t.Errorf("unexpected for_each: %v", forEach)
-	}
+	require.Equal(t, "1", forEach["a"], "unexpected for_each: %v", forEach)
 }
 
 func TestToJSON_Variables(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddVariable(config.Variable{
+	require.NoError(t, stack.AddVariable(config.Variable{
 		Name:        "instance_type",
 		Type:        "string",
 		Description: "The instance type",
@@ -859,79 +639,46 @@ func TestToJSON_Variables(t *testing.T) {
 			Condition:    "length(var.instance_type) > 0",
 			ErrorMessage: "Must not be empty",
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	v := mustMap(t, mustMap(t, obj, "variable"), "instance_type")
-	if v["type"] != "string" {
-		t.Errorf("expected type string, got %v", v["type"])
-	}
-	if v["description"] != "The instance type" {
-		t.Errorf("unexpected description: %v", v["description"])
-	}
-	if v["default"] != "t3.micro" {
-		t.Errorf("unexpected default: %v", v["default"])
-	}
-	if v["sensitive"] != true {
-		t.Error("expected sensitive true")
-	}
-	if v["nullable"] != true {
-		t.Error("expected nullable true")
-	}
+	require.Equal(t, "string", v["type"], "expected type string, got %v", v["type"])
+	require.Equal(t, "The instance type", v["description"], "unexpected description: %v", v["description"])
+	require.Equal(t, "t3.micro", v["default"], "unexpected default: %v", v["default"])
+	require.Equal(t, true, v["sensitive"], "expected sensitive true")
+	require.Equal(t, true, v["nullable"], "expected nullable true")
 	validation := mustMap(t, v, "validation")
-	if validation["condition"] != "length(var.instance_type) > 0" {
-		t.Errorf("unexpected condition: %v", validation["condition"])
-	}
-	if validation["error_message"] != "Must not be empty" {
-		t.Errorf("unexpected error_message: %v", validation["error_message"])
-	}
+	require.Equal(t, "length(var.instance_type) > 0", validation["condition"], "unexpected condition: %v", validation["condition"])
+	require.Equal(t, "Must not be empty", validation["error_message"], "unexpected error_message: %v", validation["error_message"])
 }
 
 func TestToJSON_Outputs(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddOutput(config.Output{
+	require.NoError(t, stack.AddOutput(config.Output{
 		Name:        "instance_ip",
 		Value:       "${aws_instance.web.public_ip}",
 		Description: "The public IP",
 		Sensitive:   true,
 		DependsOn:   []string{"aws_instance.web"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	o := mustMap(t, mustMap(t, obj, "output"), "instance_ip")
-	if o["value"] != "${aws_instance.web.public_ip}" {
-		t.Errorf("unexpected value: %v", o["value"])
-	}
-	if o["description"] != "The public IP" {
-		t.Errorf("unexpected description: %v", o["description"])
-	}
-	if o["sensitive"] != true {
-		t.Error("expected sensitive true")
-	}
+	require.Equal(t, "${aws_instance.web.public_ip}", o["value"], "unexpected value: %v", o["value"])
+	require.Equal(t, "The public IP", o["description"], "unexpected description: %v", o["description"])
+	require.Equal(t, true, o["sensitive"], "expected sensitive true")
 	deps := mustSlice(t, o, "depends_on")
-	if len(deps) != 1 || deps[0] != "aws_instance.web" {
-		t.Errorf("unexpected depends_on: %v", deps)
-	}
+	require.Len(t, deps, 1)
+	require.Equal(t, "aws_instance.web", deps[0], "unexpected depends_on: %v", deps)
 }
 
 func TestToJSON_Locals(t *testing.T) {
@@ -940,22 +687,14 @@ func TestToJSON_Locals(t *testing.T) {
 	stack.SetLocal("tags", map[string]string{"team": "platform"})
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	locals := mustMap(t, obj, "locals")
-	if locals["env"] != "production" {
-		t.Errorf("unexpected env: %v", locals["env"])
-	}
+	require.Equal(t, "production", locals["env"], "unexpected env: %v", locals["env"])
 	tags := mustMap(t, locals, "tags")
-	if tags["team"] != "platform" {
-		t.Errorf("unexpected tags: %v", tags)
-	}
+	require.Equal(t, "platform", tags["team"], "unexpected tags: %v", tags)
 }
 
 func TestToJSON_Backend(t *testing.T) {
@@ -970,20 +709,14 @@ func TestToJSON_Backend(t *testing.T) {
 	})
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	tf := mustMap(t, obj, "terraform")
 	backend := mustMap(t, tf, "backend")
 	s3 := mustMap(t, backend, "s3")
-	if s3["bucket"] != "my-state" {
-		t.Errorf("unexpected bucket: %v", s3["bucket"])
-	}
+	require.Equal(t, "my-state", s3["bucket"], "unexpected bucket: %v", s3["bucket"])
 }
 
 func TestToJSON_RequiredProviders(t *testing.T) {
@@ -995,23 +728,15 @@ func TestToJSON_RequiredProviders(t *testing.T) {
 	})
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	tf := mustMap(t, obj, "terraform")
 	rp := mustMap(t, tf, "required_providers")
 	aws := mustMap(t, rp, "aws")
-	if aws["source"] != "hashicorp/aws" {
-		t.Errorf("unexpected source: %v", aws["source"])
-	}
-	if aws["version"] != "~> 5.0" {
-		t.Errorf("unexpected version: %v", aws["version"])
-	}
+	require.Equal(t, "hashicorp/aws", aws["source"], "unexpected source: %v", aws["source"])
+	require.Equal(t, "~> 5.0", aws["version"], "unexpected version: %v", aws["version"])
 }
 
 func TestToJSON_FullStack(t *testing.T) {
@@ -1029,57 +754,42 @@ func TestToJSON_FullStack(t *testing.T) {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type:       "aws_instance",
 		Name:       "web",
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
-	if err := stack.AddDataSource(&config.DataSource{
+	require.NoError(t, stack.AddDataSource(&config.DataSource{
 		Type:       "aws_ami",
 		Name:       "latest",
 		Attributes: map[string]any{"most_recent": true},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
-	if err := stack.AddVariable(config.Variable{
+	require.NoError(t, stack.AddVariable(config.Variable{
 		Name:    "env",
 		Type:    "string",
 		Default: "dev",
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
-	if err := stack.AddOutput(config.Output{
+	require.NoError(t, stack.AddOutput(config.Output{
 		Name:  "ip",
 		Value: "${aws_instance.web.public_ip}",
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	stack.SetLocal("name", "my-app")
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if !json.Valid(data) {
-		t.Fatal("output is not valid JSON")
-	}
+	require.NoError(t, err)
+	require.True(t, json.Valid(data), "output is not valid JSON")
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj), "unmarshal")
 
 	// Verify all top-level keys are present
 	for _, key := range []string{"terraform", "provider", "resource", "data", "variable", "output", "locals"} {
-		if _, ok := obj[key]; !ok {
-			t.Errorf("missing top-level key: %s", key)
-		}
+		_, ok := obj[key]
+		require.True(t, ok, "missing top-level key: %s", key)
 	}
 }
 
@@ -1093,23 +803,15 @@ func TestToFile(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "main.tf.json")
 
-	if err := ToFile(stack, path, ""); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, ToFile(stack, path, ""))
 
 	fileData, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatalf("reading file: %v", err)
-	}
+	require.NoError(t, err, "reading file")
 
 	expected, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("ToJSON: %v", err)
-	}
+	require.NoError(t, err, "ToJSON")
 
-	if string(fileData) != string(expected) {
-		t.Error("file contents do not match ToJSON output")
-	}
+	require.Equal(t, string(expected), string(fileData), "file contents do not match ToJSON output")
 }
 
 func TestToFile_CreatesDirectory(t *testing.T) {
@@ -1118,18 +820,15 @@ func TestToFile_CreatesDirectory(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "subdir", "nested", "main.tf.json")
 
-	if err := ToFile(stack, path, ""); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, ToFile(stack, path, ""))
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		t.Fatal("file was not created")
-	}
+	_, err := os.Stat(path)
+	require.False(t, os.IsNotExist(err), "file was not created")
 }
 
 func TestToJSON_ResourceConnection(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1140,41 +839,25 @@ func TestToJSON_ResourceConnection(t *testing.T) {
 			Timeout: "5m",
 		},
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	conn := mustMap(t, res, "connection")
-	if conn["type"] != "ssh" {
-		t.Errorf("expected type ssh, got %v", conn["type"])
-	}
-	if conn["host"] != "1.2.3.4" {
-		t.Errorf("expected host 1.2.3.4, got %v", conn["host"])
-	}
-	if conn["user"] != "admin" {
-		t.Errorf("expected user admin, got %v", conn["user"])
-	}
-	if conn["port"] != float64(22) {
-		t.Errorf("expected port 22, got %v", conn["port"])
-	}
-	if conn["timeout"] != "5m" {
-		t.Errorf("expected timeout 5m, got %v", conn["timeout"])
-	}
+	require.Equal(t, "ssh", conn["type"], "expected type ssh, got %v", conn["type"])
+	require.Equal(t, "1.2.3.4", conn["host"], "expected host 1.2.3.4, got %v", conn["host"])
+	require.Equal(t, "admin", conn["user"], "expected user admin, got %v", conn["user"])
+	require.Equal(t, float64(22), conn["port"], "expected port 22, got %v", conn["port"])
+	require.Equal(t, "5m", conn["timeout"], "expected timeout 5m, got %v", conn["timeout"])
 }
 
 func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1187,35 +870,23 @@ func TestToJSON_ResourceConnectionWithExtra(t *testing.T) {
 			},
 		},
 		Attributes: map[string]any{},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	conn := mustMap(t, res, "connection")
-	if conn["type"] != "winrm" {
-		t.Errorf("expected type winrm, got %v", conn["type"])
-	}
-	if conn["https"] != true {
-		t.Errorf("expected https true, got %v", conn["https"])
-	}
-	if conn["cacert"] != "/path/to/ca.pem" {
-		t.Errorf("expected cacert, got %v", conn["cacert"])
-	}
+	require.Equal(t, "winrm", conn["type"], "expected type winrm, got %v", conn["type"])
+	require.Equal(t, true, conn["https"], "expected https true, got %v", conn["https"])
+	require.Equal(t, "/path/to/ca.pem", conn["cacert"], "expected cacert, got %v", conn["cacert"])
 }
 
 func TestToJSON_LifecyclePrecondition(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Lifecycle: &config.Lifecycle{
@@ -1225,33 +896,23 @@ func TestToJSON_LifecyclePrecondition(t *testing.T) {
 			},
 		},
 		Attributes: map[string]any{},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	lc := mustMap(t, res, "lifecycle")
 	pre := mustMap(t, lc, "precondition")
-	if pre["condition"] != "var.x > 0" {
-		t.Errorf("expected condition 'var.x > 0', got %v", pre["condition"])
-	}
-	if pre["error_message"] != "x must be positive" {
-		t.Errorf("expected error_message 'x must be positive', got %v", pre["error_message"])
-	}
+	require.Equal(t, "var.x > 0", pre["condition"], "expected condition 'var.x > 0', got %v", pre["condition"])
+	require.Equal(t, "x must be positive", pre["error_message"], "expected error_message 'x must be positive', got %v", pre["error_message"])
 }
 
 func TestToJSON_LifecyclePostcondition(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Lifecycle: &config.Lifecycle{
@@ -1261,65 +922,45 @@ func TestToJSON_LifecyclePostcondition(t *testing.T) {
 			},
 		},
 		Attributes: map[string]any{},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	lc := mustMap(t, res, "lifecycle")
 	post := mustMap(t, lc, "postcondition")
-	if post["condition"] != "self.public_ip != \"\"" {
-		t.Errorf("expected condition, got %v", post["condition"])
-	}
-	if post["error_message"] != "instance must have a public IP" {
-		t.Errorf("expected error_message, got %v", post["error_message"])
-	}
+	require.Equal(t, "self.public_ip != \"\"", post["condition"], "expected condition, got %v", post["condition"])
+	require.Equal(t, "instance must have a public IP", post["error_message"], "expected error_message, got %v", post["error_message"])
 }
 
 func TestToJSON_OutputPrecondition(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddOutput(config.Output{
+	require.NoError(t, stack.AddOutput(config.Output{
 		Name:  "ip",
 		Value: "${aws_instance.web.public_ip}",
 		Precondition: &config.Condition{
 			Condition:    "aws_instance.web.public_ip != \"\"",
 			ErrorMessage: "instance must have a public IP",
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	o := mustMap(t, mustMap(t, obj, "output"), "ip")
 	pre := mustMap(t, o, "precondition")
-	if pre["condition"] != "aws_instance.web.public_ip != \"\"" {
-		t.Errorf("expected condition, got %v", pre["condition"])
-	}
-	if pre["error_message"] != "instance must have a public IP" {
-		t.Errorf("expected error_message, got %v", pre["error_message"])
-	}
+	require.Equal(t, "aws_instance.web.public_ip != \"\"", pre["condition"], "expected condition, got %v", pre["condition"])
+	require.Equal(t, "instance must have a public IP", pre["error_message"], "expected error_message, got %v", pre["error_message"])
 }
 
 func TestToJSON_ProvisionerConnection(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Provisioners: []config.Provisioner{
@@ -1335,40 +976,26 @@ func TestToJSON_ProvisionerConnection(t *testing.T) {
 			},
 		},
 		Attributes: map[string]any{},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	provs := mustSlice(t, res, "provisioner")
 	remoteExec := mustMap(t, mustIndexMap(t, provs, 0), "remote-exec")
 	conn := mustMap(t, remoteExec, "connection")
-	if conn["type"] != "ssh" {
-		t.Errorf("expected type ssh, got %v", conn["type"])
-	}
-	if conn["host"] != "10.0.0.1" {
-		t.Errorf("expected host 10.0.0.1, got %v", conn["host"])
-	}
-	if conn["user"] != "deploy" {
-		t.Errorf("expected user deploy, got %v", conn["user"])
-	}
-	if conn["private_key"] != "file(\"/path/to/key\")" {
-		t.Errorf("expected private_key, got %v", conn["private_key"])
-	}
+	require.Equal(t, "ssh", conn["type"], "expected type ssh, got %v", conn["type"])
+	require.Equal(t, "10.0.0.1", conn["host"], "expected host 10.0.0.1, got %v", conn["host"])
+	require.Equal(t, "deploy", conn["user"], "expected user deploy, got %v", conn["user"])
+	require.Equal(t, "file(\"/path/to/key\")", conn["private_key"], "expected private_key, got %v", conn["private_key"])
 }
 
 func TestToJSON_ModuleBasic(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddModule(config.Module{
+	require.NoError(t, stack.AddModule(config.Module{
 		Name:    "eks",
 		Source:  "terraform-aws-modules/eks/aws",
 		Version: "~> 19.0",
@@ -1376,68 +1003,46 @@ func TestToJSON_ModuleBasic(t *testing.T) {
 			"cluster_name":    "my-eks",
 			"cluster_version": "1.27",
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 
 	mod := mustMap(t, mustMap(t, obj, "module"), "eks")
-	if mod["source"] != "terraform-aws-modules/eks/aws" {
-		t.Errorf("expected source terraform-aws-modules/eks/aws, got %v", mod["source"])
-	}
-	if mod["version"] != "~> 19.0" {
-		t.Errorf("expected version ~> 19.0, got %v", mod["version"])
-	}
-	if mod["cluster_name"] != "my-eks" {
-		t.Errorf("expected cluster_name my-eks, got %v", mod["cluster_name"])
-	}
-	if mod["cluster_version"] != "1.27" {
-		t.Errorf("expected cluster_version 1.27, got %v", mod["cluster_version"])
-	}
+	require.Equal(t, "terraform-aws-modules/eks/aws", mod["source"], "expected source terraform-aws-modules/eks/aws, got %v", mod["source"])
+	require.Equal(t, "~> 19.0", mod["version"], "expected version ~> 19.0, got %v", mod["version"])
+	require.Equal(t, "my-eks", mod["cluster_name"], "expected cluster_name my-eks, got %v", mod["cluster_name"])
+	require.Equal(t, "1.27", mod["cluster_version"], "expected cluster_version 1.27, got %v", mod["cluster_version"])
 }
 
 func TestToJSON_ModuleWithProviders(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddModule(config.Module{
+	require.NoError(t, stack.AddModule(config.Module{
 		Name:   "vpc",
 		Source: "terraform-aws-modules/vpc/aws",
 		Providers: map[string]string{
 			"aws": "aws.west",
 		},
 		Variables: map[string]any{"cidr": "10.0.0.0/16"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 
 	mod := mustMap(t, mustMap(t, obj, "module"), "vpc")
 	providers := mustMap(t, mod, "providers")
-	if providers["aws"] != "aws.west" {
-		t.Errorf("expected providers.aws = aws.west, got %v", providers["aws"])
-	}
+	require.Equal(t, "aws.west", providers["aws"], "expected providers.aws = aws.west, got %v", providers["aws"])
 }
 
 func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddModule(config.Module{
+	require.NoError(t, stack.AddModule(config.Module{
 		Name:      "server",
 		Source:    "./modules/server",
 		Variables: map[string]any{"name": "web"},
@@ -1445,70 +1050,50 @@ func TestToJSON_ModuleWithMetaArguments(t *testing.T) {
 			DependsOn: []string{"aws_vpc.main"},
 			Count:     3,
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 
 	mod := mustMap(t, mustMap(t, obj, "module"), "server")
-	if mod["source"] != "./modules/server" {
-		t.Errorf("expected source ./modules/server, got %v", mod["source"])
-	}
+	require.Equal(t, "./modules/server", mod["source"], "expected source ./modules/server, got %v", mod["source"])
 	deps := mustSlice(t, mod, "depends_on")
-	if len(deps) != 1 || deps[0] != "aws_vpc.main" {
-		t.Errorf("unexpected depends_on: %v", deps)
-	}
-	if mod["count"] != float64(3) {
-		t.Errorf("expected count 3, got %v", mod["count"])
-	}
+	require.Len(t, deps, 1)
+	require.Equal(t, "aws_vpc.main", deps[0], "unexpected depends_on: %v", deps)
+	require.Equal(t, float64(3), mod["count"], "expected count 3, got %v", mod["count"])
 	// version should not be present for local modules
-	if _, ok := mod["version"]; ok {
-		t.Error("version should not be present when empty")
-	}
+	_, ok := mod["version"]
+	require.False(t, ok, "version should not be present when empty")
 }
 
 func TestToJSON_ModuleForEach(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddModule(config.Module{
+	require.NoError(t, stack.AddModule(config.Module{
 		Name:      "bucket",
 		Source:    "terraform-aws-modules/s3-bucket/aws",
 		Variables: map[string]any{"bucket": "${each.key}-bucket"},
 		MetaArguments: config.MetaArguments{
 			ForEach: map[string]string{"logs": "logs", "data": "data"},
 		},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 
 	mod := mustMap(t, mustMap(t, obj, "module"), "bucket")
 	forEach := mustMap(t, mod, "for_each")
-	if forEach["logs"] != "logs" {
-		t.Errorf("unexpected for_each: %v", forEach)
-	}
+	require.Equal(t, "logs", forEach["logs"], "unexpected for_each: %v", forEach)
 }
 
 func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1520,32 +1105,22 @@ func TestConnectionJSON_ExtraDoesNotOverwriteKnownFields(t *testing.T) {
 			},
 		},
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	conn := mustMap(t, res, "connection")
-	if conn["type"] != "ssh" {
-		t.Errorf("expected known field type=ssh to take precedence, got %v", conn["type"])
-	}
-	if conn["host"] != "1.2.3.4" {
-		t.Errorf("expected known field host=1.2.3.4 to take precedence, got %v", conn["host"])
-	}
+	require.Equal(t, "ssh", conn["type"], "expected known field type=ssh to take precedence, got %v", conn["type"])
+	require.Equal(t, "1.2.3.4", conn["host"], "expected known field host=1.2.3.4 to take precedence, got %v", conn["host"])
 }
 
 func TestConnectionJSON_NilExtra(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1554,35 +1129,23 @@ func TestConnectionJSON_NilExtra(t *testing.T) {
 			User: "admin",
 		},
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	conn := mustMap(t, res, "connection")
-	if conn["type"] != "ssh" {
-		t.Errorf("expected type ssh, got %v", conn["type"])
-	}
-	if conn["host"] != "1.2.3.4" {
-		t.Errorf("expected host 1.2.3.4, got %v", conn["host"])
-	}
-	if conn["user"] != "admin" {
-		t.Errorf("expected user admin, got %v", conn["user"])
-	}
+	require.Equal(t, "ssh", conn["type"], "expected type ssh, got %v", conn["type"])
+	require.Equal(t, "1.2.3.4", conn["host"], "expected host 1.2.3.4, got %v", conn["host"])
+	require.Equal(t, "admin", conn["user"], "expected user admin, got %v", conn["user"])
 }
 
 func TestConnectionJSON_EmptyExtra(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1591,32 +1154,22 @@ func TestConnectionJSON_EmptyExtra(t *testing.T) {
 			Extra: map[string]any{},
 		},
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	conn := mustMap(t, res, "connection")
-	if conn["type"] != "ssh" {
-		t.Errorf("expected type ssh, got %v", conn["type"])
-	}
-	if conn["host"] != "1.2.3.4" {
-		t.Errorf("expected host 1.2.3.4, got %v", conn["host"])
-	}
+	require.Equal(t, "ssh", conn["type"], "expected type ssh, got %v", conn["type"])
+	require.Equal(t, "1.2.3.4", conn["host"], "expected host 1.2.3.4, got %v", conn["host"])
 }
 
 func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 	stack := config.NewStack("test")
-	if err := stack.AddResource(&config.Resource{
+	require.NoError(t, stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "web",
 		Connection: &config.Connection{
@@ -1629,36 +1182,20 @@ func TestConnectionJSON_ExtraOnlyUnknownFields(t *testing.T) {
 			},
 		},
 		Attributes: map[string]any{"ami": "ami-123"},
-	}); err != nil {
-		t.Fatal(err)
-	}
+	}))
 
 	data, err := ToJSON(stack, "")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	var obj map[string]any
-	if err := json.Unmarshal(data, &obj); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(data, &obj))
 	res := mustMap(t, mustMap(t, mustMap(t, obj, "resource"), "aws_instance"), "web")
 	conn := mustMap(t, res, "connection")
-	if conn["type"] != "ssh" {
-		t.Errorf("expected type ssh, got %v", conn["type"])
-	}
-	if conn["host"] != "1.2.3.4" {
-		t.Errorf("expected host 1.2.3.4, got %v", conn["host"])
-	}
-	if conn["user"] != "deploy" {
-		t.Errorf("expected user deploy, got %v", conn["user"])
-	}
-	if conn["bastion_host"] != "10.0.0.1" {
-		t.Errorf("expected bastion_host 10.0.0.1, got %v", conn["bastion_host"])
-	}
-	if conn["bastion_user"] != "bastion" {
-		t.Errorf("expected bastion_user bastion, got %v", conn["bastion_user"])
-	}
+	require.Equal(t, "ssh", conn["type"], "expected type ssh, got %v", conn["type"])
+	require.Equal(t, "1.2.3.4", conn["host"], "expected host 1.2.3.4, got %v", conn["host"])
+	require.Equal(t, "deploy", conn["user"], "expected user deploy, got %v", conn["user"])
+	require.Equal(t, "10.0.0.1", conn["bastion_host"], "expected bastion_host 10.0.0.1, got %v", conn["bastion_host"])
+	require.Equal(t, "bastion", conn["bastion_user"], "expected bastion_user bastion, got %v", conn["bastion_user"])
 }
 
 func TestResourceConfigJSON_MarshalJSON(t *testing.T) {
@@ -1672,37 +1209,20 @@ func TestResourceConfigJSON_MarshalJSON(t *testing.T) {
 		}
 
 		data, err := json.Marshal(rc)
-		if err != nil {
-			t.Fatalf("Marshal: %v", err)
-		}
+		require.NoError(t, err, "Marshal")
 		var m map[string]any
-		if err := json.Unmarshal(data, &m); err != nil {
-			t.Fatalf("Unmarshal: %v", err)
-		}
+		require.NoError(t, json.Unmarshal(data, &m), "Unmarshal")
 
-		if m["provider"] != "aws.west" {
-			t.Errorf("provider = %v, want aws.west", m["provider"])
-		}
+		require.Equal(t, "aws.west", m["provider"], "provider = %v, want aws.west", m["provider"])
 		deps, ok := m["depends_on"].([]any)
-		if !ok {
-			t.Fatalf("depends_on: expected []any, got %T", m["depends_on"])
-		}
-		if len(deps) != 1 || deps[0] != "aws_vpc.main" {
-			t.Errorf("depends_on = %v, want [aws_vpc.main]", deps)
-		}
-		if m["count"] != float64(3) {
-			t.Errorf("count = %v, want 3", m["count"])
-		}
+		require.True(t, ok, "depends_on: expected []any, got %T", m["depends_on"])
+		require.Len(t, deps, 1)
+		require.Equal(t, "aws_vpc.main", deps[0], "depends_on = %v, want [aws_vpc.main]", deps)
+		require.Equal(t, float64(3), m["count"], "count = %v, want 3", m["count"])
 		fe, ok := m["for_each"].(map[string]any)
-		if !ok {
-			t.Fatalf("for_each: expected map[string]any, got %T", m["for_each"])
-		}
-		if fe["a"] != "1" {
-			t.Errorf("for_each = %v, want map[a:1]", fe)
-		}
-		if m["existing"] != "value" {
-			t.Errorf("existing = %v, want value", m["existing"])
-		}
+		require.True(t, ok, "for_each: expected map[string]any, got %T", m["for_each"])
+		require.Equal(t, "1", fe["a"], "for_each = %v, want map[a:1]", fe)
+		require.Equal(t, "value", m["existing"], "existing = %v, want value", m["existing"])
 	})
 
 	t.Run("no meta fields set", func(t *testing.T) {
@@ -1711,22 +1231,15 @@ func TestResourceConfigJSON_MarshalJSON(t *testing.T) {
 		}
 
 		data, err := json.Marshal(rc)
-		if err != nil {
-			t.Fatalf("Marshal: %v", err)
-		}
+		require.NoError(t, err, "Marshal")
 		var m map[string]any
-		if err := json.Unmarshal(data, &m); err != nil {
-			t.Fatalf("Unmarshal: %v", err)
-		}
+		require.NoError(t, json.Unmarshal(data, &m), "Unmarshal")
 
 		for _, key := range []string{"provider", "depends_on", "count", "for_each", "lifecycle", "timeouts", "connection", "provisioner"} {
-			if _, ok := m[key]; ok {
-				t.Errorf("%s should not be present", key)
-			}
+			_, ok := m[key]
+			require.False(t, ok, "%s should not be present", key)
 		}
-		if m["existing"] != "value" {
-			t.Errorf("existing = %v, want value", m["existing"])
-		}
+		require.Equal(t, "value", m["existing"], "existing = %v, want value", m["existing"])
 	})
 }
 
@@ -1739,27 +1252,15 @@ func TestProvisionerJSON_MarshalJSON(t *testing.T) {
 	}
 
 	data, err := json.Marshal(p)
-	if err != nil {
-		t.Fatalf("Marshal: %v", err)
-	}
+	require.NoError(t, err, "Marshal")
 	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		t.Fatalf("Unmarshal: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &m), "Unmarshal")
 
 	inner, ok := m["local-exec"].(map[string]any)
-	if !ok {
-		t.Fatalf("expected local-exec key, got keys: %v", keys(m))
-	}
-	if inner["command"] != "echo hello" {
-		t.Errorf("command = %v, want echo hello", inner["command"])
-	}
-	if inner["when"] != "create" {
-		t.Errorf("when = %v, want create", inner["when"])
-	}
-	if inner["on_failure"] != "continue" {
-		t.Errorf("on_failure = %v, want continue", inner["on_failure"])
-	}
+	require.True(t, ok, "expected local-exec key, got keys: %v", keys(m))
+	require.Equal(t, "echo hello", inner["command"], "command = %v, want echo hello", inner["command"])
+	require.Equal(t, "create", inner["when"], "when = %v, want create", inner["when"])
+	require.Equal(t, "continue", inner["on_failure"], "on_failure = %v, want continue", inner["on_failure"])
 }
 
 func TestProviderConfigJSON_MarshalJSON(t *testing.T) {
@@ -1769,19 +1270,11 @@ func TestProviderConfigJSON_MarshalJSON(t *testing.T) {
 			Alias:  "east",
 		}
 		data, err := json.Marshal(p)
-		if err != nil {
-			t.Fatalf("Marshal: %v", err)
-		}
+		require.NoError(t, err, "Marshal")
 		var m map[string]any
-		if err := json.Unmarshal(data, &m); err != nil {
-			t.Fatalf("Unmarshal: %v", err)
-		}
-		if m["region"] != "us-east-1" {
-			t.Errorf("region = %v, want us-east-1", m["region"])
-		}
-		if m["alias"] != "east" {
-			t.Errorf("alias = %v, want east", m["alias"])
-		}
+		require.NoError(t, json.Unmarshal(data, &m), "Unmarshal")
+		require.Equal(t, "us-east-1", m["region"], "region = %v, want us-east-1", m["region"])
+		require.Equal(t, "east", m["alias"], "alias = %v, want east", m["alias"])
 	})
 
 	t.Run("without alias", func(t *testing.T) {
@@ -1789,16 +1282,11 @@ func TestProviderConfigJSON_MarshalJSON(t *testing.T) {
 			Config: map[string]any{"region": "us-west-2"},
 		}
 		data, err := json.Marshal(p)
-		if err != nil {
-			t.Fatalf("Marshal: %v", err)
-		}
+		require.NoError(t, err, "Marshal")
 		var m map[string]any
-		if err := json.Unmarshal(data, &m); err != nil {
-			t.Fatalf("Unmarshal: %v", err)
-		}
-		if _, ok := m["alias"]; ok {
-			t.Error("alias should not be present")
-		}
+		require.NoError(t, json.Unmarshal(data, &m), "Unmarshal")
+		_, ok := m["alias"]
+		require.False(t, ok, "alias should not be present")
 	})
 }
 
