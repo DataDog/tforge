@@ -499,6 +499,139 @@ func TestGenerateMaxItemsOneCollapse(t *testing.T) {
 	compileGeneratedCode(t, tmpDir, "testpkg")
 }
 
+// TestGenerateProviderMetadata verifies that when the generator is given the
+// provider source and version, it emits a `Provider` variable of type
+// `config.ProviderMetadata` and a NewProvider helper that reads from it.
+// Without the metadata in the Config, neither should be emitted
+// (backwards-compatible).
+func TestGenerateProviderMetadata(t *testing.T) {
+	schema := &provider.ProviderSchema{
+		ConfigSchema: &provider.SchemaBlock{Block: &provider.BlockType{}},
+		ResourceSchemas: map[string]*provider.SchemaBlock{
+			"datadog_thing": {Block: &provider.BlockType{}},
+		},
+	}
+
+	t.Run("with metadata", func(t *testing.T) {
+		tmpDir, err := os.MkdirTemp("", "tforge-gen-providermeta-*")
+		require.NoError(t, err)
+		defer os.RemoveAll(tmpDir)
+
+		g := New(Config{
+			PackageName:     "testpkg",
+			OutputDir:       tmpDir,
+			ProviderSource:  "DataDog/datadog",
+			ProviderVersion: "3.39.0",
+		})
+		require.NoError(t, g.Generate(schema))
+
+		data, err := os.ReadFile(filepath.Join(tmpDir, "provider_gen.go"))
+		require.NoError(t, err)
+		content := string(data)
+
+		require.Contains(t, content, "var Provider = config.ProviderMetadata{",
+			"Provider should be declared as a config.ProviderMetadata value")
+		require.Contains(t, content, `Name:    "datadog"`,
+			"local provider name should come from the resource type prefix")
+		require.Contains(t, content, `Source:  "DataDog/datadog"`)
+		require.Contains(t, content, `Version: "3.39.0"`)
+		require.Contains(t, content, "func NewProvider(stack *config.Stack, opts ...config.ProviderOption)",
+			"NewProvider helper signature should be emitted")
+		require.Contains(t, content, "stack.AddProvider(p)",
+			"NewProvider should call AddProvider")
+		require.Contains(t, content, "Provider.Name",
+			"NewProvider should read Name from the Provider struct")
+
+		compileGeneratedCode(t, tmpDir, "testpkg")
+	})
+
+	t.Run("without metadata", func(t *testing.T) {
+		tmpDir, err := os.MkdirTemp("", "tforge-gen-no-providermeta-*")
+		require.NoError(t, err)
+		defer os.RemoveAll(tmpDir)
+
+		g := New(Config{PackageName: "testpkg", OutputDir: tmpDir})
+		require.NoError(t, g.Generate(schema))
+
+		data, err := os.ReadFile(filepath.Join(tmpDir, "provider_gen.go"))
+		require.NoError(t, err)
+		content := string(data)
+
+		require.NotContains(t, content, "ProviderMetadata",
+			"metadata var must not leak when ProviderSource is unset")
+		require.NotContains(t, content, "NewProvider",
+			"NewProvider helper must not leak when the metadata is missing")
+
+		compileGeneratedCode(t, tmpDir, "testpkg")
+	})
+
+	t.Run("local name from prefix (google-beta source)", func(t *testing.T) {
+		// google-beta provider's source name (`google-beta`) differs from the
+		// local name resources bind to (`google`). The generator must use the
+		// resource type prefix, not the source suffix.
+		googleSchema := &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{Block: &provider.BlockType{}},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"google_compute_instance": {Block: &provider.BlockType{}},
+			},
+		}
+		tmpDir, err := os.MkdirTemp("", "tforge-gen-googlebeta-*")
+		require.NoError(t, err)
+		defer os.RemoveAll(tmpDir)
+
+		g := New(Config{
+			PackageName:     "testpkg",
+			OutputDir:       tmpDir,
+			ProviderSource:  "hashicorp/google-beta",
+			ProviderVersion: "5.0.0",
+		})
+		require.NoError(t, g.Generate(googleSchema))
+
+		data, err := os.ReadFile(filepath.Join(tmpDir, "provider_gen.go"))
+		require.NoError(t, err)
+		content := string(data)
+
+		require.Contains(t, content, `Name:    "google"`,
+			"local name must come from the resource type prefix, not the source suffix")
+		require.Contains(t, content, `Source:  "hashicorp/google-beta"`,
+			"Source should preserve the full registry address")
+	})
+
+	t.Run("collision skipped (resource shadows Provider)", func(t *testing.T) {
+		// A `<prefix>_provider` resource short-names to `Provider`, which would
+		// conflict with the metadata var. The generator must skip emission.
+		schemaWithCollision := &provider.ProviderSchema{
+			ConfigSchema: &provider.SchemaBlock{Block: &provider.BlockType{}},
+			ResourceSchemas: map[string]*provider.SchemaBlock{
+				"datadog_thing":    {Block: &provider.BlockType{}},
+				"datadog_provider": {Block: &provider.BlockType{}}, // -> type Provider
+			},
+		}
+		tmpDir, err := os.MkdirTemp("", "tforge-gen-collision-*")
+		require.NoError(t, err)
+		defer os.RemoveAll(tmpDir)
+
+		g := New(Config{
+			PackageName:     "testpkg",
+			OutputDir:       tmpDir,
+			ProviderSource:  "DataDog/datadog",
+			ProviderVersion: "3.39.0",
+		})
+		require.NoError(t, g.Generate(schemaWithCollision))
+
+		data, err := os.ReadFile(filepath.Join(tmpDir, "provider_gen.go"))
+		require.NoError(t, err)
+		content := string(data)
+
+		require.NotContains(t, content, "var Provider = config.ProviderMetadata{",
+			"metadata var must be skipped when a resource shadows `Provider`")
+		require.NotContains(t, content, "func NewProvider(stack",
+			"NewProvider must also be skipped to avoid clashing with the resource constructor")
+
+		compileGeneratedCode(t, tmpDir, "testpkg")
+	})
+}
+
 func TestGenerateWithComments(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "tforge-gen-comments-*")
 	require.NoError(t, err)

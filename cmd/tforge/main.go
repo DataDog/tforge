@@ -168,6 +168,7 @@ Examples:
 
 	var ps *provider.ProviderSchema
 	var source provider.Source
+	var resolvedVersion string
 	var err error
 
 	switch {
@@ -185,6 +186,7 @@ Examples:
 		}
 		ps = schema.Provider
 		source = schema.Source
+		resolvedVersion = schema.Version
 	default:
 		fmt.Fprintf(stderr, "Fetching schema for %s@%s...\n", *providerSource, *providerVersion)
 		schema, fetchErr := provider.FetchSchema(context.Background(), *providerSource, *providerVersion)
@@ -193,6 +195,7 @@ Examples:
 		}
 		ps = schema.Provider
 		source = schema.Source
+		resolvedVersion = schema.Version
 	}
 
 	pkg := *packageName
@@ -206,9 +209,39 @@ Examples:
 
 	fmt.Fprintf(stderr, "Generating Go code to %s (package %s)...\n", *outputDir, pkg)
 
+	// Prefer the source/version resolved from the schema fetch (these come from
+	// the archive metadata in the binary path, or the registry resolution in
+	// the registry path). When the user passed -schema (a cached JSON), the
+	// loader doesn't have that metadata, so fall back to -provider/-version
+	// flag values.
+	providerSourceStr := ""
+	if source.Name != "" {
+		providerSourceStr = source.String()
+	} else {
+		providerSourceStr = *providerSource
+	}
+	if resolvedVersion == "" {
+		resolvedVersion = *providerVersion
+	}
+
+	// Validate the source syntactically so a malformed -provider flag fails
+	// here instead of being baked verbatim into the generated metadata. The
+	// source's `Name` segment intentionally does not have to match the schema's
+	// resource prefix: Terraform binds resources to the local key in
+	// `required_providers` (derived from the resource prefix by this generator,
+	// see Generator.providerLocalName), not the source address. Fork and mirror
+	// sources like `mycorp/googlebeta` for a `google_*` schema are legitimate.
+	if providerSourceStr != "" {
+		if _, parseErr := provider.ParseSource(providerSourceStr); parseErr != nil {
+			return fmt.Errorf("invalid -provider %q: %w", providerSourceStr, parseErr)
+		}
+	}
+
 	gen := generate.New(generate.Config{
-		OutputDir:   *outputDir,
-		PackageName: pkg,
+		OutputDir:       *outputDir,
+		PackageName:     pkg,
+		ProviderSource:  providerSourceStr,
+		ProviderVersion: resolvedVersion,
 	})
 
 	if err := gen.Generate(ps); err != nil {
