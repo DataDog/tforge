@@ -392,6 +392,71 @@ func TestParseSchemaOutput_InvalidJSON(t *testing.T) {
 	require.Error(t, err, "expected error for invalid JSON, got nil")
 }
 
+func TestParseSchemaOutput_RejectsSubstringFalsePositive(t *testing.T) {
+	// "datadog/datadog" must NOT match a key whose name segment merely starts
+	// with "datadog" — the previous strings.Contains check matched any key
+	// that happened to embed the source string as a substring.
+	src := Source{Namespace: "datadog", Name: "datadog"}
+	data := []byte(`{
+		"format_version": "1.0",
+		"provider_schemas": {
+			"registry.terraform.io/datadog/datadogextra": {
+				"provider": {"block": {}},
+				"resource_schemas": {"datadogextra_thing": {"block": {}}},
+				"data_source_schemas": {}
+			}
+		}
+	}`)
+
+	_, err := parseSchemaOutput(data, src)
+	require.Error(t, err, "expected error: datadog/datadog must not match datadog/datadogextra")
+}
+
+func TestParseSchemaOutput_HostnameQualifiedRequiresHostnameMatch(t *testing.T) {
+	// A hostname-pinned src must never resolve to a provider served from a
+	// different registry, even when namespace and name happen to align.
+	src := Source{Hostname: "registry.opentofu.org", Namespace: "datadog", Name: "datadog"}
+	data := []byte(`{
+		"format_version": "1.0",
+		"provider_schemas": {
+			"registry.terraform.io/datadog/datadog": {
+				"provider": {"block": {}},
+				"resource_schemas": {"datadog_monitor": {"block": {}}},
+				"data_source_schemas": {}
+			}
+		}
+	}`)
+
+	_, err := parseSchemaOutput(data, src)
+	require.Error(t, err, "expected error: hostname-pinned src must not fall back to a different registry")
+}
+
+func TestParseSchemaOutput_HostnameQualifiedExactMatch(t *testing.T) {
+	src := Source{Hostname: "registry.opentofu.org", Namespace: "hashicorp", Name: "aws"}
+	data := []byte(`{
+		"format_version": "1.0",
+		"provider_schemas": {
+			"registry.terraform.io/hashicorp/aws": {
+				"provider": {"block": {}},
+				"resource_schemas": {"aws_wrong": {"block": {}}},
+				"data_source_schemas": {}
+			},
+			"registry.opentofu.org/hashicorp/aws": {
+				"provider": {"block": {}},
+				"resource_schemas": {"aws_correct": {"block": {}}},
+				"data_source_schemas": {}
+			}
+		}
+	}`)
+
+	ps, err := parseSchemaOutput(data, src)
+	require.NoError(t, err)
+	_, ok := ps.ResourceSchemas["aws_correct"]
+	require.True(t, ok, "expected aws_correct from the requested registry")
+	_, ok = ps.ResourceSchemas["aws_wrong"]
+	require.False(t, ok, "must not return the same provider from a different registry")
+}
+
 // ---------------------------------------------------------------------------
 // LoadSchemaFromJSON edge cases
 // ---------------------------------------------------------------------------
