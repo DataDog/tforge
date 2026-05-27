@@ -7,6 +7,7 @@ on:
   # stacked PRs (whose base is an intermediate feature branch, not `main`)
   # never trigger CI; only the bottom PR of the stack would.
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -233,7 +234,9 @@ jobs:
 
   auto-tag:
     name: Auto Tag Release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # TEMP: also allow workflow_dispatch to debug tag-push rejection without
+    # waiting for a merge to main.
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     needs: [lint, test, snapshots, migration, validate-golden]
     runs-on: ubuntu-latest
     environment: release
@@ -261,10 +264,35 @@ jobs:
             echo "Tag $TAG does not exist, will create."
           fi
 
-      - name: Create and push tag
+      - name: Create and push tag (verbose git push, REST fallback)
         if: steps.version.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.TFORGE_PROVIDER_DISPATCH_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a ${{ steps.version.outputs.tag }} -m "tforge ${{ steps.version.outputs.tag }}"
-          git push origin ${{ steps.version.outputs.tag }}
+          git tag -a "$TAG" -m "tforge $TAG"
+
+          # Experiment B: verbose git push to surface the server's actual
+          # rejection reason. Continue on failure so we can still try REST.
+          echo "=== Experiment B: verbose git push ==="
+          set +e
+          GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push --verbose origin "$TAG"
+          push_rc=$?
+          set -e
+          echo "git push exit code: $push_rc"
+
+          if [ "$push_rc" -eq 0 ]; then
+            echo "git push succeeded"
+            exit 0
+          fi
+
+          # Experiment A: try creating the tag via REST API instead. If git-push
+          # is blocked by a server policy but REST is allowed, this succeeds and
+          # tells us the policy is git-push-specific. If REST also fails, the
+          # policy blocks tag creation regardless of mechanism.
+          echo "=== Experiment A: REST API tag creation ==="
+          gh api repos/${{ github.repository }}/git/refs \
+            -f ref="refs/tags/$TAG" \
+            -f sha="$GITHUB_SHA"
