@@ -150,17 +150,19 @@ jobs:
         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         with:
           filters: |
-            go:
+            release:
               - '**/*.go'
               - 'go.mod'
               - 'go.sum'
+              - 'VERSION'
+              - 'CHANGELOG.md'
 
       - name: Checkout PR
-        if: steps.changes.outputs.go == 'true'
+        if: steps.changes.outputs.release == 'true'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Get PR version
-        if: steps.changes.outputs.go == 'true'
+        if: steps.changes.outputs.release == 'true'
         id: pr
         # Empty when the PR removes the VERSION file (rare). The Compare step
         # treats empty as "skip with warning" rather than failing.
@@ -173,14 +175,14 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Checkout base branch
-        if: steps.changes.outputs.go == 'true'
+        if: steps.changes.outputs.release == 'true'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           path: base
 
       - name: Get base version
-        if: steps.changes.outputs.go == 'true'
+        if: steps.changes.outputs.release == 'true'
         id: base
         # Empty when this PR is the one introducing the VERSION file (the base
         # branch doesn't have it yet). Handled in the Compare step.
@@ -193,10 +195,15 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Compare versions
-        if: steps.changes.outputs.go == 'true'
-        # Advisory only: emits a warning annotation when the VERSION file
-        # wasn't bumped, but never fails the job. The check is informational,
-        # not a merge gate.
+        if: steps.changes.outputs.release == 'true'
+        id: compare
+        # Two-part check:
+        #   1. Advisory only: warn (but don't fail) when the VERSION file wasn't
+        #      bumped, or when the new value isn't greater than the base.
+        #   2. Hard fail: when the VERSION file *is* bumped, CHANGELOG.md must
+        #      contain a matching '## [<new>]' heading. A release commit
+        #      without a changelog entry is hard to clean up after the tag is
+        #      cut, so we block it at PR time.
         run: |
           PR="${{ steps.pr.outputs.version }}"
           BASE="${{ steps.base.outputs.version }}"
@@ -214,6 +221,15 @@ jobs:
             exit 0
           fi
           echo "Version bumped: $BASE -> $PR"
+          if [ ! -f CHANGELOG.md ]; then
+            echo "::error::VERSION bumped to $PR but CHANGELOG.md is missing. Create CHANGELOG.md with a '## [$PR]' section."
+            exit 1
+          fi
+          if ! grep -qE "^## \[$PR\]( |$)" CHANGELOG.md; then
+            echo "::error::VERSION bumped to $PR but CHANGELOG.md has no '## [$PR]' heading. Add a changelog entry for this release."
+            exit 1
+          fi
+          echo "Changelog entry for $PR found."
 
   auto-tag:
     name: Auto Tag Release

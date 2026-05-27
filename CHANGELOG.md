@@ -56,6 +56,7 @@ Pre-1.0 minor with breaking API changes. See **Breaking changes** below before u
 - CI triggers on every PR regardless of base branch (Graphite stack friendly).
 - `version-check` job demoted to advisory warning so stacked PRs don't all need to bump.
 - `tforge.Version` wired through release builds and CI so binaries no longer report `dev`.
+- `version-check` CI job now hard-fails when the VERSION file is bumped without a matching `## [<new>]` section in `CHANGELOG.md`.
 
 ## [0.3.0] - 2026-04-27
 
