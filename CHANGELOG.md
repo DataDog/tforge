@@ -6,6 +6,81 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-27
+
+Pre-1.0 minor with breaking API changes. See **Breaking changes** below before upgrading.
+
+### Breaking changes
+
+- **Render API: `version` parameter removed.** `render.ToJSON(stack)` and `render.ToFile(stack, path)` no longer take a version string — they read it from `tforge.Version`, overridable at link time via `-X github.com/DataDog/tforge.Version=...`. Update call sites by dropping the trailing argument.
+- **Resource/data-source constructors no longer take a `resourceOpts` parameter.** Generated `NewFoo(stack, name, ...)` returns a typed handle; configure attributes and meta-arguments via `handle.Configure(...)` and `handle.ConfigureResourceOptions(...)` (renamed from the short-lived `Apply` / `ApplyResourceOptions`).
+- **`Stack.AddResource` / `Stack.AddDataSource` take interfaces.** Now accept `Resourcer` / `DataSourcer` (pointer-only). Passing a `Resource{}` or `DataSource{}` value literal no longer compiles — pass `&Resource{...}` or a generated typed handle. `Stack.AddResourcePtr` is removed (collapsed into `AddResource`). `Stack.Resources` / `Stack.DataSources` are now `[]Resourcer` / `[]DataSourcer`.
+- **`Config` field renamed.** `Resource.Config` and `DataSource.Config` → `Attributes`. `Module.Config` → `Variables`. `Config` is no longer a field of `MetaArguments` — it lives directly on `Resource`, `DataSource`, and `Module`. `MetaArguments` retains only `DependsOn`, `Count`, and `ForEach`.
+- **`MaxItems = 1` nested blocks now collapse to a single object.** Generated structs and setters use `*T` instead of `[]*T` (matching cdktf). Affects every provider; regenerate downstream packages.
+- **Caller-provided `Name` is preserved.** `AddResource` / `AddDataSource` / `AddModule` no longer mutate `Name`. Use the new `SanitizedName()` method (or `Address()` / `Ref()`, which route through it) to get the Terraform-identifier-valid form.
+- **CLI flag rename.** `tforge schema -provider-binary` → `-provider-zip-file`. The flag now accepts only release `.zip` archives and parses the version from the archive filename (the binary-name parse was unreliable).
+
+### Added
+
+- **`Stack.RequiredVersion`** for `terraform.required_version`, e.g. `stack.RequiredVersion = ">= 1.3.7"`.
+- **Generated provider metadata + `NewProvider` helper.** Every generated package now emits `var Provider = config.ProviderMetadata{Name, Source, Version}` plus `NewProvider(stack, opts...)`, so consumers stop repeating `Source` / `Version` literals at call sites.
+- **Hostname-qualified provider sources.** `ParseSource` now accepts the three-segment form (`registry.opentofu.org/hashicorp/aws`) and round-trips it through `required_providers`.
+- **`tforge schema -provider-zip-file` / `tforge generate -provider-zip-file`.** Extract schemas hermetically from a local provider release archive via `dev_overrides`, with no network access.
+- **`ResourceOption` functional options** in `config`: `WithLifecycle`, `WithProvider`, `WithDependsOn`, `WithTimeouts`. Applied via `handle.ConfigureResourceOptions(...)`.
+- **`NewTerraformHclModule`** constructor and `TerraformHclModuleConfig` (cdktf-compatible convenience API), with a `Count` field on `TerraformHclModuleConfig`.
+- **`config.SanitizeName`** for resource / data-source / module names. Forward slashes become `--`; other non-identifier characters are stripped. Idempotent. Called implicitly on insertion.
+- **cdktf-compatible `//` metadata block** emitted per resource, data source, and module (`{"//": {"metadata": {"path": "<stack>/<name>", "uniqueId": "<name>"}}}`). Informational — Terraform ignores `//` keys; downstream cdktf-aware tooling keeps working.
+- **Single `tforge.Version` variable** at the module root, overridable at link time. The release workflow now injects the tag (`-X github.com/DataDog/tforge.Version=${GITHUB_REF_NAME}`).
+
+### Changed
+
+- **Local provider name** in generated packages now derives from the schema's resource prefix (e.g. `google_*` → `google`) instead of the source's last `/`-segment. Fork and mirror sources like `mycorp/googlebeta` now produce correct bindings.
+- **Provider schema-prefix check** demoted from a hard rejection to a `<prefix>-<variant>` allowance, so `hashicorp/google-beta` schemas paired with `google_*` resources are accepted.
+- **`config.Provider` shape** consolidated into a single `ProviderMetadata` struct in `config/`. Generated packages expose `Provider.Name` / `Provider.Source` / `Provider.Version` instead of three top-level constants.
+
+### Fixed
+
+- **Plugin-cache symlink dereferencing** in `ensureInitCaches` (`cp -aL`). Fixes spurious `there is no package for ... cached in .terraform/providers` after Docker Desktop restarts on macOS.
+- **`ConfigureResourceOptions` on a zero-value handle** no longer panics; it no-ops instead of nil-derefing.
+- **`resolveAttributes`** now flags an explicit but empty `Attributes` map as a conflict with `TypedAttributes` (previously silently passed).
+
+### Removed
+
+- `ResourcePrefix` helper (unused after the source-prefix check was relaxed).
+- `Stack.AddResourcePtr` (folded into `AddResource(Resourcer)`).
+
+### Internal / testing / CI
+
+- All tests converted to `stretchr/testify/require` (net −1183 lines).
+- Round-trip generator test lifted from an embedded source string to a real `internal/handletest` fixture package, gated on `//go:build integration` and run via `make handletest`.
+- CI triggers on every PR regardless of base branch (Graphite stack friendly).
+- `version-check` job demoted to advisory warning so stacked PRs don't all need to bump.
+- `tforge.Version` wired through release builds and CI so binaries no longer report `dev`.
+
+## [0.3.0] - 2026-04-27
+
+### Breaking changes
+
+- **`Config` moved out of `MetaArguments`.** It is now a direct field on `Resource`, `DataSource`, and `Module`. `MetaArguments` retains only `DependsOn`, `Count`, and `ForEach`. Module variables, previously accessed via `module.MetaArguments.Config`, are accessed via `module.Config` (and renamed to `module.Variables` later in the same release — see below).
+- **`Config` renamed.** `Resource.Config` and `DataSource.Config` → `Attributes`; `Module.Config` → `Variables`.
+
+### Added
+
+- **Generated-code golden files.** Every `*_gen.go` now has a `*.go.golden` companion in `testdata/golden/`, asserted by `TestSnapshots`. Catches generator regressions (silently dropped files, output drift).
+- **CI versioning automation.** `version-check` PR job (warns when `VERSION` isn't bumped), `auto-tag` main-branch job (creates `v<VERSION>` annotated tags once CI passes), and a `notify-provider-repos` job in `release.yml` that dispatches to `tforge-provider-datadog` on release publication.
+- **CODEOWNERS** assigning all files to `@DataDog/api-reliability`.
+
+### Fixed
+
+- Snapshot test golden file comparison now fails on missing goldens instead of silently skipping.
+- `ensureInitCaches` checks errors from `docker volume create` and `os.MkdirAll`.
+
+### Internal
+
+- Extracted `pluginCacheDir` to a package-level constant.
+- `goldenExcludes` replaced with `isGoldenExcluded` helper that derives child exclusions from parents via `strings.HasPrefix`.
+- Snapshot tests flatten `generated_code` and `json_output` into sibling subtests so a fatal in one no longer skips the other.
+
 ## [0.2.0] - 2026-04-10
 
 ### Added
