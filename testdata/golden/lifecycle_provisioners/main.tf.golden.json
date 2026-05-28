@@ -11,6 +11,10 @@
       "aws": {
         "source": "hashicorp/aws",
         "version": "~> 5.0"
+      },
+      "null": {
+        "source": "hashicorp/null",
+        "version": "~> 3.0"
       }
     }
   },
@@ -19,6 +23,9 @@
       {
         "region": "us-east-1"
       }
+    ],
+    "null": [
+      {}
     ]
   },
   "resource": {
@@ -101,6 +108,19 @@
           "create": "30m",
           "update": "20m",
           "delete": "15m"
+        }
+      }
+    },
+    "null_resource": {
+      "deploy_trigger": {
+        "//": {
+          "metadata": {
+            "path": "lifecycle-provisioners-golden/deploy_trigger",
+            "uniqueId": "deploy_trigger"
+          }
+        },
+        "triggers": {
+          "deploy_version": "v1"
         }
       }
     }

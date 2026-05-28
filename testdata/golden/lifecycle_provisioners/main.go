@@ -20,6 +20,24 @@ func main() {
 		Config:  map[string]any{"region": "us-east-1"},
 	})
 
+	stack.AddProvider(config.Provider{
+		Name:    "null",
+		Source:  "hashicorp/null",
+		Version: "~> 3.0",
+	})
+
+	if err := stack.AddResource(&config.Resource{
+		Type: "null_resource",
+		Name: "deploy_trigger",
+		Attributes: map[string]any{
+			"triggers": map[string]string{
+				"deploy_version": "v1",
+			},
+		},
+	}); err != nil {
+		log.Fatal(err)
+	}
+
 	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "app",
