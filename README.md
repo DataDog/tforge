@@ -87,8 +87,8 @@ package main
 import (
     "log"
 
-    "tforge/config"
-    "tforge/render"
+    "github.com/DataDog/tforge/config"
+    "github.com/DataDog/tforge/render"
     "your-project/datadog"
 )
 
@@ -101,16 +101,19 @@ func main() {
         Version: "~> 3.39",
     })
 
-    stack.AddResource(config.Resource{
-        Type: "datadog_monitor",
-        Name: "cpu_high",
-        Config: map[string]any{
-            "name":    "High CPU Usage",
-            "type":    "metric alert",
-            "query":   "avg(last_5m):avg:system.cpu.user{*} > 90",
-            "message": "CPU usage is above 90%",
-        },
-    })
+    // Constructors attach the resource to the stack and return a typed handle.
+    // Configure sets attributes via generated functional options; it can be
+    // called multiple times to add more attributes later.
+    m, err := datadog.NewMonitor(stack, "cpu_high")
+    if err != nil {
+        log.Fatal(err)
+    }
+    m.Configure(
+        datadog.Monitor_SetName("High CPU Usage"),
+        datadog.Monitor_SetType("metric alert"),
+        datadog.Monitor_SetQuery("avg(last_5m):avg:system.cpu.user{*} > 90"),
+        datadog.Monitor_SetMessage("CPU usage is above 90%"),
+    )
 
     if err := render.ToFile(stack, "main.tf.json", ""); err != nil {
         log.Fatal(err)
