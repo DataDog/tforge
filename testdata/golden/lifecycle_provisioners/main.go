@@ -21,6 +21,18 @@ func main() {
 	})
 
 	if err := stack.AddResource(&config.Resource{
+		Type: "null_resource",
+		Name: "deploy_trigger",
+		Attributes: map[string]any{
+			"triggers": map[string]any{
+				"version": "1",
+			},
+		},
+	}); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := stack.AddResource(&config.Resource{
 		Type: "aws_instance",
 		Name: "app",
 		Lifecycle: &config.Lifecycle{

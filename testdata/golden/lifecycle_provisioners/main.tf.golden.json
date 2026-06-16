@@ -103,6 +103,19 @@
           "delete": "15m"
         }
       }
+    },
+    "null_resource": {
+      "deploy_trigger": {
+        "//": {
+          "metadata": {
+            "path": "lifecycle-provisioners-golden/deploy_trigger",
+            "uniqueId": "deploy_trigger"
+          }
+        },
+        "triggers": {
+          "version": "1"
+        }
+      }
     }
   },
   "variable": {
