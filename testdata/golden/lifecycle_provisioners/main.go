@@ -19,6 +19,11 @@ func main() {
 		Version: "~> 5.0",
 		Config:  map[string]any{"region": "us-east-1"},
 	})
+	stack.AddProvider(config.Provider{
+		Name:    "null",
+		Source:  "hashicorp/null",
+		Version: "~> 3.0",
+	})
 
 	if err := stack.AddResource(&config.Resource{
 		Type: "null_resource",
