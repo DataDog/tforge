@@ -23,6 +23,9 @@
       {
         "region": "us-east-1"
       }
+    ],
+    "null": [
+      {}
     ]
   },
   "resource": {
