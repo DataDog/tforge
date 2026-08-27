@@ -1,9 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
-  // Renovate is used instead of Dependabot; osvVulnerabilityAlerts keeps
-  // OSV-sourced security advisories flowing regardless, bypassing the
-  // minimumReleaseAge/schedule delays below for vulnerability fixes.
   "osvVulnerabilityAlerts": true,
   // Wait 30 days after release before proposing updates
   "minimumReleaseAge": "30 days",
