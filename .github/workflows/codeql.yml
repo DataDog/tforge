@@ -16,6 +16,7 @@ jobs:
     name: Analyze (Go)
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       security-events: write
     steps:
@@ -31,9 +32,10 @@ jobs:
         uses: github/codeql-action/init@181d5eefc20863364f96762470ba6f862bdef56b # v3.29.9
         with:
           languages: go
+          build-mode: manual
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@181d5eefc20863364f96762470ba6f862bdef56b # v3.29.9
+      - name: Build
+        run: go build ./cmd/... ./config/... ./generate/... ./provider/... ./render/...
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@181d5eefc20863364f96762470ba6f862bdef56b # v3.29.9
