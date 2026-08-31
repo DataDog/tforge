@@ -1,6 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended"],
+  "osvVulnerabilityAlerts": true,
   // Wait 30 days after release before proposing updates
   "minimumReleaseAge": "30 days",
   "schedule": ["before 6am on monday"],

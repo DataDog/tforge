@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/DataDog/tforge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DataDog/tforge/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/go-1.23+-00ADD8?logo=go)](https://go.dev/)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 tforge generates typed Go structs from Terraform provider schemas, giving you full flexibility on how you define your infrastructure. It outputs `.tf.json` files that work with both Terraform and OpenTofu.
 
@@ -207,4 +207,4 @@ make build
 
 ## License
 
-Apache License 2.0: see [LICENSE.md](LICENSE.md) for details.
+Apache License 2.0: see [LICENSE](LICENSE) for details.
