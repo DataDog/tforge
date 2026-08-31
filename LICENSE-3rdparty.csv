@@ -1,0 +1,6 @@
+Component,Origin,License,Copyright
+go.sum,github.com/dave/jennifer,MIT,2017 David Brophy
+go.sum,github.com/davecgh/go-spew,ISC,2012-2016 Dave Collins
+go.sum,github.com/pmezard/go-difflib,BSD-3-Clause,2013 Patrick Mezard
+go.sum,github.com/stretchr/testify,MIT,2012-2020 Mat Ryer, Tyler Bunnell and contributors
+go.sum,gopkg.in/yaml.v3,MIT OR Apache-2.0,2006-2011 Kirill Simonov; 2011-2019 Canonical Ltd
