@@ -49,7 +49,7 @@
   "terraform": {
     "backend": {
       "local": {
-        "path": "/Users/julien.doche/Documents/git-repos/terraform-cdk/examples/go/docker/terraform.ExampleCdktfGoDockerStack.tfstate"
+        "path": "terraform.ExampleCdktfGoDockerStack.tfstate"
       }
     },
     "required_providers": {
