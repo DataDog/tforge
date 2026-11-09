@@ -360,6 +360,28 @@ func TestParseSchemaOutput_CrossRegistryExactMatch(t *testing.T) {
 	require.True(t, ok, "expected datadog_monitor from exact match")
 }
 
+func TestParseSchemaOutput_HostnameSpellingsMatch(t *testing.T) {
+	// Terraform normalizes the hostname, so case and the default :443 port must not block a match.
+	for _, host := range []string{"REGISTRY.TERRAFORM.IO", "registry.terraform.io:443"} {
+		src := Source{Hostname: host, Namespace: "hashicorp", Name: "aws"}
+		data := []byte(`{
+			"format_version": "1.0",
+			"provider_schemas": {
+				"registry.terraform.io/hashicorp/aws": {
+					"provider": {"block": {}},
+					"resource_schemas": {"aws_instance": {"block": {}}},
+					"data_source_schemas": {}
+				}
+			}
+		}`)
+
+		ps, err := parseSchemaOutput(data, src)
+		require.NoError(t, err, host)
+		_, ok := ps.ResourceSchemas["aws_instance"]
+		require.True(t, ok, host)
+	}
+}
+
 func TestParseSchemaOutput_ProviderNotFound(t *testing.T) {
 	src := Source{Namespace: "datadog", Name: "datadog"}
 	data := []byte(`{

@@ -334,7 +334,7 @@ func parseProviderKey(key, requireHostname string) (Source, bool) {
 	if err != nil {
 		return Source{}, false
 	}
-	if requireHostname != "" && keySrc.Hostname != requireHostname {
+	if requireHostname != "" && !strings.EqualFold(strings.TrimSuffix(keySrc.Hostname, ":443"), strings.TrimSuffix(requireHostname, ":443")) {
 		return Source{}, false
 	}
 	return keySrc, true
