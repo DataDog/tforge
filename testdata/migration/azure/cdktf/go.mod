@@ -22,4 +22,4 @@ require (
 )
 
 // only required when running example against terraform-cdk repo locally
-replace github.com/hashicorp/terraform-cdk-go/cdktf => ../../../packages/cdktf/dist/go/cdktf
+// replace github.com/hashicorp/terraform-cdk-go/cdktf => ../../../packages/cdktf/dist/go/cdktf

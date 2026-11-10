@@ -22,4 +22,5 @@ require (
 	golang.org/x/tools v0.23.0 // indirect
 )
 
-replace github.com/hashicorp/terraform-cdk-go/cdktf => ../../../packages/cdktf/dist/go/cdktf
+// only required when running example against terraform-cdk repo locally
+// replace github.com/hashicorp/terraform-cdk-go/cdktf => ../../../packages/cdktf/dist/go/cdktf
