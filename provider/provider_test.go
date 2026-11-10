@@ -588,3 +588,31 @@ func TestFetchSchema_InvalidSourceWithCancelledContext(t *testing.T) {
 	require.Error(t, err, "expected error for invalid source, got nil")
 	require.Contains(t, err.Error(), "invalid provider source", "expected parse error, got: %v", err)
 }
+
+func TestRunInitRetriesTransientFailure(t *testing.T) {
+	old := initRetryDelay
+	initRetryDelay = time.Millisecond
+	t.Cleanup(func() { initRetryDelay = old })
+
+	dir := t.TempDir()
+	cli := filepath.Join(dir, "fake-cli")
+	script := "#!/bin/sh\n[ -f attempted ] && exit 0\ntouch attempted\necho '500 Internal Server Error'\nexit 1\n"
+	require.NoError(t, os.WriteFile(cli, []byte(script), 0o755))
+
+	require.NoError(t, runInit(context.Background(), cli, dir, nil))
+}
+
+func TestRunInitGivesUp(t *testing.T) {
+	old := initRetryDelay
+	initRetryDelay = time.Millisecond
+	t.Cleanup(func() { initRetryDelay = old })
+
+	dir := t.TempDir()
+	cli := filepath.Join(dir, "fake-cli")
+	require.NoError(t, os.WriteFile(cli, []byte("#!/bin/sh\necho x >> attempts\nexit 1\n"), 0o755))
+
+	require.ErrorContains(t, runInit(context.Background(), cli, dir, nil), "init failed")
+	attempts, err := os.ReadFile(filepath.Join(dir, "attempts"))
+	require.NoError(t, err)
+	require.Equal(t, initAttempts, strings.Count(string(attempts), "x"))
+}
