@@ -1,0 +1,12 @@
+# Lets the Auto Tag Release job in ci.yml push version tags on main. Tags pushed with
+# this token, unlike GITHUB_TOKEN, start release.yml.
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/tforge:ref:refs/heads/main
+
+claim_pattern:
+  event_name: push
+  job_workflow_ref: 'DataDog/tforge/\.github/workflows/ci\.yml@refs/heads/main'
+
+permissions:
+  contents: write
