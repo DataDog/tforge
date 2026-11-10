@@ -30,9 +30,11 @@ This creates:
 package main
 
 import (
-    "tforge/config"
-    "tforge/example/datadog"
-    "tforge/render"
+    "log"
+
+    "github.com/DataDog/tforge/config"
+    "github.com/DataDog/tforge/example/datadog"
+    "github.com/DataDog/tforge/render"
 )
 
 func main() {
@@ -48,25 +50,28 @@ func main() {
         },
     })
 
-    // Create a monitor using generated types
-    monitor := datadog.DatadogMonitor{
-        Name:    "High CPU Alert",
-        Type:    "metric alert",
-        Message: "CPU usage is high!",
-        Query:   "avg(last_5m):avg:system.cpu.user{*} > 80",
-        MonitorThresholds: []*datadog.DatadogMonitorMonitorThresholds{
-            {Critical: "80", Warning: "60"},
-        },
+    // Create a monitor: the constructor attaches it to the stack and
+    // returns a typed handle. Configure sets attributes via generated
+    // functional options and can be called multiple times.
+    m, err := datadog.NewMonitor(stack, "cpu_alert")
+    if err != nil {
+        log.Fatal(err)
     }
-
-    stack.AddResource(config.Resource{
-        Type:   "datadog_monitor",
-        Name:   "cpu_alert",
-        Config: structToMap(monitor),
-    })
+    m.Configure(
+        datadog.Monitor_SetName("High CPU Alert"),
+        datadog.Monitor_SetType("metric alert"),
+        datadog.Monitor_SetMessage("CPU usage is high!"),
+        datadog.Monitor_SetQuery("avg(last_5m):avg:system.cpu.user{*} > 80"),
+        datadog.Monitor_SetMonitorThresholds(&datadog.MonitorMonitorThresholds{
+            Critical: "80",
+            Warning:  "60",
+        }),
+    )
 
     // Render to .tf.json
-    render.ToFile(stack, "main.tf.json", "")
+    if err := render.ToFile(stack, "main.tf.json", ""); err != nil {
+        log.Fatal(err)
+    }
 }
 ```
 
