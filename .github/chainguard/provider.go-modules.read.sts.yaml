@@ -1,0 +1,10 @@
+# Lets DataDog/tforge-provider-datadog's CI fetch this private Go module; drop once tforge is public.
+issuer: https://token.actions.githubusercontent.com
+
+subject_pattern: 'repo:DataDog/tforge-provider-datadog:(pull_request|ref:refs/heads/main)'
+
+claim_pattern:
+  job_workflow_ref: 'DataDog/tforge-provider-datadog/\.github/workflows/(ci|update-tforge)\.yml@refs/(heads/main|pull/[0-9]+/merge)'
+
+permissions:
+  contents: read

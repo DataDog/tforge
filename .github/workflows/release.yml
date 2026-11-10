@@ -99,11 +99,19 @@ jobs:
     name: Notify Provider Repos
     needs: publish
     runs-on: ubuntu-latest
-    environment: release
+    permissions:
+      contents: read
+      id-token: write
     steps:
+      - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        id: octo-sts
+        with:
+          scope: DataDog/tforge-provider-datadog
+          policy: tforge.release.dispatch
+
       - name: Dispatch to tforge-provider-datadog
         env:
-          GH_TOKEN: ${{ secrets.TFORGE_PROVIDER_DISPATCH_TOKEN }}
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
         run: |
           VERSION=${GITHUB_REF_NAME#v}
           gh api repos/DataDog/tforge-provider-datadog/dispatches \
