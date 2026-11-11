@@ -1,6 +1,6 @@
 module github.com/hashicorp/terraform-cdk/examples/go/docker
 
-go 1.25.9
+go 1.26.0
 
 require (
 	github.com/aws/constructs-go/constructs/v10 v10.3.0
@@ -16,9 +16,9 @@ require (
 	github.com/yuin/goldmark v1.8.7 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/mod v0.42.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/tools v0.23.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 )
 
 // only required when running example against terraform-cdk repo locally
