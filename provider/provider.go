@@ -24,6 +24,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const (
@@ -235,16 +236,38 @@ func FetchSchema(ctx context.Context, source, version string) (*Schema, error) {
 	cmdEnv := filterEnv(os.Environ(), "OTEL_TRACES_EXPORTER")
 	cmdEnv = append(cmdEnv, "TF_PLUGIN_CACHE_DIR="+cacheDir)
 
-	// Run init
-	initCmd := exec.CommandContext(ctx, cliPath, "init", "-input=false", "-no-color")
-	initCmd.Dir = tmpDir
-	initCmd.Env = cmdEnv
-	initOut, err := initCmd.CombinedOutput()
-	if err != nil {
-		return nil, fmt.Errorf("init failed: %w\n%s", err, initOut)
+	if err := runInit(ctx, cliPath, tmpDir, cmdEnv); err != nil {
+		return nil, err
 	}
 
 	return runProvidersSchema(ctx, cliPath, tmpDir, cmdEnv, src, version)
+}
+
+const initAttempts = 3
+
+// initRetryDelay is a var so tests can shorten it.
+var initRetryDelay = 2 * time.Second
+
+// runInit runs `init` in dir, retrying because registry and GitHub downloads fail transiently.
+func runInit(ctx context.Context, cliPath, dir string, env []string) error {
+	for attempt := 1; ; attempt++ {
+		initCmd := exec.CommandContext(ctx, cliPath, "init", "-input=false", "-no-color")
+		initCmd.Dir = dir
+		initCmd.Env = env
+		out, runErr := initCmd.CombinedOutput()
+		if runErr == nil {
+			return nil
+		}
+		err := fmt.Errorf("init failed: %w\n%s", runErr, out)
+		if attempt == initAttempts {
+			return err
+		}
+		select {
+		case <-ctx.Done():
+			return errors.Join(err, ctx.Err())
+		case <-time.After(time.Duration(attempt) * initRetryDelay):
+		}
+	}
 }
 
 // writeTerraformConfig writes a minimal `main.tf` declaring src@version into dir.
