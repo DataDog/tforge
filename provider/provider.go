@@ -198,8 +198,9 @@ type NestedBlock struct {
 	MaxItems    int         `json:"max_items,omitempty"`
 }
 
-// FetchSchema fetches a provider schema using tofu CLI.
-// The source should be in the format "namespace/name" (e.g., "datadog/datadog").
+// FetchSchema fetches a provider schema using tofu CLI. The source accepts
+// either form documented on Source: "namespace/name" (default registry) or
+// "hostname/namespace/name" (explicit registry).
 func FetchSchema(ctx context.Context, source, version string) (*Schema, error) {
 	src, err := ParseSource(source)
 	if err != nil {
@@ -300,20 +301,61 @@ type schemaOutput struct {
 	} `json:"provider_schemas"`
 }
 
+// providerKeyMatchesSource reports whether a fully-qualified Terraform
+// provider key from `tofu providers schema -json` (e.g.
+// "registry.terraform.io/hashicorp/aws") refers to src. A two-segment src
+// matches any hostname; a three-segment src requires the hostname to match
+// exactly.
+func providerKeyMatchesSource(key string, src Source) bool {
+	keySrc, ok := parseProviderKey(key, src.Hostname)
+	if !ok {
+		return false
+	}
+	return src.Namespace == keySrc.Namespace && src.Name == keySrc.Name
+}
+
+// providerKeyHasName is the relaxed second-pass match used when the
+// namespace doesn't need to align (forks, mirrors). It still pins the
+// hostname when src has one set.
+func providerKeyHasName(key string, src Source) bool {
+	keySrc, ok := parseProviderKey(key, src.Hostname)
+	if !ok {
+		return false
+	}
+	return src.Name == keySrc.Name
+}
+
+// parseProviderKey parses a schema-output key into a Source and applies the
+// hostname filter shared by both lookup passes. Returns ok=false for any
+// malformed key or any key whose hostname doesn't match requireHostname
+// (when non-empty).
+func parseProviderKey(key, requireHostname string) (Source, bool) {
+	keySrc, err := ParseSource(key)
+	if err != nil {
+		return Source{}, false
+	}
+	if requireHostname != "" && !strings.EqualFold(strings.TrimSuffix(keySrc.Hostname, ":443"), strings.TrimSuffix(requireHostname, ":443")) {
+		return Source{}, false
+	}
+	return keySrc, true
+}
+
 // parseSchemaOutput extracts the provider schema from tofu output.
 // It prefers an exact namespace/name match and only falls back to a suffix
 // match on the provider name when no exact match exists. An ambiguous suffix
 // match (more than one candidate) returns an error instead of silently
-// picking a random provider.
+// picking a random provider. When src has a Hostname set, both passes
+// require the key's hostname to match — a registry-pinned source never
+// silently resolves to a provider on a different host.
 func parseSchemaOutput(data []byte, src Source) (*ProviderSchema, error) {
 	var output schemaOutput
 	if err := json.Unmarshal(data, &output); err != nil {
 		return nil, fmt.Errorf("unmarshaling schema: %w", err)
 	}
 
-	// First pass: look for an exact namespace/name match.
+	// First pass: exact match on namespace/name (and hostname, if set).
 	for key, ps := range output.ProviderSchemas {
-		if strings.Contains(key, src.String()) {
+		if providerKeyMatchesSource(key, src) {
 			return &ProviderSchema{
 				ConfigSchema:      ps.Provider,
 				ResourceSchemas:   ps.ResourceSchemas,
@@ -322,15 +364,15 @@ func parseSchemaOutput(data []byte, src Source) (*ProviderSchema, error) {
 		}
 	}
 
-	// Second pass: fall back to suffix match on "/name" only.
-	// Collect all candidates to detect ambiguity.
+	// Second pass: fall back to a name-only match. Still pins the hostname
+	// when src has one. Collect all candidates to detect ambiguity.
 	type candidate struct {
 		key string
 		ps  *ProviderSchema
 	}
 	var candidates []candidate
 	for key, ps := range output.ProviderSchemas {
-		if strings.HasSuffix(key, "/"+src.Name) {
+		if providerKeyHasName(key, src) {
 			candidates = append(candidates, candidate{
 				key: key,
 				ps: &ProviderSchema{
