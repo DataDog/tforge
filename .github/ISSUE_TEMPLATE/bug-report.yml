@@ -1,0 +1,36 @@
+name: Bug report
+description: Something in tforge doesn't work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: A minimal Go program or `tforge` command that shows the problem, and the provider it uses.
+      render: go
+    validations:
+      required: true
+  - type: input
+    id: tforge-version
+    attributes:
+      label: tforge version
+      placeholder: v0.4.0
+    validations:
+      required: true
+  - type: input
+    id: cli-version
+    attributes:
+      label: Terraform or OpenTofu version
+      placeholder: Terraform 1.17.2
+  - type: input
+    id: go-version
+    attributes:
+      label: Go version
+      placeholder: go1.25.9
