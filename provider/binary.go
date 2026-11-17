@@ -109,6 +109,9 @@ func unzipProvider(archivePath, dest string, src Source) error {
 		if f.FileInfo().IsDir() {
 			continue
 		}
+		if strings.Contains(f.Name, "..") {
+			return fmt.Errorf("unsafe path %q in %s", f.Name, archivePath)
+		}
 		name := filepath.Base(f.Name)
 		if err := extractZipEntry(f, filepath.Join(dest, name)); err != nil {
 			return err

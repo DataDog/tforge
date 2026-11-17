@@ -84,6 +84,18 @@ func TestUnzipProvider_MissingBinary(t *testing.T) {
 	}
 }
 
+func TestUnzipProvider_RejectsPathTraversal(t *testing.T) {
+	src := Source{Namespace: "datadog", Name: "datadog"}
+	archivePath := buildTestZip(t, map[string][]byte{
+		"../terraform-provider-datadog": []byte("#!/fakebinary\n"),
+	})
+
+	err := unzipProvider(archivePath, t.TempDir(), src)
+	if err == nil || !strings.Contains(err.Error(), "unsafe path") {
+		t.Fatalf("error = %v, want unsafe path error", err)
+	}
+}
+
 func TestUnzipProvider_NonExistentArchive(t *testing.T) {
 	src := Source{Namespace: "datadog", Name: "datadog"}
 	err := unzipProvider(filepath.Join(t.TempDir(), "does-not-exist.zip"), t.TempDir(), src)
