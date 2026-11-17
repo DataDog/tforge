@@ -5,6 +5,17 @@
   // Wait 30 days after release before proposing updates
   "minimumReleaseAge": "30 days",
   "schedule": ["before 6am on monday"],
+  // Pinned CLI versions in shell scripts, marked with a `# renovate:` comment
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^scripts/.+\\.sh$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n[A-Z_]+=\"\\$\\{[A-Z_]+:-(?<currentValue>[^}]+)\\}\""
+      ],
+      "extractVersionTemplate": "^v(?<version>.+)$"
+    }
+  ],
   "packageRules": [
     // Go directive in go.mod: do NOT bump (keep at lowest non-EOL)
     {

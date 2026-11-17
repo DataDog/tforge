@@ -3,7 +3,9 @@
 # CI uses this because the org's Actions policy blocks the third-party setup actions.
 set -euo pipefail
 
+# renovate: datasource=github-releases depName=hashicorp/terraform
 TERRAFORM_VERSION="${TERRAFORM_VERSION:-1.17.2}"
+# renovate: datasource=github-releases depName=opentofu/opentofu
 TOFU_VERSION="${TOFU_VERSION:-1.13.9}"
 BIN_DIR="${1:-$(go env GOPATH)/bin}"
 PLATFORM="$(go env GOOS)_$(go env GOARCH)"
